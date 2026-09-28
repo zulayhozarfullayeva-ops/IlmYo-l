@@ -1,7 +1,0 @@
-﻿{
-  "version": 2,
-  "cleanUrls": true,
-  "rewrites": [
-    { "source": "/ilmyol_dashboard/(.*)", "destination": "/$1" }
-  ]
-}
