@@ -1,0 +1,238 @@
+{
+  "summary": {
+    "total": 12,
+    "passed": 12,
+    "warnings": 0,
+    "failed": 0
+  },
+  "results": [
+    {
+      "pair_id": "PAIR-01",
+      "topic_a": "ILMYOL-001",
+      "topic_b": "ILMYOL-002",
+      "expected_label": "EXACT",
+      "expected_band": "99-100",
+      "actual_score": 100,
+      "diff": 0,
+      "status": "PASS",
+      "calc_breakdown": {
+        "lexical_similarity": 100.0,
+        "semantic_similarity": 100.0,
+        "domain_similarity": 100.0,
+        "concept_similarity": 100.0,
+        "exact_match": true,
+        "classification": "EXACT"
+      },
+      "rationale": "Same title appears under two OAK registration IDs; duplicate alert expected."
+    },
+    {
+      "pair_id": "PAIR-02",
+      "topic_a": "ILMYOL-003",
+      "topic_b": "ILMYOL-004",
+      "expected_label": "HIGH",
+      "expected_band": "70-90",
+      "actual_score": 78,
+      "diff": 0,
+      "status": "PASS",
+      "calc_breakdown": {
+        "lexical_similarity": 21.1,
+        "semantic_similarity": 90.0,
+        "domain_similarity": 100.0,
+        "concept_similarity": 100.0,
+        "exact_match": false,
+        "classification": "HIGH"
+      },
+      "rationale": "Both combine AI and journalist activity; ethics vs comparative creativity/subjectivity."
+    },
+    {
+      "pair_id": "PAIR-03",
+      "topic_a": "ILMYOL-003",
+      "topic_b": "ILMYOL-005",
+      "expected_label": "HIGH",
+      "expected_band": "65-85",
+      "actual_score": 74,
+      "diff": 0,
+      "status": "PASS",
+      "calc_breakdown": {
+        "lexical_similarity": 15.9,
+        "semantic_similarity": 90.0,
+        "domain_similarity": 100.0,
+        "concept_similarity": 100.0,
+        "exact_match": false,
+        "classification": "HIGH"
+      },
+      "rationale": "AI + journalism/media overlap; audience trust and multimedia integration differentiate the second."
+    },
+    {
+      "pair_id": "PAIR-04",
+      "topic_a": "ILMYOL-006",
+      "topic_b": "ILMYOL-008",
+      "expected_label": "MEDIUM",
+      "expected_band": "40-65",
+      "actual_score": 46,
+      "diff": 0,
+      "status": "PASS",
+      "calc_breakdown": {
+        "lexical_similarity": 9.1,
+        "semantic_similarity": 57.5,
+        "domain_similarity": 100.0,
+        "concept_similarity": 50.0,
+        "exact_match": false,
+        "classification": "MEDIUM"
+      },
+      "rationale": "Both concern online media, but research problems differ."
+    },
+    {
+      "pair_id": "PAIR-05",
+      "topic_a": "ILMYOL-007",
+      "topic_b": "ILMYOL-009",
+      "expected_label": "MEDIUM",
+      "expected_band": "35-60",
+      "actual_score": 48,
+      "diff": 0,
+      "status": "PASS",
+      "calc_breakdown": {
+        "lexical_similarity": 9.0,
+        "semantic_similarity": 57.5,
+        "domain_similarity": 100.0,
+        "concept_similarity": 50.0,
+        "exact_match": false,
+        "classification": "MEDIUM"
+      },
+      "rationale": "Blogosphere vs podcast/new-media phenomenon."
+    },
+    {
+      "pair_id": "PAIR-06",
+      "topic_a": "ILMYOL-013",
+      "topic_b": "ILMYOL-014",
+      "expected_label": "MEDIUM",
+      "expected_band": "35-60",
+      "actual_score": 50,
+      "diff": 0,
+      "status": "PASS",
+      "calc_breakdown": {
+        "lexical_similarity": 8.8,
+        "semantic_similarity": 53.3,
+        "domain_similarity": 100.0,
+        "concept_similarity": 33.3,
+        "exact_match": false,
+        "classification": "MEDIUM"
+      },
+      "rationale": "Both PR communication; crisis management vs ethical-professional principles."
+    },
+    {
+      "pair_id": "PAIR-07",
+      "topic_a": "ILMYOL-003",
+      "topic_b": "ILMYOL-023",
+      "expected_label": "LOW",
+      "expected_band": "10-35",
+      "actual_score": 22,
+      "diff": 0,
+      "status": "PASS",
+      "calc_breakdown": {
+        "lexical_similarity": 4.7,
+        "semantic_similarity": 15.0,
+        "domain_similarity": 10.0,
+        "concept_similarity": 33.3,
+        "exact_match": false,
+        "classification": "LOW-MEDIUM"
+      },
+      "rationale": "Lexical trap: AI/social media/text analysis does not mean same discipline or research problem."
+    },
+    {
+      "pair_id": "PAIR-08",
+      "topic_a": "ILMYOL-005",
+      "topic_b": "ILMYOL-026",
+      "expected_label": "LOW",
+      "expected_band": "5-25",
+      "actual_score": 7,
+      "diff": 0,
+      "status": "PASS",
+      "calc_breakdown": {
+        "lexical_similarity": 2.8,
+        "semantic_similarity": 15.0,
+        "domain_similarity": 10.0,
+        "concept_similarity": 33.3,
+        "exact_match": false,
+        "classification": "LOW"
+      },
+      "rationale": "Lexical trap: 'video' in computer vision is not audiovisual journalism."
+    },
+    {
+      "pair_id": "PAIR-09",
+      "topic_a": "ILMYOL-006",
+      "topic_b": "ILMYOL-019",
+      "expected_label": "LOW",
+      "expected_band": "10-30",
+      "actual_score": 18,
+      "diff": 0,
+      "status": "PASS",
+      "calc_breakdown": {
+        "lexical_similarity": 5.9,
+        "semantic_similarity": 17.5,
+        "domain_similarity": 10.0,
+        "concept_similarity": 50.0,
+        "exact_match": false,
+        "classification": "LOW"
+      },
+      "rationale": "Online/interactivity concepts overlap, but domains and objectives differ."
+    },
+    {
+      "pair_id": "PAIR-10",
+      "topic_a": "ILMYOL-016",
+      "topic_b": "ILMYOL-020",
+      "expected_label": "LOW-MEDIUM",
+      "expected_band": "20-40",
+      "actual_score": 28,
+      "diff": 0,
+      "status": "PASS",
+      "calc_breakdown": {
+        "lexical_similarity": 4.1,
+        "semantic_similarity": 17.5,
+        "domain_similarity": 10.0,
+        "concept_similarity": 50.0,
+        "exact_match": false,
+        "classification": "LOW-MEDIUM"
+      },
+      "rationale": "Management/digital overlap, but pedagogy competence vs industrial HR optimization."
+    },
+    {
+      "pair_id": "PAIR-11",
+      "topic_a": "ILMYOL-021",
+      "topic_b": "ILMYOL-006",
+      "expected_label": "LOW",
+      "expected_band": "5-25",
+      "actual_score": 12,
+      "diff": 0,
+      "status": "PASS",
+      "calc_breakdown": {
+        "lexical_similarity": 1.7,
+        "semantic_similarity": 10.0,
+        "domain_similarity": 10.0,
+        "concept_similarity": 0.0,
+        "exact_match": false,
+        "classification": "LOW"
+      },
+      "rationale": "Monitoring/information-system vocabulary should not create false media-domain similarity."
+    },
+    {
+      "pair_id": "PAIR-12",
+      "topic_a": "ILMYOL-029",
+      "topic_b": "ILMYOL-030",
+      "expected_label": "LOW-MEDIUM",
+      "expected_band": "15-35",
+      "actual_score": 26,
+      "diff": 0,
+      "status": "PASS",
+      "calc_breakdown": {
+        "lexical_similarity": 4.8,
+        "semantic_similarity": 70.0,
+        "domain_similarity": 100.0,
+        "concept_similarity": 100.0,
+        "exact_match": false,
+        "classification": "LOW-MEDIUM"
+      },
+      "rationale": "Both engineering/modeling, but physical objects differ; tests domain-aware similarity."
+    }
+  ]
+}
