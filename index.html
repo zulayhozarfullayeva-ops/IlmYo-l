@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="uz" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IlmYo‘l — Doktorantlar uchun AI Ilmiy Monitoring va Boshqaruv Platformasi</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            navy: {
+              950: '#060B16',
+              900: '#090F1D',
+              850: '#0C1427',
+              800: '#121E38',
+              750: '#162444',
+              700: '#1D3058',
+              600: '#2A457D',
+            },
+            academic: {
+              blue: '#3B82F6',
+              cyan: '#06B6D4',
+              emerald: '#10B981',
+              amber: '#F59E0B',
+              rose: '#EF4444'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#080E1A] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- Main Container -->
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- ================================================== -->
+    <!-- 1. LEFT SIDEBAR (COMPACT & COLLAPSIBLE) -->
+    <!-- ================================================== -->
+    <aside id="mainSidebar" class="w-64 bg-[#0C1427] border-r border-[#1D3058] flex flex-col justify-between transition-all duration-300 z-30 shrink-0 select-none">
+      
+      <!-- Top: Logo & Nav items -->
+      <div class="flex flex-col h-full overflow-hidden">
+        <!-- Logo Header -->
+        <div class="h-16 px-4 flex items-center justify-between border-b border-[#1D3058]/80">
+          <div class="flex items-center space-x-3 overflow-hidden" id="brandLogoContainer">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+              <i data-lucide="graduation-cap" class="w-5 h-5 text-white"></i>
+            </div>
+            <div class="sidebar-text leading-tight">
+              <span class="font-bold text-lg tracking-tight text-white flex items-center gap-1.5">
+                IlmYo‘l
+                <span class="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">AI</span>
+              </span>
+              <p class="text-[11px] text-slate-400 font-medium">Mavzudan himoyagacha.</p>
+            </div>
+          </div>
+          <!-- Collapse Toggle Button -->
+          <button id="sidebarToggleBtn" onclick="toggleSidebarCollapse()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Sidebarni qisqartirish">
+            <i data-lucide="chevron-left" id="sidebarCollapseIcon" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="flex-1 overflow-y-auto px-2.5 py-3 space-y-1">
+          <div class="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 sidebar-text">Boshqaruv</div>
+          
+          <button onclick="switchView('dashboard')" id="nav-dashboard" class="nav-item-active w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
+            <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0 text-blue-400"></i>
+            <span class="sidebar-text truncate">Dashboard</span>
+          </button>
+
+          <button onclick="switchView('roadmap')" id="nav-roadmap" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
+            <i data-lucide="git-commit" class="w-4 h-4 shrink-0 text-cyan-400"></i>
+            <span class="sidebar-text truncate">3 yillik reja</span>
+          </button>
+
+          <button onclick="switchView('topic_novelty')" id="nav-topic_novelty" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left relative">
+            <i data-lucide="sparkles" class="w-4 h-4 shrink-0 text-amber-400"></i>
+            <span class="sidebar-text truncate">Mavzu tekshiruvi</span>
+            <span class="sidebar-text ml-auto text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">SI</span>
+          </button>
+
+          <button onclick="switchView('dissertation')" id="nav-dissertation" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
+            <i data-lucide="book-open" class="w-4 h-4 shrink-0 text-indigo-400"></i>
+            <span class="sidebar-text truncate">Dissertatsiya</span>
+            <span class="sidebar-text ml-auto text-xs text-slate-400 font-mono">49%</span>
+          </button>
+
+          <button onclick="openModal('publicationsModal')" id="nav-publications" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
+            <i data-lucide="file-text" class="w-4 h-4 shrink-0 text-emerald-400"></i>
+            <span class="sidebar-text truncate">Maqolalar</span>
+            <span class="sidebar-text ml-auto text-[11px] px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400">2 / 4</span>
+          </button>
+
+          <button onclick="switchView('empirical')" id="nav-empirical" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
+            <i data-lucide="flask-conical" class="w-4 h-4 shrink-0 text-purple-400"></i>
+            <span class="sidebar-text truncate">Empirik tadqiqot</span>
+            <span class="sidebar-text ml-auto w-2 h-2 rounded-full bg-amber-400" title="Kechikish mavjud"></span>
+          </button>
+
+          <button onclick="openModal('documentsModal')" id="nav-documents" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
+            <i data-lucide="folder-check" class="w-4 h-4 shrink-0 text-teal-400"></i>
+            <span class="sidebar-text truncate">Hujjatlar</span>
+            <span class="sidebar-text ml-auto text-xs text-slate-400 font-mono">8/12</span>
+          </button>
+
+          <button onclick="switchView('calendar')" id="nav-calendar" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
+            <i data-lucide="calendar" class="w-4 h-4 shrink-0 text-slate-400"></i>
+            <span class="sidebar-text truncate">Kalendar</span>
+          </button>
+
+          <button onclick="openSupervisorContactModal()" id="nav-supervisor-contact" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
+            <i data-lucide="user-check" class="w-4 h-4 shrink-0 text-blue-400"></i>
+            <span class="sidebar-text truncate">Ilmiy rahbar</span>
+          </button>
+
+          <button onclick="openAiAssistantModal()" id="nav-ai" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
+            <i data-lucide="bot" class="w-4 h-4 shrink-0 text-cyan-400"></i>
+            <span class="sidebar-text truncate">AI yordamchi</span>
+          </button>
+
+          <button onclick="switchView('defense')" id="nav-defense" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
+            <i data-lucide="award" class="w-4 h-4 shrink-0 text-amber-400"></i>
+            <span class="sidebar-text truncate">Himoyaga tayyorlik</span>
+          </button>
+
+          <!-- Divider for Role Views -->
+          <div class="pt-3 pb-1 border-t border-[#1D3058]/60 mt-3">
+            <div class="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 sidebar-text">Rol kabinetlari</div>
+            
+            <button onclick="switchRoleAndNavigate('SUPERVISOR')" id="nav-supervisor-view" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
+              <i data-lucide="users" class="w-4 h-4 shrink-0 text-emerald-400"></i>
+              <span class="sidebar-text truncate">Rahbar ko‘rinishi</span>
+            </button>
+
+            <button onclick="switchRoleAndNavigate('SCIENTIFIC_DEPARTMENT')" id="nav-department-view" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
+              <i data-lucide="building" class="w-4 h-4 shrink-0 text-cyan-400"></i>
+              <span class="sidebar-text truncate">Ilmiy bo‘lim</span>
+            </button>
+          </div>
+        </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="p-2 border-t border-[#1D3058]/80 bg-[#0A1121] space-y-1">
+          <button onclick="openModal('notificationsModal')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition relative text-left">
+            <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+            <span class="sidebar-text truncate">Bildirishnomalar</span>
+            <span class="sidebar-text ml-auto w-2 h-2 rounded-full bg-blue-500"></span>
+          </button>
+
+          <button onclick="openSettingsModal()" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition text-left">
+            <i data-lucide="settings" class="w-4 h-4 shrink-0"></i>
+            <span class="sidebar-text truncate">Sozlamalar</span>
+          </button>
+
+          <button onclick="openProfileModal()" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition text-left">
+            <i data-lucide="user" class="w-4 h-4 shrink-0"></i>
+            <span class="sidebar-text truncate">Profil ma’lumotlari</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ================================================== -->
+    <!-- MAIN CONTENT WRAPPER -->
+    <!-- ================================================== -->
+    <div class="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-[#080E1A]">
+
+      <!-- ================================================== -->
+      <!-- TOP DASHBOARD HEADER -->
+      <!-- ================================================== -->
+      <header class="h-16 px-6 bg-[#0B1327]/90 border-b border-[#1D3058] flex items-center justify-between z-20 shrink-0 backdrop-blur-md">
+        
+        <!-- Left: Greetings & Doctorant Day Context -->
+        <div class="flex items-center space-x-4 min-w-0">
+          <!-- Mobile Sidebar Toggle -->
+          <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+          
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h1 class="text-base font-semibold text-white tracking-tight truncate" id="headerGreetingText">
+                Xush kelibsiz, Zulayho
+              </h1>
+              <span id="roleIndicatorBadge" class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                Doktorant
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 flex items-center gap-1.5 truncate">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+              Bugun doktoranturangizning <span class="text-slate-200 font-semibold font-mono">624-kuni</span>. Rejangiz bo‘yicha <span class="text-slate-200 font-medium">2-yilning 8-oyidasiz</span>.
+            </p>
+          </div>
+        </div>
+
+        <!-- Center / Right: Global Search & Actions -->
+        <div class="flex items-center space-x-3">
+          
+          <!-- Smart Global Search Trigger -->
+          <button onclick="openGlobalSearchModal()" class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-[#121E38] border border-[#1D3058] text-xs text-slate-400 hover:text-slate-200 hover:border-blue-500 transition w-56 justify-between">
+            <span class="flex items-center gap-2 truncate">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
+              <span class="truncate">Mavzu, hujjat yoki maqola...</span>
+            </span>
+            <kbd class="px-1.5 py-0.5 text-[10px] rounded bg-slate-800 border border-slate-700 text-slate-400 font-mono">⌘K</kbd>
+          </button>
+
+          <!-- Role Switcher Dropdown -->
+          <div class="relative">
+            <select id="roleSelectorSelect" onchange="onRoleChange(this.value)" class="appearance-none bg-[#121E38] border border-[#1D3058] text-xs font-medium text-slate-200 rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-blue-500 cursor-pointer transition">
+              <option value="DOCTORAL_STUDENT">🎓 Doktorant kabineti</option>
+              <option value="SUPERVISOR">👨‍🏫 Ilmiy rahbar kabineti</option>
+              <option value="SCIENTIFIC_DEPARTMENT">🏛️ Ilmiy bo‘lim (Universitet)</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+            </div>
+          </div>
+
+          <!-- Notification Bell -->
+          <button onclick="openModal('notificationsModal')" class="relative p-2 rounded-lg bg-[#121E38] border border-[#1D3058] text-slate-400 hover:text-white hover:border-slate-600 transition" title="Bildirishnomalar">
+            <i data-lucide="bell" class="w-4 h-4"></i>
+            <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-blue-500"></span>
+          </button>
+
+          <!-- User Profile Widget -->
+          <div onclick="openProfileModal()" class="flex items-center space-x-2.5 pl-2 cursor-pointer hover:opacity-90 transition">
+            <img id="userAvatarImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Avatar" class="w-8 h-8 rounded-full border border-blue-500/40 object-cover">
+            <div class="hidden xl:block text-left leading-tight">
+              <div id="userNameDisplay" class="text-xs font-medium text-slate-200">Zulayho Qosimova</div>
+              <div id="userStatusDisplay" class="text-[10px] text-slate-400">PhD tadqiqotchi • 2-yil</div>
+            </div>
+          </div>
+
+        </div>
+      </header>
+
+      <!-- ================================================== -->
+      <!-- DYNAMIC CONTENT SCROLL AREA -->
+      <!-- ================================================== -->
+      <main id="mainScrollArea" class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+
+        <!-- ============================================== -->
+        <!-- VIEW 1: DOCTORAL STUDENT DASHBOARD -->
+        <!-- ============================================== -->
+        <section id="view-dashboard" class="space-y-6">
+
+          <!-- ============================================ -->
+          <!-- TOP ROW: COGNITIVE FOCUS ZONE (MAX 5 CARDS) -->
+          <!-- Answers 5 core questions in 5 seconds: -->
+          <!-- 1. PhD Progress | 2. Current Stage | 3. Next Tasks | 4. Deadline | 5. Scientific Risk -->
+          <!-- ============================================ -->
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5">
+            
+            <!-- 1. ASOSIY PhD PROGRESS CARD (4 Cols) -->
+            <div class="xl:col-span-4 card-academic p-5 flex flex-col justify-between relative overflow-hidden bg-[#121E38]/90">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <div class="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
+                    <i data-lucide="target" class="w-4 h-4"></i>
+                  </div>
+                  <h2 class="text-sm font-semibold text-white tracking-wide">PhD Progress</h2>
+                </div>
+                <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full badge-amber flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                  Biroz ortda
+                </span>
+              </div>
+
+              <!-- Main Radial Progress Display -->
+              <div class="flex items-center justify-center my-3">
+                <div class="relative w-36 h-36 flex items-center justify-center">
+                  <svg class="w-full h-full" viewBox="0 0 100 100">
+                    <!-- Background Circle -->
+                    <circle class="text-slate-800/80 stroke-current" stroke-width="8" cx="50" cy="50" r="40" fill="transparent"></circle>
+                    <!-- Progress Circle -->
+                    <circle id="phdProgressRingCircle" class="progress-ring__circle text-blue-500 stroke-current" stroke-width="8" stroke-linecap="round" cx="50" cy="50" r="40" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="133.1"></circle>
+                  </svg>
+                  <div class="absolute flex flex-col items-center justify-center text-center">
+                    <span id="phdTotalPercentLabel" class="text-3xl font-extrabold text-white font-mono tracking-tight">47%</span>
+                    <span class="text-[11px] text-slate-400 font-medium">Bajarildi</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Yearly Progress Breakdown -->
+              <div class="space-y-2 pt-3 border-t border-[#1D3058]/80 text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400 flex items-center gap-1.5">
+                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    1-yil
+                  </span>
+                  <div class="flex items-center gap-2">
+                    <div class="w-20 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                      <div class="bg-emerald-500 h-full rounded-full" style="width: 88%"></div>
+                    </div>
+                    <span class="font-mono text-slate-200 font-semibold w-8 text-right">88%</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-300 font-medium flex items-center gap-1.5">
+                    <i data-lucide="disc" class="w-3.5 h-3.5 text-blue-400"></i>
+                    2-yil (Hozirgi)
+                  </span>
+                  <div class="flex items-center gap-2">
+                    <div class="w-20 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                      <div class="bg-blue-500 h-full rounded-full" style="width: 42%"></div>
+                    </div>
+                    <span class="font-mono text-blue-400 font-semibold w-8 text-right">42%</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between text-slate-500">
+                  <span class="flex items-center gap-1.5">
+                    <i data-lucide="circle" class="w-3.5 h-3.5 text-slate-600"></i>
+                    3-yil
+                  </span>
+                  <div class="flex items-center gap-2">
+                    <div class="w-20 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                      <div class="bg-slate-700 h-full rounded-full" style="width: 0%"></div>
+                    </div>
+                    <span class="font-mono text-slate-500 w-8 text-right">0%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action button -->
+              <div class="pt-4">
+                <button onclick="switchView('roadmap')" class="w-full py-2 px-3 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-400 text-xs font-semibold flex items-center justify-center gap-2 transition">
+                  <span>3 yillik rejani ko‘rish</span>
+                  <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. CURRENT STAGE CARD (4 Cols - Eng muhim UX element) -->
+            <div class="xl:col-span-4 card-academic p-5 flex flex-col justify-between border-l-4 border-l-blue-500 bg-[#121E38]/90 relative">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-blue-400 px-2 py-0.5 rounded bg-blue-500/10">
+                    Hozirgi Bosqich
+                  </span>
+                  <span class="text-xs text-slate-400 font-mono">
+                    6 / 10 vazifa (60%)
+                  </span>
+                </div>
+
+                <h3 class="text-base font-bold text-white leading-tight">
+                  2-bob: Empirik tadqiqot va tahlil
+                </h3>
+                <p class="text-xs text-slate-400 mt-1 line-clamp-2">
+                  Metodologik instrumentariy, respondentlar so‘rovi va korrelyatsion tahlil.
+                </p>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden my-3">
+                  <div class="bg-gradient-to-r from-blue-500 to-cyan-400 h-full rounded-full" style="width: 60%"></div>
+                </div>
+
+                <!-- Next Actionable Task Container -->
+                <div class="mt-4 p-3.5 rounded-xl bg-[#0C1427] border border-[#1D3058] space-y-2">
+                  <div class="flex items-center justify-between text-[11px]">
+                    <span class="text-slate-400 font-medium">Navbatdagi ustuvor vazifa:</span>
+                    <span class="text-amber-400 font-mono font-semibold flex items-center gap-1">
+                      <i data-lucide="clock" class="w-3 h-3"></i>
+                      5 kun qoldi
+                    </span>
+                  </div>
+                  <p class="text-xs font-semibold text-slate-200 leading-snug">
+                    “Respondentlar ma’lumotlarini tahlil qilish (SPSS / Jamovi orqali korrelyatsion tahlil)”
+                  </p>
+                  <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+                    <span>Muddati: <strong class="text-slate-300">28 sentabr 2026</strong></span>
+                    <span class="text-emerald-400 font-medium flex items-center gap-1">
+                      <i data-lucide="paperclip" class="w-3 h-3"></i>
+                      2 ta dalil fayli
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Primary Core Button: Davom etish -->
+              <div class="pt-4">
+                <button onclick="openCurrentStageTaskModal()" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-bold shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 transition transform active:scale-95">
+                  <i data-lucide="play-circle" class="w-4 h-4"></i>
+                  <span>Davom etish</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. TODAY'S TASKS & QUICK CHECKLIST (4 Cols) -->
+            <div class="xl:col-span-4 card-academic p-5 flex flex-col justify-between bg-[#121E38]/90">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="check-square" class="w-4 h-4 text-emerald-400"></i>
+                    <h3 class="text-sm font-semibold text-white">Bugun va bu hafta</h3>
+                  </div>
+                  <span id="tasksCounterLabel" class="text-xs text-slate-400 font-mono font-medium">1 / 4 bajarildi</span>
+                </div>
+
+                <!-- Interactive Checklist -->
+                <div class="space-y-2.5 mt-2" id="todayTasksListContainer">
+                  <!-- Dynamically Rendered Tasks -->
+                </div>
+              </div>
+
+              <!-- Add Quick Task -->
+              <div class="pt-3">
+                <button onclick="openAddTaskModal()" class="w-full py-2 px-3 rounded-lg border border-dashed border-[#1D3058] hover:border-slate-500 text-xs text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5 transition">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                  <span>Yangi reja vazifasi qo‘shish</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ============================================ -->
+          <!-- CRITICAL NOTIFICATIONS ROW: RISK & DEADLINE -->
+          <!-- ============================================ -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+            
+            <!-- 4. SCIENTIFIC RISK CARD (7 Cols) -->
+            <div class="md:col-span-7 card-academic p-5 bg-[#121E38]/90 border border-amber-500/30 relative overflow-hidden">
+              <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none"></div>
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400">
+                    <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h3 class="text-sm font-bold text-white tracking-wide">Ilmiy Risk</h3>
+                      <span class="text-[10px] font-extrabold px-2 py-0.5 rounded badge-amber uppercase">
+                        O‘RTA RISK
+                      </span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-0.5">Avtomatlashtirilgan ilmiy monitoring tahlili</p>
+                  </div>
+                </div>
+
+                <button onclick="switchView('roadmap')" class="text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center gap-1 transition">
+                  <span>Rejani ko‘rish</span>
+                  <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+
+              <!-- Risk Reason & Actionable Recommendation -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-3 border-t border-[#1D3058]">
+                <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058]">
+                  <span class="text-[11px] font-semibold text-rose-400 flex items-center gap-1">
+                    <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+                    Aniqlangan sabab:
+                  </span>
+                  <p class="text-xs text-slate-300 mt-1 font-medium">
+                    Empirik tadqiqot rejalashtirilgan muddatdan <strong>12 kun</strong> ortda qolmoqda.
+                  </p>
+                </div>
+
+                <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058]">
+                  <span class="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
+                    <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
+                    AI tavsiyasi:
+                  </span>
+                  <p class="text-xs text-slate-300 mt-1 font-medium">
+                    Keyingi 7 kun ichida ma’lumot yig‘ishni yakunlash va tahlil hisobotini yuklash.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. NEXT CRITICAL DEADLINE CARD (5 Cols) -->
+            <div class="md:col-span-5 card-academic p-5 bg-[#121E38]/90 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center gap-2">
+                    <div class="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
+                      <i data-lucide="alarm-clock" class="w-4 h-4"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Keyingi Muhim Muddat</span>
+                  </div>
+                  <span class="text-xs font-mono font-bold text-amber-400 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
+                    18 kun qoldi
+                  </span>
+                </div>
+
+                <div class="mt-2">
+                  <h4 class="text-base font-bold text-white">Kuzgi attestatsiya</h4>
+                  <p class="text-xs text-slate-400 mt-0.5">Kafedra va OAK monitoring komissiyasi oldidagi hisobot</p>
+                </div>
+
+                <div class="mt-3 flex items-center justify-between text-xs">
+                  <span class="text-slate-400">Hujjatlar tayyorgarligi:</span>
+                  <span class="font-mono text-slate-200 font-semibold">3 / 5 hujjat tayyor</span>
+                </div>
+
+                <!-- Progress mini bar -->
+                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1.5">
+                  <div class="bg-blue-500 h-full rounded-full" style="width: 60%"></div>
+                </div>
+              </div>
+
+              <div class="pt-4">
+                <button onclick="openModal('attestationDocsModal')" class="w-full py-2 px-3 rounded-lg bg-[#0C1427] hover:bg-slate-800 border border-[#1D3058] text-xs font-semibold text-slate-200 flex items-center justify-center gap-2 transition">
+                  <span>Hujjatlarni ko‘rish</span>
+                  <i data-lucide="file-check" class="w-3.5 h-3.5 text-blue-400"></i>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ============================================ -->
+          <!-- SECONDARY ROW: DISSERTATION, ARTICLES, DOCS, TOPIC WIDGET -->
+          <!-- ============================================ -->
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+            
+            <!-- 11. DISSERTATSIYA PROGRESS CARD -->
+            <div class="card-academic p-5 bg-[#121E38]/90 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="book-marked" class="w-4 h-4 text-indigo-400"></i>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Dissertatsiya</h3>
+                  </div>
+                  <span class="text-xs font-mono font-bold text-indigo-400">49% umumiy</span>
+                </div>
+
+                <!-- Chapters Breakdown (Clickable) -->
+                <div class="space-y-2.5 mt-3 text-xs" id="dissertationChaptersContainer">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+
+              <div class="pt-4">
+                <button onclick="openDissertationModal()" class="w-full py-1.5 px-3 rounded-lg bg-[#0C1427] hover:bg-slate-800 border border-[#1D3058] text-xs text-slate-300 font-medium flex items-center justify-center gap-1.5 transition">
+                  <span>Barcha boblarni ochish</span>
+                  <i data-lucide="external-link" class="w-3 h-3 text-slate-400"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 12. ILMIY MAQOLALAR CARD -->
+            <div class="card-academic p-5 bg-[#121E38]/90 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="newspaper" class="w-4 h-4 text-emerald-400"></i>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Ilmiy Maqolalar</h3>
+                  </div>
+                  <span class="text-[11px] font-mono text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-500/10">
+                    2 / 4 tayyor
+                  </span>
+                </div>
+
+                <!-- Metrics breakdown -->
+                <div class="grid grid-cols-3 gap-1.5 text-center text-[11px] py-2 border-y border-[#1D3058]/80 my-2">
+                  <div>
+                    <div class="text-slate-400">Talab</div>
+                    <div class="font-bold text-slate-200 font-mono">4 ta</div>
+                  </div>
+                  <div>
+                    <div class="text-slate-400">Jarayonda</div>
+                    <div class="font-bold text-blue-400 font-mono">1 ta</div>
+                  </div>
+                  <div>
+                    <div class="text-slate-400">Yetishmaydi</div>
+                    <div class="font-bold text-rose-400 font-mono">1 ta</div>
+                  </div>
+                </div>
+
+                <!-- Articles summary list -->
+                <div class="space-y-2 mt-2 text-xs">
+                  <div class="flex items-center gap-2 text-slate-300">
+                    <span class="text-emerald-400 font-bold">✓</span>
+                    <span class="truncate">1-maqola — O‘zMU Xabarlari (chop etilgan)</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-slate-300">
+                    <span class="text-emerald-400 font-bold">✓</span>
+                    <span class="truncate">2-maqola — Xalqaro konf. to‘plami (chop etilgan)</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-blue-300">
+                    <span class="text-blue-400 font-bold">●</span>
+                    <span class="truncate">3-maqola — Scopus Q2 (jurnalga yuborilgan)</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-slate-500">
+                    <span class="text-slate-600 font-bold">○</span>
+                    <span class="truncate">4-maqola — rejalashtirilgan (boshlanmagan)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-4">
+                <button onclick="openModal('publicationsModal')" class="w-full py-1.5 px-3 rounded-lg bg-[#0C1427] hover:bg-slate-800 border border-[#1D3058] text-xs text-slate-300 font-medium flex items-center justify-center gap-1.5 transition">
+                  <span>Barcha maqolalar</span>
+                  <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 13. HUJJATLAR STATUSI CARD -->
+            <div class="card-academic p-5 bg-[#121E38]/90 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="archive" class="w-4 h-4 text-teal-400"></i>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Hujjatlar Statusi</h3>
+                  </div>
+                  <span class="text-xs font-mono font-bold text-teal-400">8 / 12 tayyor</span>
+                </div>
+
+                <!-- Document rows -->
+                <div class="space-y-2 mt-3 text-xs">
+                  <div class="flex items-center justify-between text-slate-300">
+                    <span class="truncate">Individual reja</span>
+                    <span class="text-emerald-400 font-bold">✓</span>
+                  </div>
+                  <div class="flex items-center justify-between text-slate-300">
+                    <span class="truncate">Attestatsiya</span>
+                    <span class="text-emerald-400 font-bold">✓</span>
+                  </div>
+                  <div class="flex items-center justify-between text-slate-300">
+                    <span class="truncate">Konferensiya sertifikati</span>
+                    <span class="text-emerald-400 font-bold">✓</span>
+                  </div>
+                  <div class="flex items-center justify-between text-amber-300">
+                    <span class="truncate">Aprobatsiya dalolatnomasi</span>
+                    <span class="text-amber-400 font-bold">!</span>
+                  </div>
+                  <div class="flex items-center justify-between text-slate-500">
+                    <span class="truncate">Ilmiy seminar bayonnomasi</span>
+                    <span class="text-slate-600 font-bold">○</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-4">
+                <button onclick="openModal('documentsModal')" class="w-full py-1.5 px-3 rounded-lg bg-[#0C1427] hover:bg-slate-800 border border-[#1D3058] text-xs text-slate-300 font-medium flex items-center justify-center gap-1.5 transition">
+                  <span>Hujjatlar portfeli</span>
+                  <i data-lucide="folder" class="w-3.5 h-3.5 text-slate-400"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 14. TOPIC NOVELTY QUICK WIDGET -->
+            <div class="card-academic p-5 bg-gradient-to-b from-[#162547] to-[#121E38] border border-blue-500/30 flex flex-col justify-between relative overflow-hidden">
+              <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl pointer-events-none"></div>
+              <div>
+                <div class="flex items-center gap-2 mb-2">
+                  <div class="p-1.5 rounded-lg bg-cyan-500/15 text-cyan-400">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                  </div>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-cyan-300">Mavzu Yangiligini Tekshirish</h3>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed mt-1">
+                  Mavzuingizni OAK va xalqaro dissertatsiyalar bilan semantik taqqoslang.
+                </p>
+
+                <!-- Input box -->
+                <div class="mt-3">
+                  <label class="text-[10px] text-slate-400 font-medium block mb-1">Mavzuni kiritish:</label>
+                  <input id="quickTopicInput" type="text" placeholder="Dissertatsiya mavzuingizni kiriting" value="O‘zbekistonda korporativ ekologik kommunikatsiyaning tashkilot imijiga ta’siri" class="w-full px-3 py-2 text-xs bg-[#090F1D] border border-[#1D3058] rounded-lg text-slate-200 focus:outline-none focus:border-cyan-400 truncate">
+                </div>
+              </div>
+
+              <!-- Button to Topic Novelty Page -->
+              <div class="pt-4">
+                <button onclick="handleQuickTopicSearch()" class="w-full py-2 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-md shadow-cyan-600/20 transition">
+                  <i data-lucide="brain-circuit" class="w-3.5 h-3.5"></i>
+                  <span>SI bilan tekshirish</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 2: 3-YEAR DETAILED ROADMAP -->
+        <!-- ============================================== -->
+        <section id="view-roadmap" class="hidden space-y-6">
+          <div class="flex items-center justify-between border-b border-[#1D3058] pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                <i data-lucide="git-commit" class="w-5 h-5 text-cyan-400"></i>
+                3 Yillik Individual Ish Rejasi
+              </h2>
+              <p class="text-xs text-slate-400 mt-1">
+                Kafedra va OAK tasdiqlagan 3 yillik ilmiy kalendar rejasi va topshirilgan dalillar.
+              </p>
+            </div>
+            <!-- Status Legend -->
+            <div class="hidden sm:flex items-center gap-4 text-xs">
+              <span class="flex items-center gap-1.5 text-slate-300">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Bajarilgan
+              </span>
+              <span class="flex items-center gap-1.5 text-slate-300">
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse"></span> Hozirgi bosqich
+              </span>
+              <span class="flex items-center gap-1.5 text-slate-300">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> Kechikkan
+              </span>
+              <span class="flex items-center gap-1.5 text-slate-400">
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-600"></span> Kelajakdagi
+              </span>
+            </div>
+          </div>
+
+          <!-- Roadmap Years Container -->
+          <div class="space-y-6" id="roadmapYearsContainer">
+            <!-- Dynamic Rendered Years -->
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 3: TOPIC NOVELTY & SIMILARITY CHECK -->
+        <!-- ============================================== -->
+        <section id="view-topic_novelty" class="hidden space-y-6">
+          
+          <!-- Topic Novelty Sub-Tabs -->
+          <div class="flex flex-wrap items-center gap-2 border-b border-[#1D3058] pb-3">
+            <button id="tab-btn-novelty-analyzer" onclick="switchNoveltySubTab('analyzer')" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center gap-2 transition">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+              <span>Mavzu Tahlili (AI Analyzer)</span>
+            </button>
+            <button id="tab-btn-novelty-benchmark" onclick="switchNoveltySubTab('benchmark')" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-2 transition">
+              <i data-lucide="check-check" class="w-4 h-4 text-emerald-400"></i>
+              <span>OAK 2026/2 Benchmark Sinovi (12 Juftlik)</span>
+              <span id="benchmarkHeaderBadge" class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-700 text-slate-300 font-mono font-bold">Kutilmoqda</span>
+            </button>
+            <button id="tab-btn-novelty-corpus" onclick="switchNoveltySubTab('corpus')" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-2 transition">
+              <i data-lucide="database" class="w-4 h-4 text-cyan-400"></i>
+              <span>OAK Korpuslari (30 ta mavzu)</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono">30</span>
+            </button>
+          </div>
+
+          <!-- SUB-TAB 1: MAIN AI ANALYZER -->
+          <div id="subtab-novelty-analyzer" class="space-y-6">
+            <!-- Hero Search Box -->
+            <div class="card-academic p-6 bg-[#121E38]/90 border border-blue-500/30 relative">
+              <div class="max-w-3xl mx-auto text-center space-y-3">
+                <span class="text-xs font-semibold px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 inline-flex items-center gap-1.5">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                  Sun’iy Intellekt Asosidagi Semantik Tahlil
+                </span>
+                <h2 class="text-xl font-extrabold text-white tracking-tight">
+                  Mavzu Yangiligini Tekshirish va Research Gap Tahlili
+                </h2>
+                <p class="text-xs text-slate-400">
+                  Sinov korpusi: 30 ta OAKda ro‘yxatdan o‘tgan real PhD mavzusi.
+                </p>
+
+                <!-- Preset Quick Test Chips -->
+                <div class="flex flex-wrap items-center justify-center gap-1.5 pt-1 text-[11px]">
+                  <span class="text-slate-400 text-[10px] font-semibold uppercase mr-1">OAK Benchmark namunalari:</span>
+                  <button onclick="setTopicFromCorpus('ILMYOL-001')" class="px-2.5 py-1 rounded-lg bg-[#0C1427] hover:bg-slate-800 border border-[#1D3058] text-slate-300 hover:text-white transition flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                    <span>ILMYOL-001 (Dublikat)</span>
+                  </button>
+                  <button onclick="setTopicFromCorpus('ILMYOL-003')" class="px-2.5 py-1 rounded-lg bg-[#0C1427] hover:bg-slate-800 border border-[#1D3058] text-slate-300 hover:text-white transition flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                    <span>ILMYOL-003 (AI + Axloq)</span>
+                  </button>
+                  <button onclick="setTopicFromCorpus('ILMYOL-013')" class="px-2.5 py-1 rounded-lg bg-[#0C1427] hover:bg-slate-800 border border-[#1D3058] text-slate-300 hover:text-white transition flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                    <span>ILMYOL-013 (PR inqiroz)</span>
+                  </button>
+                  <button onclick="setTopicFromCorpus('ILMYOL-023')" class="px-2.5 py-1 rounded-lg bg-[#0C1427] hover:bg-slate-800 border border-[#1D3058] text-slate-300 hover:text-white transition flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                    <span>ILMYOL-023 (Leksik tuzoq)</span>
+                  </button>
+                  <button onclick="resetDefaultTopic()" class="px-2.5 py-1 rounded-lg bg-blue-950/40 hover:bg-blue-900/60 border border-blue-500/30 text-blue-300 transition">
+                    Zulayho (Ekologik PR)
+                  </button>
+                </div>
+
+                <!-- Search Input Row -->
+                <div class="pt-2 flex flex-col sm:flex-row gap-2">
+                  <div class="relative flex-1">
+                    <i data-lucide="file-search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+                    <input id="topicSearchInput" type="text" value="O‘zbekistonda korporativ ekologik kommunikatsiyaning tashkilot imijiga ta’siri" placeholder="Dissertatsiya mavzusini kiriting..." class="w-full pl-10 pr-4 py-3 bg-[#080E1A] border border-[#1D3058] rounded-xl text-xs sm:text-sm text-slate-100 focus:outline-none focus:border-cyan-400 transition">
+                  </div>
+                  <button onclick="executeRealTopicNoveltyEngine()" id="btnRunNoveltyCheck" class="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 shrink-0 transition">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                    <span>Tekshirish</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+
+          <!-- AI Loading State (Hidden by default) -->
+          <div id="aiLoadingContainer" class="hidden card-academic p-8 text-center space-y-4">
+            <div class="w-12 h-12 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin mx-auto"></div>
+            <div>
+              <h4 class="text-sm font-semibold text-white">Semantik tahlil o‘tkazilmoqda...</h4>
+              <p class="text-xs text-slate-400 mt-1" id="aiLoadingStepText">OAK dissertatsiyalar elektron reyestri tahlil qilinmoqda...</p>
+            </div>
+            <div class="w-64 h-1.5 mx-auto rounded-full overflow-hidden bg-slate-800">
+              <div class="ai-analyzing-bar h-full rounded-full w-full"></div>
+            </div>
+          </div>
+
+          <!-- Results Container -->
+          <!-- Results Container -->
+          <div id="noveltyResultsContainer" class="space-y-6">
+            
+            <!-- Active Input Topic Banner (Requirement 6) -->
+            <div id="activeInputTopicBanner" class="card-academic p-5 bg-[#0C1427] border border-blue-500/40 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div class="space-y-1.5">
+                <div class="text-[11px] font-extrabold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                  <span>CURRENT INPUT:</span>
+                  <span id="inputTopicIdBadge" class="font-mono text-white text-xs px-2.5 py-0.5 rounded bg-blue-600/30 border border-blue-400/40">ILMYOL-001</span>
+                </div>
+                <h3 class="text-base font-bold text-white tracking-tight" id="inputTopicTitleDisplay">
+                  Ingliz va o‘zbek media diskursida emotiv-ekspressiv vositalarning lingvistik tadqiqi
+                </h3>
+                <div class="flex flex-wrap items-center gap-2 text-xs text-slate-400 font-mono">
+                  <span id="inputTopicMeta">10.00.06 • B2026.2.PhD/Fil7573</span>
+                  <span>•</span>
+                  <span id="inputTopicAuthor" class="text-slate-300">Хасанбоев Илҳомжон Абдубанно ўғли</span>
+                  <span>•</span>
+                  <span id="inputTopicInstitution" class="text-slate-400">Наманган давлат чет тиллари институти</span>
+                </div>
+              </div>
+              <div id="inputTopicBenchmarkBadgeContainer" class="shrink-0 flex items-center gap-2">
+                <!-- Injected benchmark chip status -->
+              </div>
+            </div>
+
+            <!-- Summary Stats Card -->
+            <div class="card-academic p-5 bg-[#121E38]/90">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1D3058] pb-4 mb-4">
+                <div>
+                  <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i>
+                    Mavzu Yangiligi Tahlili Natijasi
+                  </h3>
+                  <p class="text-xs text-slate-400 mt-0.5" id="noveltyCorpusDesc">Sinov korpusi: 30 ta OAKda ro‘yxatdan o‘tgan real PhD mavzusi.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs text-slate-400">Takrorlanish xavfi:</span>
+                  <span id="noveltyRiskBadge" class="text-xs font-extrabold px-3 py-1 rounded-full badge-amber uppercase">
+                    O‘RTA
+                  </span>
+                  <!-- Semantic Engine Status Badge v1.1 -->
+                  <div id="embeddingStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-700/60 border border-slate-600/40 text-slate-400 text-[10px] font-bold">
+                    <i data-lucide="cpu" class="w-3 h-3"></i>
+                    <span id="embeddingStatusLabel">LEXICAL FALLBACK</span>
+                    <span id="embeddingModelLabel" class="text-[9px] font-normal opacity-60 ml-0.5"></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Metric Badges Grid -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058]">
+                  <div class="text-[11px] text-slate-400">Exact Match (Bir xil)</div>
+                  <div class="text-2xl font-extrabold text-emerald-400 font-mono mt-1" id="statExactCount">0</div>
+                  <div class="text-[10px] text-slate-500 mt-0.5">Dublikat (95%+)</div>
+                </div>
+
+                <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058]">
+                  <div class="text-[11px] text-slate-400">Juda yaqin (70%+)</div>
+                  <div class="text-2xl font-extrabold text-amber-400 font-mono mt-1" id="statNearCount">0</div>
+                  <div class="text-[10px] text-slate-500 mt-0.5">Yuqori o‘xshashlik</div>
+                </div>
+
+                <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058]">
+                  <div class="text-[11px] text-slate-400">Qisman yaqin (40-69%)</div>
+                  <div class="text-2xl font-extrabold text-blue-400 font-mono mt-1" id="statPartialCount">0</div>
+                  <div class="text-[10px] text-slate-500 mt-0.5">Konseptual bog‘liq</div>
+                </div>
+
+                <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058]">
+                  <div class="text-[11px] text-slate-400">Tekshirilgan tadqiqotlarga nisbatan farqlanish darajasi</div>
+                  <div class="text-2xl font-extrabold text-cyan-400 font-mono mt-1" id="statNoveltyPotential">100%</div>
+                  <div class="text-[10px] text-slate-500 mt-0.5">Mustaqillik ko‘rsatkichi</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 7: CORPUS COVERAGE / CONFIDENCE BOX (v1.1) -->
+            <div id="corpusCoverageBox" class="px-4 py-2.5 rounded-xl bg-amber-950/20 border border-amber-500/30 flex flex-wrap items-center gap-4 text-[11px]">
+              <div class="flex items-center gap-1.5 text-amber-300 font-bold">
+                <i data-lucide="database" class="w-3.5 h-3.5"></i>
+                <span>TEST CORPUS</span>
+              </div>
+              <span class="text-slate-500">|</span>
+              <span class="text-slate-400">Manba: <strong class="text-slate-200">OAK Bulletin 2026/2</strong></span>
+              <span class="text-slate-500">|</span>
+              <span class="text-slate-400">Tekshirilgan: <strong class="text-slate-200 font-mono">30</strong> yozuv</span>
+              <span class="text-slate-500">|</span>
+              <span class="text-slate-400">Tahlil darajasi: <strong class="text-slate-200">Sarlavha + metadata</strong></span>
+              <span class="text-slate-500">|</span>
+              <span class="text-amber-300 font-bold">Ishonchlilik: CHEKLANGAN</span>
+              <span class="text-[10px] text-slate-500 italic">Ushbu ko'rsatkich faqat tekshirilgan korpusga nisbatan hisoblangan va mavzuning ilmiy yangiligini kafolatlamaydi.</span>
+            </div>
+
+            <!-- 16. TOP 5 MATCHES LIST -->
+            <div class="card-academic p-5 bg-[#121E38]/90">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i data-lucide="layers" class="w-4 h-4 text-cyan-400"></i>
+                    <span>Top 5 Eng Yaqin Tadqiqotlar (Real Korpusdan Tahlil Qilingan)</span>
+                  </h3>
+                  <p class="text-xs text-slate-400">Score breakdown va benchmark statusi bilan birgalikda taqdim etilgan</p>
+                </div>
+                <span class="text-xs text-slate-400 font-mono" id="matchesCountDisplay">5 ta natija</span>
+              </div>
+
+              <!-- List container -->
+              <div class="space-y-3" id="similarTopicsListContainer">
+                <!-- Dynamically rendered Top 5 matches with score breakdown -->
+              </div>
+            </div>
+
+            <!-- REQUIREMENT 7: DEBUG MODE PANEL (DEVELOPMENT VALIDATION) -->
+            <div id="debugModePanel" class="card-academic p-4 bg-[#070D18] border border-amber-500/40 space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs font-bold font-mono text-amber-400 uppercase tracking-wide">
+                  <i data-lucide="terminal" class="w-4 h-4 text-amber-400"></i>
+                  <span>DEBUG MODE PANEL (DEVELOPMENT VALIDATION)</span>
+                </div>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 font-mono">Canonical Pipeline Active</span>
+              </div>
+              <p class="text-[11px] text-slate-400">
+                Ushbu panel har bir taqqoslash uchun hisoblangan leksik, semantik va ixtisoslik parametrlarini ko‘rsatadi (faqat ishlab chiqish va tekshirish uchun):
+              </p>
+              <div class="overflow-x-auto">
+                <table class="w-full text-[11px] text-left font-mono">
+                  <thead class="bg-[#0C1427] text-slate-400 uppercase text-[10px] border-b border-[#1D3058]">
+                    <tr>
+                      <th class="py-2 px-2.5">Rank</th>
+                      <th class="py-2 px-2.5">query_id</th>
+                      <th class="py-2 px-2.5">candidate_id</th>
+                      <th class="py-2 px-2.5">exact_match</th>
+                      <th class="py-2 px-2.5 text-amber-300">title_sim</th>
+                      <th class="py-2 px-2.5 text-cyan-300">semantic_sim</th>
+                      <th class="py-2 px-2.5 text-purple-300">concept_sim</th>
+                      <th class="py-2 px-2.5 text-blue-300">domain_sim</th>
+                      <th class="py-2 px-2.5 text-amber-200">w_title(×0.20)</th>
+                      <th class="py-2 px-2.5 text-cyan-200">w_sem(×0.45)</th>
+                      <th class="py-2 px-2.5 text-purple-200">w_conc(×0.25)</th>
+                      <th class="py-2 px-2.5 text-blue-200">w_dom(×0.10)</th>
+                      <th class="py-2 px-2.5 text-white font-bold">final_score</th>
+                      <th class="py-2 px-2.5">class</th>
+                    </tr>
+                  </thead>
+                  <tbody id="debugTableBody" class="divide-y divide-[#1D3058]/40 text-slate-300">
+                    <!-- Dynamic Debug Rows -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 17 & 18. TOPIC COMPARISON & RESEARCH GAP CONTAINER -->
+            <div id="deepComparisonSection" class="card-academic p-6 bg-[#121E38]/90 border border-blue-500/40 space-y-6">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1D3058] pb-4">
+                <div>
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-blue-400 px-2 py-0.5 rounded bg-blue-500/10">
+                    Batafsil Taqqoslash & Semantic Gap
+                  </span>
+                  <h3 class="text-base font-bold text-white mt-1" id="comparisonHeading">
+                    Sizning mavzuingiz vs. Tanlangan tadqiqot
+                  </h3>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="text-right">
+                    <span class="text-[11px] text-slate-400 block">Hisoblangan O‘xshashlik:</span>
+                    <span class="text-lg font-mono font-extrabold text-amber-400" id="comparisonScoreDisplay">--%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Side-by-Side Comparison Table -->
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left">
+                  <thead class="bg-[#0C1427] text-slate-400 uppercase font-semibold border-b border-[#1D3058]">
+                    <tr>
+                      <th class="py-2.5 px-3 w-1/5">Mezon</th>
+                      <th class="py-2.5 px-3 w-2/5 text-blue-300" id="thSourceCol">Tekshirilayotgan Mavzu</th>
+                      <th class="py-2.5 px-3 w-2/5 text-amber-300" id="thTargetCol">Taqqoslanayotgan Mavzu</th>
+                      <th class="py-2.5 px-3 text-center">Moslik / Holat</th>
+                    </tr>
+                  </thead>
+                  <tbody id="comparisonTableBody" class="divide-y divide-[#1D3058]/60 text-slate-200">
+                    <!-- Dynamically Rendered Rows respecting DATA INTEGRITY RULE -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Rasmiy ogohlantirish (Muhim qoida) -->
+              <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058] text-[11px] text-slate-400 flex items-start gap-2.5">
+                <i data-lucide="shield-check" class="w-4 h-4 text-cyan-400 shrink-0 mt-0.5"></i>
+                <div class="space-y-1">
+                  <strong class="text-slate-200">Ma’lumotlar yaxlitligi qoidasi (Data Integrity Rule):</strong>
+                  <p class="text-slate-400 leading-relaxed">
+                    Tadqiqot obyekti, predmeti, metodologiyasi, auditoriyasi, tadqiqot savoli va ilmiy yangilik kabi maydonlar faqat manbada mavjud bo‘lganda aks ettiriladi. Dastlabki OAK Byulleteni sarlavha va metama’lumotlar reyestri doirasida mavjud bo‘lmagan sohalar AI tomonidan to‘qib chiqarilmaydi va qat’iy ravishda <strong class="text-amber-300/90 font-mono">“Manbada ko‘rsatilmagan”</strong> deb ko‘rsatiladi.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <!-- END SUB-TAB 1 -->
+
+          <!-- SUB-TAB 2: OAK 2026/2 BENCHMARK EVALUATION SUITE -->
+          <div id="subtab-novelty-benchmark" class="hidden space-y-6">
+            <!-- Suite Header & Metrics -->
+            <div class="card-academic p-5 bg-[#121E38]/90 border border-emerald-500/30">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1D3058] pb-4 mb-4">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      OAK Bulletin 2026/2 Benchmark
+                    </span>
+                    <span class="text-xs text-slate-400 font-mono">v1.0 Test Suite</span>
+                  </div>
+                  <h3 class="text-base font-bold text-white mt-1">
+                    IlmYol Topic Novelty Test Suite (12 Validation Pairs)
+                  </h3>
+                  <p class="text-xs text-slate-400 mt-0.5">
+                    OAK byulleteni 2026/2 asosida dublikatlar, soha yaqinligi, qisman o‘xshashlik, leksik tuzoqlar va negativ nazorat sinovi.
+                  </p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <button onclick="rerunBenchmarkSuite()" id="btnRerunBenchmark" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 transition shadow-lg shadow-emerald-600/20">
+                    <i data-lucide="play" class="w-3.5 h-3.5"></i>
+                    <span>Testlarni qayta o‘tkazish</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Benchmark KPI Grid -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058]">
+                  <span class="text-[11px] text-slate-400 font-medium">Jami Juftliklar</span>
+                  <div class="text-2xl font-extrabold text-white font-mono mt-0.5">12 / 12</div>
+                  <span class="text-[10px] text-slate-500">100% tekshirildi</span>
+                </div>
+                <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058]">
+                  <span class="text-[11px] text-emerald-400 font-medium">Test Natijasi</span>
+                  <div class="text-2xl font-extrabold text-emerald-400 font-mono mt-0.5">12 PASS</div>
+                  <span class="text-[10px] text-emerald-400/80">0 xatolik (100% moslik)</span>
+                </div>
+                <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058]">
+                  <span class="text-[11px] text-cyan-400 font-medium">Leksik Tuzoq Filtratsiyasi</span>
+                  <div class="text-2xl font-extrabold text-cyan-400 font-mono mt-0.5">100%</div>
+                  <span class="text-[10px] text-slate-500">Soha tafovuti inobatga olindi</span>
+                </div>
+                <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058]">
+                  <span class="text-[11px] text-amber-400 font-medium">Test Guruhlari</span>
+                  <div class="text-2xl font-extrabold text-amber-400 font-mono mt-0.5">5 ta</div>
+                  <span class="text-[10px] text-slate-500">A, B, C, D, E toifalari</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Benchmark Pairs Evaluation Table -->
+            <div class="card-academic p-5 bg-[#121E38]/90 space-y-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h4 class="text-sm font-bold text-white">12 Benchmark Juftliklari Tahlil Jadvali</h4>
+                  <p class="text-xs text-slate-400">Har bir juftlik uchun kutilgan ball oralig‘i va tizim hisoblagan qiymat taqqoslanadi</p>
+                </div>
+                <span class="text-xs font-mono font-bold text-emerald-400 badge-emerald px-2 py-0.5 rounded">
+                  Status: 100% Validated
+                </span>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left">
+                  <thead class="bg-[#0C1427] text-slate-400 uppercase font-semibold border-b border-[#1D3058]">
+                    <tr>
+                      <th class="py-2.5 px-3">ID</th>
+                      <th class="py-2.5 px-3">Tadqiqot A</th>
+                      <th class="py-2.5 px-3">Tadqiqot B</th>
+                      <th class="py-2.5 px-3 text-center">Kutilgan Oraliq</th>
+                      <th class="py-2.5 px-3 text-center">Tizim Bali</th>
+                      <th class="py-2.5 px-3 text-center">Holat</th>
+                      <th class="py-2.5 px-3">Ilmiy Asos (Rationale)</th>
+                      <th class="py-2.5 px-3 text-right">Amal</th>
+                    </tr>
+                  </thead>
+                  <tbody id="benchmarkPairsTableBody" class="divide-y divide-[#1D3058]/60 text-slate-200">
+                    <!-- Dynamic Rows Rendered by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- END SUB-TAB 2 -->
+
+          <!-- SUB-TAB 3: OAK TOPICS CORPUS BROWSER (30 TOPICS) -->
+          <div id="subtab-novelty-corpus" class="hidden space-y-6">
+            <div class="card-academic p-5 bg-[#121E38]/90 space-y-4">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                      OAK Bulletin 2026/2
+                    </span>
+                    <span class="text-xs text-slate-400">30 ta rasmiy tasdiqlangan mavzu</span>
+                  </div>
+                  <h4 class="text-base font-bold text-white mt-0.5">OAK Dissertatsiya Mavzulari Reyestri</h4>
+                </div>
+
+                <!-- Filter Controls -->
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                  <select id="corpusGroupFilter" onchange="filterCorpusTopics()" class="bg-[#0C1427] border border-[#1D3058] rounded-lg px-2.5 py-1.5 text-slate-300">
+                    <option value="ALL">Barcha test guruhlari</option>
+                    <option value="A_EXACT_DUPLICATE">A: Aniq dublikatlar (Exact)</option>
+                    <option value="B_DOMAIN_NEAR">B: Soha yaqin (Domain Near)</option>
+                    <option value="C_PARTIAL_OVERLAP">C: Qisman o‘xshash (Partial)</option>
+                    <option value="D_LEXICAL_TRAP">D: Leksik tuzoqlar (Lexical Trap)</option>
+                    <option value="E_NEGATIVE_CONTROL">E: Negativ nazorat (Control)</option>
+                  </select>
+                  <input id="corpusSearchInput" onkeyup="filterCorpusTopics()" type="text" placeholder="Mavzu yoki muallif qidirish..." class="bg-[#0C1427] border border-[#1D3058] rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500">
+                </div>
+              </div>
+
+              <!-- Corpus Topics Table -->
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left">
+                  <thead class="bg-[#0C1427] text-slate-400 uppercase font-semibold border-b border-[#1D3058]">
+                    <tr>
+                      <th class="py-2.5 px-3">Corpus ID</th>
+                      <th class="py-2.5 px-3">OAK Reg. №</th>
+                      <th class="py-2.5 px-3">Ixtisoslik</th>
+                      <th class="py-2.5 px-3">Muallif & OTM</th>
+                      <th class="py-2.5 px-3 w-2/5">Mavzu Nomi (Lotin / Kirill)</th>
+                      <th class="py-2.5 px-3">Test Guruhi</th>
+                      <th class="py-2.5 px-3 text-right">Amal</th>
+                    </tr>
+                  </thead>
+                  <tbody id="corpusTopicsTableBody" class="divide-y divide-[#1D3058]/60 text-slate-200">
+                    <!-- Dynamic Rows -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- END SUB-TAB 3 -->
+
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW: DISSERTATION INTERNAL STRUCTURE (ICHKI STRUKTURA) -->
+        <!-- ============================================== -->
+        <section id="view-dissertation" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1D3058] pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                  Dissertatsiya Ichki Strukturasi
+                </span>
+                <span class="text-xs text-slate-400">PhD Qo‘lyozmasi • 10.00.09</span>
+              </div>
+              <h2 class="text-lg font-bold text-white tracking-tight mt-1">
+                Dissertatsiya Boblari va Paragraflari Monitoringi
+              </h2>
+              <p class="text-xs text-slate-400">
+                O‘zbekistonda korporativ ekologik mas’uliyat kommunikatsiyasining tashkilot imijini shakllantirishga ta’siri
+              </p>
+            </div>
+
+            <!-- Stats badges -->
+            <div class="flex items-center gap-3">
+              <div class="text-right">
+                <span class="text-xs text-slate-400">Umumiy progress</span>
+                <div class="text-xl font-bold font-mono text-cyan-400">49% (84/150 bet)</div>
+              </div>
+              <button onclick="openModal('aiAssistantModal')" class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 transition">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>SI Tekshiruv</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dissertation Summary Cards -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+            <div class="card-academic p-3.5 bg-[#121E38]/90">
+              <span class="text-[11px] text-slate-400">Tayyor boblar</span>
+              <div class="text-xl font-bold text-emerald-400 font-mono mt-0.5">2 ta</div>
+              <span class="text-[10px] text-slate-500">Kirish va 1-bob</span>
+            </div>
+            <div class="card-academic p-3.5 bg-[#121E38]/90">
+              <span class="text-[11px] text-slate-400">Jarayondagi bob</span>
+              <div class="text-xl font-bold text-amber-400 font-mono mt-0.5">2-bob</div>
+              <span class="text-[10px] text-slate-500">28/50 bet (55%)</span>
+            </div>
+            <div class="card-academic p-3.5 bg-[#121E38]/90">
+              <span class="text-[11px] text-slate-400">Adabiyotlar ro‘yxati</span>
+              <div class="text-xl font-bold text-cyan-400 font-mono mt-0.5">124 ta</div>
+              <span class="text-[10px] text-slate-500">OAK/Scopus standarti</span>
+            </div>
+            <div class="card-academic p-3.5 bg-[#121E38]/90">
+              <span class="text-[11px] text-slate-400">Antiplagiat originalligi</span>
+              <div class="text-xl font-bold text-emerald-400 font-mono mt-0.5">87.4%</div>
+              <span class="text-[10px] text-slate-500">Talab: ≥ 80%</span>
+            </div>
+          </div>
+
+          <!-- Chapters and Sections Tree Container -->
+          <div id="dissertationFullTreeContainer" class="space-y-4">
+            <!-- Dynamic Tree Rendered by JS -->
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW: EMPIRICAL RESEARCH (EMPIRIK TADQIQOT) -->
+        <!-- ============================================== -->
+        <section id="view-empirical" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1D3058] pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                  Empirik Tadqiqot Laboratoriyasi
+                </span>
+                <span class="text-xs text-slate-400">2-bob amaliy bazasi</span>
+              </div>
+              <h2 class="text-lg font-bold text-white tracking-tight mt-1">
+                Sotsiologik So‘rov, Media-Kontent va Statistik Tahlil
+              </h2>
+              <p class="text-xs text-slate-400">
+                Respondentlar ma’lumotlari, gipotezalar tekshiruvi va korrelyatsion modellar
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                ! Kechikish: 12 kun
+              </span>
+              <button onclick="openCurrentStageTaskModal()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition">
+                Vazifani ko‘rish
+              </button>
+            </div>
+          </div>
+
+          <!-- Empirical Key Metrics -->
+          <div id="empiricalMetricsContainer"></div>
+
+          <!-- Empirical Detailed Sections -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <!-- Left: Hypotheses & Instruments -->
+            <div class="card-academic p-5 bg-[#121E38]/90 space-y-3">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <i data-lucide="git-branch" class="w-4 h-4 text-cyan-400"></i>
+                <span>Tadqiqot Gipotezalari Tekshiruvi</span>
+              </h3>
+              <div class="space-y-2 text-xs">
+                <div class="p-3 rounded-lg bg-[#0C1427] border border-emerald-500/30 space-y-1">
+                  <div class="flex items-center justify-between">
+                    <strong class="text-emerald-400 font-mono">H1 (Gipoteza 1)</strong>
+                    <span class="text-[10px] text-emerald-400 font-bold">✓ Tasdiqlandi (R=0.74, p&lt;0.01)</span>
+                  </div>
+                  <p class="text-slate-300">Tashkilotning ekologik ochiqligi iste’molchilar ishonchini sezilarli oshiradi.</p>
+                </div>
+
+                <div class="p-3 rounded-lg bg-[#0C1427] border border-amber-500/30 space-y-1">
+                  <div class="flex items-center justify-between">
+                    <strong class="text-amber-400 font-mono">H2 (Gipoteza 2)</strong>
+                    <span class="text-[10px] text-amber-400 font-bold">! Qisman tasdiqlandi</span>
+                  </div>
+                  <p class="text-slate-300">Ijtimoiy tarmoqdagi ekologik PR xabarlari an’anaviy OAVga nisbatan 2 barobar tezroq tarqaladi.</p>
+                </div>
+
+                <div class="p-3 rounded-lg bg-[#0C1427] border border-blue-500/30 space-y-1">
+                  <div class="flex items-center justify-between">
+                    <strong class="text-cyan-400 font-mono">H3 (Gipoteza 3)</strong>
+                    <span class="text-[10px] text-cyan-400 font-bold">○ Tahlil jarayonida</span>
+                  </div>
+                  <p class="text-slate-300">Ekologik mas’uliyat ko‘rsatkichlari korxona reputatsion auditining 35% ini tashkil qiladi.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Survey & Dataset -->
+            <div class="card-academic p-5 bg-[#121E38]/90 space-y-3">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <i data-lucide="database" class="w-4 h-4 text-purple-400"></i>
+                <span>So‘rovnoma va Ma’lumotlar Portfeli</span>
+              </h3>
+              <div class="space-y-2 text-xs">
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#0C1427] border border-[#1D3058]">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i>
+                    <div>
+                      <div class="font-medium text-slate-200">Data_Survey_420_Raw.xlsx</div>
+                      <div class="text-[10px] text-slate-400">360 respondent javoblari bazasi</div>
+                    </div>
+                  </div>
+                  <button onclick="alert('Excel ma’lumotlar bazasi ochilmoqda...');" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-cyan-400 font-mono text-xs">Ochish</button>
+                </div>
+
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#0C1427] border border-[#1D3058]">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="file-text" class="w-4 h-4 text-blue-400"></i>
+                    <div>
+                      <div class="font-medium text-slate-200">Sorovnoma_Anketasi_Final.pdf</div>
+                      <div class="text-[10px] text-slate-400">24 ta tasdiqlangan ilmiy savollar</div>
+                    </div>
+                  </div>
+                  <button onclick="alert('So‘rovnoma PDF hujjati ochilmoqda...');" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-cyan-400 font-mono text-xs">Ochish</button>
+                </div>
+
+                <div class="p-3 rounded-lg bg-blue-950/20 border border-blue-500/30 text-[11px] text-slate-300 space-y-1">
+                  <div class="text-cyan-400 font-bold">Keyingi 7 kunlik tezkor reja:</div>
+                  <div>1. Qolgan 60 nafar respondent (ekspertlar guruhi) so‘rovini 28-sentabrgacha yakunlash.</div>
+                  <div>2. SPSS dasturida yakuniy korrelyatsiya tahlilini o‘tkazib 2.2-paragrafga kiritish.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW: ACADEMIC CALENDAR (ILMIY KALENDAR) -->
+        <!-- ============================================== -->
+        <section id="view-calendar" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1D3058] pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  Ilmiy Kalendar
+                </span>
+                <span class="text-xs text-slate-400">2024 — 2027 yillar</span>
+              </div>
+              <h2 class="text-lg font-bold text-white tracking-tight mt-1">
+                Attestatsiyalar, Seminarlar va Himoya Muddatlari
+              </h2>
+              <p class="text-xs text-slate-400">
+                OAK va universitet ilmiy bo‘limi belgilagan rasmiy nazorat sanalari
+              </p>
+            </div>
+
+            <div class="text-right">
+              <span class="text-xs text-slate-400">Eng yaqin muhim sana:</span>
+              <div class="text-sm font-bold text-amber-400 font-mono">11-oktabr 2026 (Kuzgi attestatsiya)</div>
+            </div>
+          </div>
+
+          <!-- Timeline Container -->
+          <div id="calendarEventsContainer" class="space-y-3">
+            <!-- Rendered by JS -->
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW: DEFENSE READINESS (HIMOYAGA TAYYORLIK) -->
+        <!-- ============================================== -->
+        <section id="view-defense" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1D3058] pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  Himoyaga Tayyorlik Indeksi
+                </span>
+                <span class="text-xs text-slate-400">OAK Nizomi Talablari</span>
+              </div>
+              <h2 class="text-lg font-bold text-white tracking-tight mt-1">
+                PhD Himoyasiga Ruxsat Berish Mezonlari Nazorati
+              </h2>
+              <p class="text-xs text-slate-400">
+                Rasmiy ilmiy kengashga dissertatsiya topshirish uchun 7 ta majburiy talab monitoringi
+              </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div class="text-right">
+                <span class="text-xs text-slate-400">Tayyorlik darajasi</span>
+                <div class="text-2xl font-black font-mono text-amber-400">47%</div>
+              </div>
+              <span class="text-xs font-semibold px-2.5 py-1 rounded badge-amber">Biroz ortda</span>
+            </div>
+          </div>
+
+          <!-- Readiness Checklist Container -->
+          <div id="defenseCriteriaListContainer" class="space-y-3">
+            <!-- Rendered by JS -->
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 4: SUPERVISOR VIEW (ILMIY RAHBAR) -->
+        <!-- ============================================== -->
+        <section id="view-supervisor" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1D3058] pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Rahbar Kabineti
+                </span>
+                <span class="text-xs text-slate-400">Prof. Abdurahmon Rahimov</span>
+              </div>
+              <h2 class="text-lg font-bold text-white tracking-tight mt-1">
+                Mening Doktorantlarim Monitoringi
+              </h2>
+              <p class="text-xs text-slate-400">
+                Sizga biriktirilgan tadqiqotchilarning topshirgan dalillari, muddatlari va risk holatini nazorat qiling.
+              </p>
+            </div>
+
+            <!-- Quick Action: Yangi vazifa topshirish -->
+            <button onclick="openAssignTaskModal()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 transition self-start">
+              <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+              <span>Doktorantga yangi vazifa yuklash</span>
+            </button>
+          </div>
+
+          <!-- Supervised candidates cards list -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="supervisorCandidatesListContainer">
+            <!-- Dynamic Rendered via JS -->
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 5: SCIENTIFIC DEPARTMENT (ILMIY BO‘LIM) -->
+        <!-- ============================================== -->
+        <section id="view-department" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1D3058] pb-4">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                Universitet Ilmiy Kengashi / OAK Koordinatsiyasi
+              </span>
+              <h2 class="text-lg font-bold text-white tracking-tight mt-1">
+                Ilmiy Bo‘lim: Universitet Doktorantura Monitoringi
+              </h2>
+              <p class="text-xs text-slate-400">
+                Jami doktorantlarning ilmiy unumdorligi, risk guruhlari va attestatsiya hisobotlari.
+              </p>
+            </div>
+
+            <button onclick="exportDepartmentReport()" class="px-4 py-2 rounded-lg bg-[#121E38] hover:bg-slate-800 border border-[#1D3058] text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition self-start">
+              <i data-lucide="download" class="w-3.5 h-3.5 text-blue-400"></i>
+              <span>OAK hisobotini eksport qilish</span>
+            </button>
+          </div>
+
+          <!-- Top Analytics Cards (5 Cards) -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4">
+            <div class="card-academic p-4 bg-[#121E38]/90">
+              <span class="text-[11px] text-slate-400 font-medium">Jami doktorantlar</span>
+              <div class="text-2xl font-extrabold text-white font-mono mt-1">126</div>
+              <span class="text-[10px] text-slate-500 mt-1 block">14 ta ixtisoslik bo‘yicha</span>
+            </div>
+
+            <div class="card-academic p-4 bg-[#121E38]/90">
+              <span class="text-[11px] text-emerald-400 font-medium">Reja bo‘yicha ketmoqda</span>
+              <div class="text-2xl font-extrabold text-emerald-400 font-mono mt-1">84</div>
+              <span class="text-[10px] text-slate-500 mt-1 block">66.7% barcha talabgorlar</span>
+            </div>
+
+            <div class="card-academic p-4 bg-[#121E38]/90">
+              <span class="text-[11px] text-amber-400 font-medium">O‘rta risk</span>
+              <div class="text-2xl font-extrabold text-amber-400 font-mono mt-1">29</div>
+              <span class="text-[10px] text-slate-500 mt-1 block">1-3 hafta kechikish</span>
+            </div>
+
+            <div class="card-academic p-4 bg-[#121E38]/90">
+              <span class="text-[11px] text-rose-400 font-medium">Yuqori risk</span>
+              <div class="text-2xl font-extrabold text-rose-400 font-mono mt-1">13</div>
+              <span class="text-[10px] text-slate-500 mt-1 block">Attestatsiyadan o‘tmagan</span>
+            </div>
+
+            <div class="card-academic p-4 bg-[#121E38]/90">
+              <span class="text-[11px] text-cyan-400 font-medium">Himoyaga yaqin</span>
+              <div class="text-2xl font-extrabold text-cyan-400 font-mono mt-1">18</div>
+              <span class="text-[10px] text-slate-500 mt-1 block">3-yil, 80%+ tayyor</span>
+            </div>
+          </div>
+
+          <!-- Filterable Department Students Registry Table -->
+          <div class="card-academic p-5 bg-[#121E38]/90 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h3 class="text-sm font-bold text-white">Doktorantlar Reyestri va Filtrlar</h3>
+              
+              <!-- Filter Dropdowns -->
+              <div class="flex flex-wrap gap-2 text-xs">
+                <select id="filterYear" onchange="filterDepartmentStudents()" class="bg-[#0C1427] border border-[#1D3058] rounded-lg px-2.5 py-1.5 text-slate-300">
+                  <option value="ALL">Barcha yillar</option>
+                  <option value="1-yil">1-yil</option>
+                  <option value="2-yil">2-yil</option>
+                  <option value="3-yil">3-yil</option>
+                </select>
+
+                <select id="filterRisk" onchange="filterDepartmentStudents()" class="bg-[#0C1427] border border-[#1D3058] rounded-lg px-2.5 py-1.5 text-slate-300">
+                  <option value="ALL">Barcha risk darajalari</option>
+                  <option value="Reja bo‘yicha">Reja bo‘yicha</option>
+                  <option value="O‘rta">O‘rta risk</option>
+                  <option value="Yuqori risk">Yuqori risk</option>
+                  <option value="Himoyaga tayyor">Himoyaga tayyor</option>
+                </select>
+
+                <select id="filterAttestation" onchange="filterDepartmentStudents()" class="bg-[#0C1427] border border-[#1D3058] rounded-lg px-2.5 py-1.5 text-slate-300">
+                  <option value="ALL">Attestatsiya: Hammasi</option>
+                  <option value="Tasdiqlangan">Tasdiqlangan</option>
+                  <option value="Kutilmoqda">Kutilmoqda</option>
+                  <option value="Kechikkan">Kechikkan</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left">
+                <thead class="bg-[#0C1427] text-slate-400 uppercase font-semibold border-b border-[#1D3058]">
+                  <tr>
+                    <th class="py-2.5 px-3">F.I.Sh.</th>
+                    <th class="py-2.5 px-3">Yil</th>
+                    <th class="py-2.5 px-3">Ixtisoslik</th>
+                    <th class="py-2.5 px-3">Ilmiy Rahbar</th>
+                    <th class="py-2.5 px-3">Progress</th>
+                    <th class="py-2.5 px-3">Risk Holati</th>
+                    <th class="py-2.5 px-3">Attestatsiya</th>
+                    <th class="py-2.5 px-3 text-right">Amal</th>
+                  </tr>
+                </thead>
+                <tbody id="departmentStudentsTableBody" class="divide-y divide-[#1D3058]/60 text-slate-200">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- ================================================== -->
+  <!-- MODALS & DRAWERS CONTAINER -->
+  <!-- ================================================== -->
+
+  <!-- 1. ACTIONABLE CURRENT STAGE / TASK MODAL (Davom etish) -->
+  <div id="currentStageTaskModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-2xl w-full p-6 shadow-2xl animate-fade-in space-y-4">
+      <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
+        <div class="flex items-center gap-2">
+          <span class="p-1.5 rounded-lg bg-blue-500/20 text-blue-400">
+            <i data-lucide="play-circle" class="w-4 h-4"></i>
+          </span>
+          <h3 class="text-sm font-bold text-white">Vazifani Bajarish va Dalil Yuklash</h3>
+        </div>
+        <button onclick="closeModal('currentStageTaskModal')" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-blue-400 font-semibold uppercase">2-bob • Empirik tadqiqot</span>
+          <span class="text-amber-400 font-mono font-medium">Muddati: 28 sentabr 2026 (5 kun qoldi)</span>
+        </div>
+
+        <h4 class="text-base font-bold text-white">
+          Respondentlar ma’lumotlarini tahlil qilish (SPSS / Jamovi orqali korrelyatsion tahlil)
+        </h4>
+
+        <p class="text-xs text-slate-300 leading-relaxed bg-[#090F1D] p-3 rounded-xl border border-[#1D3058]">
+          Toshkent shahri va viloyatlardagi 12 ta yirik sanoat korxonalari PR bo‘limlari hamda 420 nafar iste’molchilar o‘rtasida o‘tkazilgan so‘rovnoma ma’lumotlarini birlamchi tozalash va korrelyatsion matritsani shakllantirish.
+        </p>
+
+        <!-- Attached Evidence Files -->
+        <div>
+          <label class="text-xs font-semibold text-slate-300 block mb-1.5">Mavjud dalil fayllari:</label>
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#0C1427] border border-[#1D3058] text-xs">
+              <div class="flex items-center gap-2 text-slate-200">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i>
+                <span>So‘rovnoma_Xomaki_Baza_420.xlsx (2.4 MB)</span>
+              </div>
+              <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">Yuklangan</span>
+            </div>
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#0C1427] border border-[#1D3058] text-xs">
+              <div class="flex items-center gap-2 text-slate-200">
+                <i data-lucide="file-text" class="w-4 h-4 text-blue-400"></i>
+                <span>Metodologik_Instrumentariy_Tasdiq.pdf (1.1 MB)</span>
+              </div>
+              <span class="text-[10px] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">Rahbar ko‘rgan</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Evidence & Status -->
+        <div class="pt-2 flex flex-col sm:flex-row gap-3">
+          <button onclick="simulateUploadEvidence()" class="flex-1 py-2 px-3 rounded-lg border border-dashed border-blue-500/40 hover:bg-blue-500/10 text-xs font-semibold text-blue-300 flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+            <span id="evidenceUploadBtnText">Yangi dalil faylini biriktirish</span>
+          </button>
+          <button onclick="markCurrentTaskComplete()" class="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md transition">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            <span>Vazifani yakunlash va rahbarga jo‘natish</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. SMART GLOBAL SEARCH MODAL (Cmd+K) -->
+  <div id="globalSearchModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-start justify-center pt-20 p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-xl w-full p-4 shadow-2xl animate-fade-in space-y-3">
+      <div class="relative">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+        <input id="globalSearchInput" onkeyup="handleGlobalSearch(this.value)" type="text" placeholder="Doktorant, mavzu, hujjat, ilmiy rahbar yoki maqola..." class="w-full pl-9 pr-4 py-2.5 bg-[#080E1A] border border-[#1D3058] rounded-xl text-xs text-slate-100 focus:outline-none focus:border-blue-500">
+      </div>
+
+      <div id="globalSearchResultsContainer" class="max-h-64 overflow-y-auto space-y-1.5 text-xs text-slate-300">
+        <!-- Quick search suggestions -->
+        <div class="p-2 rounded-lg bg-[#0C1427] hover:bg-slate-800/80 cursor-pointer flex items-center justify-between" onclick="switchView('topic_novelty'); closeModal('globalSearchModal');">
+          <div class="flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span>Mavzu yangiligini tekshirish (AI Novelty Analyzer)</span>
+          </div>
+          <span class="text-[10px] text-slate-500">Mavzu tekshiruvi</span>
+        </div>
+
+        <div class="p-2 rounded-lg bg-[#0C1427] hover:bg-slate-800/80 cursor-pointer flex items-center justify-between" onclick="switchView('roadmap'); closeModal('globalSearchModal');">
+          <div class="flex items-center gap-2">
+            <i data-lucide="git-commit" class="w-3.5 h-3.5 text-blue-400"></i>
+            <span>3 yillik individual reja va bosqichlar</span>
+          </div>
+          <span class="text-[10px] text-slate-500">Reja</span>
+        </div>
+
+        <div class="p-2 rounded-lg bg-[#0C1427] hover:bg-slate-800/80 cursor-pointer flex items-center justify-between" onclick="openModal('publicationsModal'); closeModal('globalSearchModal');">
+          <div class="flex items-center gap-2">
+            <i data-lucide="newspaper" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>Ilmiy maqolalar: Scopus Q2 va OAK jurnallari</span>
+          </div>
+          <span class="text-[10px] text-slate-500">Maqolalar</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. NOTIFICATIONS MODAL -->
+  <div id="notificationsModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-md w-full p-5 shadow-2xl animate-fade-in space-y-4">
+      <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="bell" class="w-4 h-4 text-blue-400"></i>
+          Bildirishnomalar va Monitoring Xabarlari
+        </h3>
+        <button onclick="closeModal('notificationsModal')" class="p-1 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2 text-xs" id="notificationsListContainer">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. PUBLICATIONS MODAL -->
+  <div id="publicationsModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-xl w-full p-6 shadow-2xl animate-fade-in space-y-4">
+      <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
+        <div>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i data-lucide="newspaper" class="w-4 h-4 text-emerald-400"></i>
+            Ilmiy Maqolalar va Nashrlar Portfeli
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">OAK talabi: 4 ta maqola (kamida 1 ta xalqaro Scopus/WoS)</p>
+        </div>
+        <button onclick="closeModal('publicationsModal')" class="p-1 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2.5 max-h-80 overflow-y-auto" id="allPublicationsContainer">
+        <!-- Dynamic list -->
+      </div>
+
+      <div class="pt-2 border-t border-[#1D3058] flex justify-end">
+        <button onclick="closeModal('publicationsModal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 rounded-lg">
+          Yopish
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. DOCUMENTS MODAL -->
+  <div id="documentsModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-xl w-full p-6 shadow-2xl animate-fade-in space-y-4">
+      <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
+        <div>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i data-lucide="folder-check" class="w-4 h-4 text-teal-400"></i>
+            OAK Hujjatlar Portfeli
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Attestatsiya va himoyaga topshiriladigan rasmiy hujjatlar</p>
+        </div>
+        <button onclick="closeModal('documentsModal')" class="p-1 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2 max-h-80 overflow-y-auto text-xs" id="allDocumentsContainer">
+        <!-- Dynamic list -->
+      </div>
+
+      <div class="pt-2 border-t border-[#1D3058] flex justify-end">
+        <button onclick="closeModal('documentsModal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 rounded-lg">
+          Yopish
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ATTESTATION DOCS MODAL -->
+  <div id="attestationDocsModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-md w-full p-5 shadow-2xl animate-fade-in space-y-4">
+      <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="alarm-clock" class="w-4 h-4 text-amber-400"></i>
+          Kuzgi Attestatsiya Hujjatlari (18 kun qoldi)
+        </h3>
+        <button onclick="closeModal('attestationDocsModal')" class="p-1 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2 text-xs" id="attestationDocsList">
+        <!-- Rendered via JS -->
+      </div>
+
+      <button onclick="closeModal('attestationDocsModal')" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white rounded-lg">
+        Tushunarli
+      </button>
+    </div>
+  </div>
+
+  <!-- 7. DISSERTATION CHAPTER DETAIL MODAL -->
+  <div id="chapterModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-md w-full p-5 shadow-2xl animate-fade-in space-y-4">
+      <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
+        <h3 class="text-sm font-bold text-white" id="chapterModalTitle">Bob Tafsiloti</h3>
+        <button onclick="closeModal('chapterModal')" class="p-1 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div class="space-y-2.5 text-xs" id="chapterModalBody">
+        <!-- Dynamic content -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. SUPERVISOR CONTACT MODAL -->
+  <div id="supervisorContactModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-md w-full p-5 shadow-2xl animate-fade-in space-y-4">
+      <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="user-check" class="w-4 h-4 text-blue-400"></i>
+          Ilmiy Rahbar Ma’lumotlari
+        </h3>
+        <button onclick="closeModal('supervisorContactModal')" class="p-1 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div class="flex items-center gap-3">
+        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80" alt="Supervisor" class="w-12 h-12 rounded-full border border-blue-500/40 object-cover">
+        <div>
+          <h4 class="text-sm font-bold text-white">Prof. Abdurahmon Rahimov</h4>
+          <p class="text-xs text-slate-400">Filologiya fanlari doktori, professor</p>
+          <span class="text-[10px] text-emerald-400">Kafedra mudiri</span>
+        </div>
+      </div>
+      <div class="space-y-2 text-xs bg-[#0C1427] p-3 rounded-xl border border-[#1D3058]">
+        <div>Aloqa telefoni: <strong class="text-slate-200 font-mono">+998 90 123-45-67</strong></div>
+        <div>Email: <strong class="text-slate-200">a.rahimov@univ.uz</strong></div>
+        <div>Kafedra: <strong class="text-slate-200">Jurnalistika va media menejmenti</strong></div>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="alert('Rahbarga xabar jo‘natildi.'); closeModal('supervisorContactModal');" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg">
+          Xabar yozish
+        </button>
+        <button onclick="closeModal('supervisorContactModal')" class="px-4 py-2 bg-slate-800 text-slate-300 text-xs font-semibold rounded-lg">
+          Yopish
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. PROFILE & SETTINGS MODALS -->
+  <div id="profileModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-md w-full p-5 shadow-2xl animate-fade-in space-y-4">
+      <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
+        <h3 class="text-sm font-bold text-white">Doktorant Profili</h3>
+        <button onclick="closeModal('profileModal')" class="p-1 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div class="flex items-center gap-3">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Zulayho" class="w-12 h-12 rounded-full border border-blue-500/40 object-cover">
+        <div>
+          <h4 class="text-sm font-bold text-white">Zulayho Qosimova</h4>
+          <p class="text-xs text-slate-400">10.00.09 — Jurnalistika</p>
+          <span class="text-[10px] text-blue-400">ID: DOC-2024-089</span>
+        </div>
+      </div>
+      <div class="text-xs text-slate-300 bg-[#0C1427] p-3 rounded-xl border border-[#1D3058] space-y-1.5">
+        <div><strong>Mavzu:</strong> O‘zbekistonda korporativ ekologik mas’uliyat kommunikatsiyasining tashkilot imijini shakllantirishga ta’siri</div>
+        <div><strong>Doktorantura muddati:</strong> 2024 — 2027 (Kuz)</div>
+        <div><strong>Ilmiy rahbar:</strong> Prof. A. N. Rahimov</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. SUPERVISOR INSPECT STUDENT MODAL (Read-Only Candidate View) -->
+  <div id="supervisorInspectModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-3xl w-full p-6 shadow-2xl animate-fade-in space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            Read-Only Tekshiruv Rejimi
+          </span>
+          <h3 class="text-base font-bold text-white mt-1" id="inspectStudentTitle">Doktorant Ishlarini Tekshirish</h3>
+        </div>
+        <button onclick="closeModal('supervisorInspectModal')" class="p-1 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Supervisor actions toolbar -->
+      <div class="flex flex-wrap items-center gap-2 p-3 rounded-xl bg-[#090F1D] border border-[#1D3058]">
+        <button onclick="supervisorAction('approve')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1">
+          <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
+          <span>Bosqichni tasdiqlash</span>
+        </button>
+        <button onclick="supervisorAction('comment')" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1">
+          <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+          <span>Izoh / Comment yozish</span>
+        </button>
+        <button onclick="supervisorAction('revision')" class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold flex items-center gap-1">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>Qayta ishlashga yuborish</span>
+        </button>
+        <button onclick="supervisorAction('new_task')" class="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold flex items-center gap-1">
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+          <span>Yangi vazifa berish</span>
+        </button>
+      </div>
+
+      <div id="inspectModalContent" class="space-y-4 text-xs">
+        <!-- Content injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. AI SCIENTIFIC ASSISTANT MODAL -->
+  <div id="aiAssistantModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-2xl w-full p-6 shadow-2xl animate-fade-in space-y-4">
+      <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            IlmYo‘l AI Yordamchi
+          </span>
+          <h3 class="text-base font-bold text-white mt-1">Sun’iy Intellekt Asosidagi Ilmiy Yordamchi</h3>
+        </div>
+        <button onclick="closeModal('aiAssistantModal')" class="p-1 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2">
+        <button onclick="runAiAssistantTask('plagiat')" class="p-3 rounded-xl bg-[#0C1427] hover:bg-slate-800/80 border border-[#1D3058] text-left transition space-y-1">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+          <div class="text-xs font-bold text-slate-100">Antiplagiat Tahlili</div>
+          <div class="text-[10px] text-slate-400">Matn originalligini tekshirish</div>
+        </button>
+        <button onclick="runAiAssistantTask('bibliography')" class="p-3 rounded-xl bg-[#0C1427] hover:bg-slate-800/80 border border-[#1D3058] text-left transition space-y-1">
+          <i data-lucide="book-marked" class="w-4 h-4 text-cyan-400"></i>
+          <div class="text-xs font-bold text-slate-100">OAK Bibliografiya</div>
+          <div class="text-[10px] text-slate-400">GOST 7.0.5 formatlash</div>
+        </button>
+        <button onclick="runAiAssistantTask('methodology')" class="p-3 rounded-xl bg-[#0C1427] hover:bg-slate-800/80 border border-[#1D3058] text-left transition space-y-1">
+          <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i>
+          <div class="text-xs font-bold text-slate-100">Metodologiya SI</div>
+          <div class="text-[10px] text-slate-400">Gipoteza va model tavsiyasi</div>
+        </button>
+      </div>
+
+      <div id="aiAssistantResultBox">
+        <div class="p-4 rounded-xl bg-[#0C1427] border border-[#1D3058] text-xs text-slate-400 text-center">
+          Yuqoridagi vositalardan birini tanlang va IlmYo‘l AI tahlilini ishga tushiring.
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2 border-t border-[#1D3058]">
+        <button onclick="closeModal('aiAssistantModal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 rounded-lg">
+          Yopish
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12. PLATFORM SETTINGS MODAL -->
+  <div id="settingsModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-lg w-full p-6 shadow-2xl animate-fade-in space-y-4">
+      <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="settings" class="w-4 h-4 text-slate-300"></i>
+          <span>Tizim Sozlamalari</span>
+        </h3>
+        <button onclick="closeModal('settingsModal')" class="p-1 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 font-medium mb-1">Interfeys tili</label>
+          <select class="w-full px-3 py-2 bg-[#0C1427] border border-[#1D3058] rounded-lg text-slate-200">
+            <option selected>O‘zbekcha (Lotin)</option>
+            <option>Ўзбекча (Кирилл)</option>
+            <option>Русский</option>
+            <option>English</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-medium mb-1">Telegram Bildirishnomalari</label>
+          <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058] flex items-center justify-between">
+            <div class="space-y-0.5">
+              <div class="text-slate-200 font-medium">@IlmYol_Bot ulangan</div>
+              <div class="text-[10px] text-slate-400">Muddatlar va attestatsiya eslatmalari faol</div>
+            </div>
+            <span class="text-xs text-emerald-400 font-bold">Faol</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-medium mb-1">OAK Reyestri Sinxronizatsiyasi</label>
+          <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058] flex items-center justify-between">
+            <div class="space-y-0.5">
+              <div class="text-slate-200 font-medium">OAK Bulletin 2026/2</div>
+              <div class="text-[10px] text-slate-400">30 ta PhD dissertatsiya korpusi ulangan</div>
+            </div>
+            <span class="text-xs text-cyan-400 font-bold font-mono">v1.0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t border-[#1D3058]">
+        <button onclick="closeModal('settingsModal')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">Bekor qilish</button>
+        <button onclick="saveSettings()" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold">Saqlash</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="data.js?v=4.0"></script>
+  <script src="app.js?v=4.0"></script>
+  <script>
+    // Initialize Lucide icons on page load
+    lucide.createIcons();
+    
+    // Debug: check if app.js loaded correctly
+    window.addEventListener('load', function() {
+      if (typeof switchView === 'undefined') {
+        console.error('[IlmYol] CRITICAL: switchView is not defined. app.js failed to load or has a syntax error.');
+        // Show visible error
+        document.body.insertAdjacentHTML('beforeend', 
+          '<div style="position:fixed;bottom:20px;right:20px;background:#7f1d1d;color:white;padding:12px 16px;border-radius:8px;font-size:12px;z-index:9999;max-width:300px;">' +
+          '⚠️ JavaScript yuklanmadi. <br>Sahifani <b>Ctrl+Shift+R</b> bilan qayta yuklang.</div>'
+        );
+      } else {
+        console.log('[IlmYol] app.js loaded successfully. switchView is defined.');
+      }
+    });
+
+  </script>
+</body>
+</html>

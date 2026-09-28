@@ -1,0 +1,189 @@
+/* IlmYo'l Academic Theme & Custom Utility Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg-main: #090F1D;
+  --bg-sidebar: #0C1427;
+  --bg-card: #121E38;
+  --bg-card-hover: #172749;
+  --bg-card-elevated: #162444;
+  --border-subtle: #1D3058;
+  --border-focus: #3B82F6;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --accent-blue: #3B82F6;
+  --accent-cyan: #06B6D4;
+  --accent-emerald: #10B981;
+  --accent-amber: #F59E0B;
+  --accent-rose: #EF4444;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090F1D;
+}
+::-webkit-scrollbar-thumb {
+  background: #1D3058;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3B82F6;
+}
+
+/* Glass & Card Surfaces */
+.card-academic {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  transition: all 0.2s ease-in-out;
+}
+.card-academic:hover {
+  border-color: #2D487D;
+}
+.card-academic-interactive {
+  cursor: pointer;
+}
+.card-academic-interactive:hover {
+  background-color: var(--bg-card-hover);
+  border-color: #3B82F6;
+  transform: translateY(-1px);
+}
+
+/* Badges */
+.badge-emerald {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.badge-amber {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.badge-rose {
+  background: rgba(239, 68, 68, 0.15);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.badge-blue {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60A5FA;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+.badge-cyan {
+  background: rgba(6, 182, 212, 0.15);
+  color: #22D3EE;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+.badge-slate {
+  background: rgba(100, 116, 139, 0.15);
+  color: #94A3B8;
+  border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+/* Pulse indicator for live task */
+.pulse-indicator {
+  position: relative;
+}
+.pulse-indicator::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background-color: inherit;
+  animation: pulse-ring 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+  opacity: 0.7;
+}
+@keyframes pulse-ring {
+  0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.8; }
+  70% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
+}
+
+/* Circular Progress Ring */
+.progress-ring__circle {
+  transition: stroke-dashoffset 0.6s ease-in-out;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+/* Sidebar item active state */
+.nav-item-active {
+  background-color: rgba(59, 130, 246, 0.18) !important;
+  color: #60A5FA !important;
+  border-left: 3px solid #3B82F6;
+  font-weight: 600;
+}
+
+/* Task Checkbox */
+.custom-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid #2C4270;
+  border-radius: 6px;
+  background-color: #0E182F;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.custom-checkbox:checked {
+  background-color: #10B981;
+  border-color: #10B981;
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+}
+
+/* Modal and Drawer animations */
+.modal-backdrop {
+  background-color: rgba(4, 8, 16, 0.75);
+  backdrop-filter: blur(4px);
+}
+.animate-slide-in-right {
+  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Shimmer AI processing animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.ai-analyzing-bar {
+  background: linear-gradient(90deg, #1E3A8A 25%, #3B82F6 50%, #06B6D4 75%, #1E3A8A 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite linear;
+}
