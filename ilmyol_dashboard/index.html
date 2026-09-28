@@ -41,7 +41,10 @@
 <body class="bg-[#080E1A] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
 
   <!-- Main Container -->
-  <div class="flex h-screen overflow-hidden">
+  <div class="flex h-screen overflow-hidden relative">
+
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="sidebarBackdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity duration-300"></div>
 
     <!-- ================================================== -->
     <!-- 1. LEFT SIDEBAR (COMPACT & COLLAPSIBLE) -->
@@ -64,9 +67,12 @@
               <p class="text-[11px] text-slate-400 font-medium">Mavzudan himoyagacha.</p>
             </div>
           </div>
-          <!-- Collapse Toggle Button -->
-          <button id="sidebarToggleBtn" onclick="toggleSidebarCollapse()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Sidebarni qisqartirish">
+          <!-- Collapse Toggle Button (Desktop: collapse, Mobile: close drawer) -->
+          <button id="sidebarToggleBtn" onclick="toggleSidebarCollapse()" class="hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Sidebarni qisqartirish">
             <i data-lucide="chevron-left" id="sidebarCollapseIcon" class="w-4 h-4"></i>
+          </button>
+          <button id="sidebarMobileCloseBtn" onclick="toggleMobileSidebar()" class="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Yopish">
+            <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
 
@@ -179,51 +185,56 @@
       <!-- ================================================== -->
       <!-- TOP DASHBOARD HEADER -->
       <!-- ================================================== -->
-      <header class="h-16 px-6 bg-[#0B1327]/90 border-b border-[#1D3058] flex items-center justify-between z-20 shrink-0 backdrop-blur-md">
+      <header class="h-16 px-3 sm:px-6 bg-[#0B1327]/90 border-b border-[#1D3058] flex items-center justify-between z-20 shrink-0 backdrop-blur-md">
         
         <!-- Left: Greetings & Doctorant Day Context -->
-        <div class="flex items-center space-x-4 min-w-0">
+        <div class="flex items-center space-x-2.5 sm:space-x-4 min-w-0">
           <!-- Mobile Sidebar Toggle -->
-          <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+          <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" aria-label="Menyuni ochish">
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
           
           <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <h1 class="text-base font-semibold text-white tracking-tight truncate" id="headerGreetingText">
+            <div class="flex items-center gap-1.5 sm:gap-2">
+              <h1 class="text-sm sm:text-base font-semibold text-white tracking-tight truncate" id="headerGreetingText">
                 Xush kelibsiz, Zulayho
               </h1>
-              <span id="roleIndicatorBadge" class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
+              <span id="roleIndicatorBadge" class="hidden sm:inline-flex text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 shrink-0">
                 Doktorant
               </span>
             </div>
-            <p class="text-xs text-slate-400 flex items-center gap-1.5 truncate">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
-              Bugun doktoranturangizning <span class="text-slate-200 font-semibold font-mono">624-kuni</span>. Rejangiz bo‘yicha <span class="text-slate-200 font-medium">2-yilning 8-oyidasiz</span>.
+            <p class="text-xs text-slate-400 hidden sm:flex items-center gap-1.5 truncate">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block shrink-0"></span>
+              <span class="truncate">Bugun doktoranturangizning <span class="text-slate-200 font-semibold font-mono">624-kuni</span>. Rejangiz bo‘yicha <span class="text-slate-200 font-medium">2-yilning 8-oyidasiz</span>.</span>
             </p>
           </div>
         </div>
 
         <!-- Center / Right: Global Search & Actions -->
-        <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-2 sm:space-x-3 shrink-0">
           
-          <!-- Smart Global Search Trigger -->
-          <button onclick="openGlobalSearchModal()" class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-[#121E38] border border-[#1D3058] text-xs text-slate-400 hover:text-slate-200 hover:border-blue-500 transition w-56 justify-between">
+          <!-- Mobile Search Trigger Button -->
+          <button onclick="openGlobalSearchModal()" class="md:hidden p-2 rounded-lg bg-[#121E38] border border-[#1D3058] text-slate-400 hover:text-white hover:border-slate-600 transition" title="Qidiruv">
+            <i data-lucide="search" class="w-4 h-4"></i>
+          </button>
+
+          <!-- Desktop Smart Global Search Trigger -->
+          <button onclick="openGlobalSearchModal()" class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-[#121E38] border border-[#1D3058] text-xs text-slate-400 hover:text-slate-200 hover:border-blue-500 transition w-44 lg:w-56 justify-between">
             <span class="flex items-center gap-2 truncate">
-              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
               <span class="truncate">Mavzu, hujjat yoki maqola...</span>
             </span>
             <kbd class="px-1.5 py-0.5 text-[10px] rounded bg-slate-800 border border-slate-700 text-slate-400 font-mono">⌘K</kbd>
           </button>
 
           <!-- Role Switcher Dropdown -->
-          <div class="relative">
-            <select id="roleSelectorSelect" onchange="onRoleChange(this.value)" class="appearance-none bg-[#121E38] border border-[#1D3058] text-xs font-medium text-slate-200 rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-blue-500 cursor-pointer transition">
-              <option value="DOCTORAL_STUDENT">🎓 Doktorant kabineti</option>
-              <option value="SUPERVISOR">👨‍🏫 Ilmiy rahbar kabineti</option>
-              <option value="SCIENTIFIC_DEPARTMENT">🏛️ Ilmiy bo‘lim (Universitet)</option>
+          <div class="relative max-w-[125px] sm:max-w-none">
+            <select id="roleSelectorSelect" onchange="onRoleChange(this.value)" class="w-full appearance-none bg-[#121E38] border border-[#1D3058] text-xs font-medium text-slate-200 rounded-lg pl-2.5 sm:pl-3 pr-7 sm:pr-8 py-1.5 focus:outline-none focus:border-blue-500 cursor-pointer transition truncate">
+              <option value="DOCTORAL_STUDENT">🎓 Doktorant</option>
+              <option value="SUPERVISOR">👨‍🏫 Ilmiy rahbar</option>
+              <option value="SCIENTIFIC_DEPARTMENT">🏛️ Ilmiy bo‘lim</option>
             </select>
-            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 sm:px-2 text-slate-400">
               <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
             </div>
           </div>
@@ -235,8 +246,8 @@
           </button>
 
           <!-- User Profile Widget -->
-          <div onclick="openProfileModal()" class="flex items-center space-x-2.5 pl-2 cursor-pointer hover:opacity-90 transition">
-            <img id="userAvatarImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Avatar" class="w-8 h-8 rounded-full border border-blue-500/40 object-cover">
+          <div onclick="openProfileModal()" class="flex items-center space-x-2 sm:pl-1 cursor-pointer hover:opacity-90 transition">
+            <img id="userAvatarImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Avatar" class="w-8 h-8 rounded-full border border-blue-500/40 object-cover shrink-0">
             <div class="hidden xl:block text-left leading-tight">
               <div id="userNameDisplay" class="text-xs font-medium text-slate-200">Zulayho Qosimova</div>
               <div id="userStatusDisplay" class="text-[10px] text-slate-400">PhD tadqiqotchi • 2-yil</div>
@@ -249,7 +260,7 @@
       <!-- ================================================== -->
       <!-- DYNAMIC CONTENT SCROLL AREA -->
       <!-- ================================================== -->
-      <main id="mainScrollArea" class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+      <main id="mainScrollArea" class="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-6 space-y-6">
 
         <!-- ============================================== -->
         <!-- VIEW 1: DOCTORAL STUDENT DASHBOARD -->
@@ -401,7 +412,7 @@
             </div>
 
             <!-- 3. TODAY'S TASKS & QUICK CHECKLIST (4 Cols) -->
-            <div class="xl:col-span-4 card-academic p-5 flex flex-col justify-between bg-[#121E38]/90">
+            <div class="md:col-span-2 xl:col-span-4 card-academic p-5 flex flex-col justify-between bg-[#121E38]/90">
               <div>
                 <div class="flex items-center justify-between mb-3">
                   <div class="flex items-center gap-2">
@@ -945,7 +956,7 @@
                 Ushbu panel har bir taqqoslash uchun hisoblangan leksik, semantik va ixtisoslik parametrlarini ko‘rsatadi (faqat ishlab chiqish va tekshirish uchun):
               </p>
               <div class="overflow-x-auto">
-                <table class="w-full text-[11px] text-left font-mono">
+                <table class="w-full min-w-[760px] text-[11px] text-left font-mono">
                   <thead class="bg-[#0C1427] text-slate-400 uppercase text-[10px] border-b border-[#1D3058]">
                     <tr>
                       <th class="py-2 px-2.5">Rank</th>
@@ -992,7 +1003,7 @@
 
               <!-- Side-by-Side Comparison Table -->
               <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left">
+                <table class="w-full min-w-[620px] text-xs text-left">
                   <thead class="bg-[#0C1427] text-slate-400 uppercase font-semibold border-b border-[#1D3058]">
                     <tr>
                       <th class="py-2.5 px-3 w-1/5">Mezon</th>
@@ -1016,11 +1027,12 @@
                     Tadqiqot obyekti, predmeti, metodologiyasi, auditoriyasi, tadqiqot savoli va ilmiy yangilik kabi maydonlar faqat manbada mavjud bo‘lganda aks ettiriladi. Dastlabki OAK Byulleteni sarlavha va metama’lumotlar reyestri doirasida mavjud bo‘lmagan sohalar AI tomonidan to‘qib chiqarilmaydi va qat’iy ravishda <strong class="text-amber-300/90 font-mono">“Manbada ko‘rsatilmagan”</strong> deb ko‘rsatiladi.
                   </p>
                 </div>
-              </div>
             </div>
 
           </div>
-          <!-- END SUB-TAB 1 -->
+        </div>
+      </div>
+      <!-- END SUB-TAB 1 -->
 
           <!-- SUB-TAB 2: OAK 2026/2 BENCHMARK EVALUATION SUITE -->
           <div id="subtab-novelty-benchmark" class="hidden space-y-6">
@@ -1087,7 +1099,7 @@
               </div>
 
               <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left">
+                <table class="w-full min-w-[720px] text-xs text-left">
                   <thead class="bg-[#0C1427] text-slate-400 uppercase font-semibold border-b border-[#1D3058]">
                     <tr>
                       <th class="py-2.5 px-3">ID</th>
@@ -1139,7 +1151,7 @@
 
               <!-- Corpus Topics Table -->
               <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left">
+                <table class="w-full min-w-[680px] text-xs text-left">
                   <thead class="bg-[#0C1427] text-slate-400 uppercase font-semibold border-b border-[#1D3058]">
                     <tr>
                       <th class="py-2.5 px-3">Corpus ID</th>
@@ -1521,7 +1533,7 @@
 
             <!-- Table -->
             <div class="overflow-x-auto">
-              <table class="w-full text-xs text-left">
+              <table class="w-full min-w-[700px] text-xs text-left">
                 <thead class="bg-[#0C1427] text-slate-400 uppercase font-semibold border-b border-[#1D3058]">
                   <tr>
                     <th class="py-2.5 px-3">F.I.Sh.</th>
@@ -1554,8 +1566,8 @@
   <!-- ================================================== -->
 
   <!-- 1. ACTIONABLE CURRENT STAGE / TASK MODAL (Davom etish) -->
-  <div id="currentStageTaskModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-2xl w-full p-6 shadow-2xl animate-fade-in space-y-4">
+  <div id="currentStageTaskModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl animate-fade-in space-y-4 max-h-[calc(100dvh-2rem)] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
         <div class="flex items-center gap-2">
           <span class="p-1.5 rounded-lg bg-blue-500/20 text-blue-400">
@@ -1619,8 +1631,8 @@
   </div>
 
   <!-- 2. SMART GLOBAL SEARCH MODAL (Cmd+K) -->
-  <div id="globalSearchModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-start justify-center pt-20 p-4">
-    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-xl w-full p-4 shadow-2xl animate-fade-in space-y-3">
+  <div id="globalSearchModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-start justify-center pt-16 sm:pt-20 p-3 sm:p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-xl w-full p-4 shadow-2xl animate-fade-in space-y-3 max-h-[calc(100dvh-5rem)] overflow-y-auto">
       <div class="relative">
         <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
         <input id="globalSearchInput" onkeyup="handleGlobalSearch(this.value)" type="text" placeholder="Doktorant, mavzu, hujjat, ilmiy rahbar yoki maqola..." class="w-full pl-9 pr-4 py-2.5 bg-[#080E1A] border border-[#1D3058] rounded-xl text-xs text-slate-100 focus:outline-none focus:border-blue-500">
@@ -1656,8 +1668,8 @@
   </div>
 
   <!-- 3. NOTIFICATIONS MODAL -->
-  <div id="notificationsModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-md w-full p-5 shadow-2xl animate-fade-in space-y-4">
+  <div id="notificationsModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-md w-full p-4 sm:p-5 shadow-2xl animate-fade-in space-y-4 max-h-[calc(100dvh-2rem)] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
           <i data-lucide="bell" class="w-4 h-4 text-blue-400"></i>
@@ -1675,8 +1687,8 @@
   </div>
 
   <!-- 4. PUBLICATIONS MODAL -->
-  <div id="publicationsModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-xl w-full p-6 shadow-2xl animate-fade-in space-y-4">
+  <div id="publicationsModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-xl w-full p-4 sm:p-6 shadow-2xl animate-fade-in space-y-4 max-h-[calc(100dvh-2rem)] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
         <div>
           <h3 class="text-sm font-bold text-white flex items-center gap-2">
@@ -1703,8 +1715,8 @@
   </div>
 
   <!-- 5. DOCUMENTS MODAL -->
-  <div id="documentsModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-xl w-full p-6 shadow-2xl animate-fade-in space-y-4">
+  <div id="documentsModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-xl w-full p-4 sm:p-6 shadow-2xl animate-fade-in space-y-4 max-h-[calc(100dvh-2rem)] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
         <div>
           <h3 class="text-sm font-bold text-white flex items-center gap-2">
@@ -1731,8 +1743,8 @@
   </div>
 
   <!-- 6. ATTESTATION DOCS MODAL -->
-  <div id="attestationDocsModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-md w-full p-5 shadow-2xl animate-fade-in space-y-4">
+  <div id="attestationDocsModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-md w-full p-4 sm:p-5 shadow-2xl animate-fade-in space-y-4 max-h-[calc(100dvh-2rem)] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
           <i data-lucide="alarm-clock" class="w-4 h-4 text-amber-400"></i>
@@ -1754,8 +1766,8 @@
   </div>
 
   <!-- 7. DISSERTATION CHAPTER DETAIL MODAL -->
-  <div id="chapterModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-md w-full p-5 shadow-2xl animate-fade-in space-y-4">
+  <div id="chapterModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-md w-full p-4 sm:p-5 shadow-2xl animate-fade-in space-y-4 max-h-[calc(100dvh-2rem)] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
         <h3 class="text-sm font-bold text-white" id="chapterModalTitle">Bob Tafsiloti</h3>
         <button onclick="closeModal('chapterModal')" class="p-1 text-slate-400 hover:text-white">
@@ -1769,8 +1781,8 @@
   </div>
 
   <!-- 8. SUPERVISOR CONTACT MODAL -->
-  <div id="supervisorContactModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-md w-full p-5 shadow-2xl animate-fade-in space-y-4">
+  <div id="supervisorContactModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-md w-full p-4 sm:p-5 shadow-2xl animate-fade-in space-y-4 max-h-[calc(100dvh-2rem)] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
           <i data-lucide="user-check" class="w-4 h-4 text-blue-400"></i>
@@ -1781,7 +1793,7 @@
         </button>
       </div>
       <div class="flex items-center gap-3">
-        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80" alt="Supervisor" class="w-12 h-12 rounded-full border border-blue-500/40 object-cover">
+        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80" alt="Supervisor" class="w-12 h-12 rounded-full border border-blue-500/40 object-cover shrink-0">
         <div>
           <h4 class="text-sm font-bold text-white">Prof. Abdurahmon Rahimov</h4>
           <p class="text-xs text-slate-400">Filologiya fanlari doktori, professor</p>
@@ -1805,8 +1817,8 @@
   </div>
 
   <!-- 9. PROFILE & SETTINGS MODALS -->
-  <div id="profileModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-md w-full p-5 shadow-2xl animate-fade-in space-y-4">
+  <div id="profileModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-md w-full p-4 sm:p-5 shadow-2xl animate-fade-in space-y-4 max-h-[calc(100dvh-2rem)] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
         <h3 class="text-sm font-bold text-white">Doktorant Profili</h3>
         <button onclick="closeModal('profileModal')" class="p-1 text-slate-400 hover:text-white">
@@ -1814,7 +1826,7 @@
         </button>
       </div>
       <div class="flex items-center gap-3">
-        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Zulayho" class="w-12 h-12 rounded-full border border-blue-500/40 object-cover">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Zulayho" class="w-12 h-12 rounded-full border border-blue-500/40 object-cover shrink-0">
         <div>
           <h4 class="text-sm font-bold text-white">Zulayho Qosimova</h4>
           <p class="text-xs text-slate-400">10.00.09 — Jurnalistika</p>
@@ -1830,8 +1842,8 @@
   </div>
 
   <!-- 10. SUPERVISOR INSPECT STUDENT MODAL (Read-Only Candidate View) -->
-  <div id="supervisorInspectModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-3xl w-full p-6 shadow-2xl animate-fade-in space-y-4 max-h-[90vh] overflow-y-auto">
+  <div id="supervisorInspectModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-3xl w-full p-4 sm:p-6 shadow-2xl animate-fade-in space-y-4 max-h-[calc(100dvh-2rem)] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
         <div>
           <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
@@ -1871,8 +1883,8 @@
   </div>
 
   <!-- 11. AI SCIENTIFIC ASSISTANT MODAL -->
-  <div id="aiAssistantModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-2xl w-full p-6 shadow-2xl animate-fade-in space-y-4">
+  <div id="aiAssistantModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl animate-fade-in space-y-4 max-h-[calc(100dvh-2rem)] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
         <div>
           <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
@@ -1885,7 +1897,7 @@
         </button>
       </div>
 
-      <div class="grid grid-cols-3 gap-2">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <button onclick="runAiAssistantTask('plagiat')" class="p-3 rounded-xl bg-[#0C1427] hover:bg-slate-800/80 border border-[#1D3058] text-left transition space-y-1">
           <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
           <div class="text-xs font-bold text-slate-100">Antiplagiat Tahlili</div>
@@ -1918,8 +1930,8 @@
   </div>
 
   <!-- 12. PLATFORM SETTINGS MODAL -->
-  <div id="settingsModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-lg w-full p-6 shadow-2xl animate-fade-in space-y-4">
+  <div id="settingsModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-lg w-full p-4 sm:p-6 shadow-2xl animate-fade-in space-y-4 max-h-[calc(100dvh-2rem)] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
           <i data-lucide="settings" class="w-4 h-4 text-slate-300"></i>

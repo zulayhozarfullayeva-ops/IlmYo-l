@@ -148,12 +148,29 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAllDocuments();
   renderAttestationDocs();
   
-  // Setup keyboard shortcut for Smart Search (Cmd+K or Ctrl+K)
+  // Setup keyboard shortcut for Smart Search (Cmd+K or Ctrl+K) and ESC closing
   window.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
       openGlobalSearchModal();
+    } else if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-backdrop:not(.hidden)').forEach(m => m.classList.add('hidden'));
+      const sidebar = document.getElementById('mainSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (sidebar && sidebar.classList.contains('mobile-open')) {
+        sidebar.classList.remove('mobile-open');
+        if (backdrop) backdrop.classList.add('hidden');
+      }
     }
+  });
+
+  // Modal backdrop click-to-close listener
+  document.querySelectorAll('.modal-backdrop').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.add('hidden');
+      }
+    });
   });
 
   lucide.createIcons();
@@ -216,6 +233,16 @@ function switchView(viewName) {
   // Scroll to top
   const scrollArea = document.getElementById('mainScrollArea');
   if (scrollArea) scrollArea.scrollTop = 0;
+
+  // Auto-close mobile drawer on view switch if on mobile/tablet
+  if (window.innerWidth < 1024) {
+    const sidebar = document.getElementById('mainSidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (sidebar && sidebar.classList.contains('mobile-open')) {
+      sidebar.classList.remove('mobile-open');
+      if (backdrop) backdrop.classList.add('hidden');
+    }
+  }
 
   lucide.createIcons();
 }
@@ -284,7 +311,17 @@ function toggleSidebarCollapse() {
 
 function toggleMobileSidebar() {
   const sidebar = document.getElementById('mainSidebar');
-  sidebar.classList.toggle('hidden');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if (!sidebar) return;
+
+  const isOpen = sidebar.classList.contains('mobile-open');
+  if (isOpen) {
+    sidebar.classList.remove('mobile-open');
+    if (backdrop) backdrop.classList.add('hidden');
+  } else {
+    sidebar.classList.add('mobile-open');
+    if (backdrop) backdrop.classList.remove('hidden');
+  }
 }
 
 // 1. Render Today's Tasks
@@ -1796,7 +1833,7 @@ function inspectCandidate(candidateId) {
   content.innerHTML = `
     <div class="p-3.5 bg-[#0C1427] rounded-xl border border-[#1D3058] space-y-2">
       <div class="text-slate-300"><strong>Mavzu:</strong> ${c.topic}</div>
-      <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-800">
         <div>Umumiy progress: <strong class="text-blue-400 font-mono">${c.overallProgress}%</strong></div>
         <div>Dissertatsiya: <strong class="text-indigo-400 font-mono">${c.dissertationProgress}%</strong></div>
         <div>Maqolalar: <strong class="text-emerald-400 font-mono">${c.articles}</strong></div>
@@ -1904,6 +1941,14 @@ function openModal(modalId) {
   const el = document.getElementById(modalId);
   if (el) {
     el.classList.remove('hidden');
+    if (window.innerWidth < 1024) {
+      const sidebar = document.getElementById('mainSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (sidebar && sidebar.classList.contains('mobile-open')) {
+        sidebar.classList.remove('mobile-open');
+        if (backdrop) backdrop.classList.add('hidden');
+      }
+    }
     lucide.createIcons();
   }
 }

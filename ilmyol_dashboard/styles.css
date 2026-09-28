@@ -27,7 +27,15 @@ body {
   padding: 0;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
+
+/* Responsive Media & Embed Constraints */
+img, svg, video, canvas, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
@@ -187,3 +195,59 @@ body {
   background-size: 200% 100%;
   animation: shimmer 1.8s infinite linear;
 }
+
+/* =========================================================================
+   RESPONSIVE UTILITIES & MOBILE ENHANCEMENTS
+   ========================================================================= */
+
+/* Mobile Drawer & Off-Canvas Navigation (< 1024px) */
+@media (max-width: 1023px) {
+  #mainSidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    width: 280px;
+    max-width: 85vw;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.6);
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  #mainSidebar.mobile-open {
+    transform: translateX(0);
+  }
+}
+
+/* Smooth Touch Momentum Scrolling */
+.overflow-y-auto, .overflow-x-auto, #mainScrollArea {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Responsive Table Container with Horizontal Scroll Hints */
+.table-scroll-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  border-radius: 8px;
+}
+
+/* Modal Content Height Constraints for Small/Landscape Screens */
+.modal-content-scroll {
+  max-height: calc(100dvh - 2rem);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Touch Usability (WCAG 2.5.5 / 2.5.8 Minimum 44x44px target on touch devices) */
+@media (pointer: coarse) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+

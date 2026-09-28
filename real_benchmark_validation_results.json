@@ -1,0 +1,470 @@
+{
+  "ILMYOL-001": {
+    "source_id": "ILMYOL-001",
+    "source_title": "Ingliz va o‘zbek media diskursida emotiv-ekspressiv vositalarning lingvistik tadqiqi",
+    "source_specialty": "10.00.06",
+    "source_author": "Хасанбоев Илҳомжон Абдубанно ўғли",
+    "source_institution": "Наманган давлат чет тиллари институти",
+    "source_oak_id": "B2026.2.PhD/Fil7573",
+    "top_5": [
+      {
+        "cand_id": "ILMYOL-002",
+        "cand_title": "Ingliz va o‘zbek media diskursida emotiv-ekspressiv vositalarning lingvistik tadqiqi",
+        "cand_title_orig": "Инглиз ва ўзбек медиа дискурсида эмотив-экспрессив воситаларнинг лингвистик тадқиқи",
+        "cand_author": "Хасанбоев Илҳомжон Абдубанно ўғли",
+        "cand_institution": "Наманган давлат чет тиллари институти",
+        "cand_specialty": "10.00.06",
+        "cand_oak_id": "B2026.2.PhD/Fil7666",
+        "metrics": {
+          "title_sim": 100.0,
+          "semantic_sim": 100.0,
+          "domain_sim": 100.0,
+          "concept_sim": 100.0,
+          "final_score": 100
+        },
+        "expected_label": "EXACT",
+        "expected_band": "99-100",
+        "rationale": "Same title appears under two OAK registration IDs; duplicate alert expected.",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-013",
+        "cand_title": "Media muhitdagi inqirozli vaziyatlarda PR kommunikatsiyalarni boshqarish muammolari (O‘zbekiston internet OAV va ijtimoiy tarmoqlar misolida)",
+        "cand_title_orig": "Медиа муҳитдаги инқирозли вазиятларда ПР коммуникацияларни бошқариш муаммолари (Ўзбекистон интернет ОАВ ва ижтимоий тармоқлар мисолида)",
+        "cand_author": "Шукурова Гулмира Рустамовна",
+        "cand_institution": "Ўзбекистон давлат жаҳон тиллари университети",
+        "cand_specialty": "10.00.09",
+        "cand_oak_id": "B2026.2.PhD/Fil7609",
+        "metrics": {
+          "title_sim": 6.6,
+          "semantic_sim": 25.0,
+          "domain_sim": 75.0,
+          "concept_sim": 100.0,
+          "final_score": 28
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-014",
+        "cand_title": "O‘zbekistonda PR kommunikatsiyalarda axloqiy professional tamoyillarning ahamiyati (IIB hamda Sog‘liqni saqlash vazirligi tajribasi misolida)",
+        "cand_title_orig": "Ўзбекистонда ПР коммуникацияларда аҳлоқий профессиёнал тамойилларнинг аҳамияти (ИИБ ҳамда Соғлиқни сақлаш вазирлиги тажрибаси мисолида)",
+        "cand_author": "Юсупова Зулайхо Абдираимовна",
+        "cand_institution": "Ўзбекистон журналистика ва оммавий коммуникациялар университети",
+        "cand_specialty": "10.00.09",
+        "cand_oak_id": "B2026.2.PhD/Fil7611",
+        "metrics": {
+          "title_sim": 3.4,
+          "semantic_sim": 15.0,
+          "domain_sim": 75.0,
+          "concept_sim": 33.3,
+          "final_score": 28
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-016",
+        "cand_title": "Kasbiy ta’limda malaka oshirishning raqamli transformatsiyasi sharoitida rahbar xodimlarning menejerlik kompetentligini rivojlantirish texnologiyasi",
+        "cand_title_orig": "Касбий таълимда малака оширишнинг рақамли трансформацияси шароитида раҳбар ходимларни менежерлик компетентлигини ривожлантириш технологияси",
+        "cand_author": "Абдурахманова Нигора Каландаровна",
+        "cand_institution": "Касбий таълимни ривожлантириш институти",
+        "cand_specialty": "13.00.05",
+        "cand_oak_id": "B2026.2.PhD/Ped12555",
+        "metrics": {
+          "title_sim": 1.5,
+          "semantic_sim": 17.5,
+          "domain_sim": 10.0,
+          "concept_sim": 50.0,
+          "final_score": 28
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-017",
+        "cand_title": "Suv ta’minoti va isitish tizimlarining ma’lumotlarini boshqarish va qayta ishlash algoritmlari",
+        "cand_title_orig": "Сув таъминоти ва иситиш тизимларининг маълумотларини бошқариш ва қайта ишлаш алгоритмлари",
+        "cand_author": "Ходжаева Дамира Фарходовна",
+        "cand_institution": "Самарқанд давлат университети",
+        "cand_specialty": "05.01.02",
+        "cand_oak_id": "B2026.2.PhD/T6712",
+        "metrics": {
+          "title_sim": 2.1,
+          "semantic_sim": 15.0,
+          "domain_sim": 10.0,
+          "concept_sim": 33.3,
+          "final_score": 28
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      }
+    ],
+    "acceptance_checks": [
+      {
+        "rule": "Must find ILMYOL-002 with 99-100% similarity",
+        "result": "Found ILMYOL-002 with 100%",
+        "passed": true
+      }
+    ]
+  },
+  "ILMYOL-003": {
+    "source_id": "ILMYOL-003",
+    "source_title": "Sun’iy intellekt sharoitida yangiliklar mediasi jurnalistlari faoliyatining axloqiy asoslari",
+    "source_specialty": "10.00.09",
+    "source_author": "Пердебаева Дурдана Рауаж қизи",
+    "source_institution": "Ўзбекистон журналистика ва оммавий коммуникациялар университети",
+    "source_oak_id": "B2026.2.PhD/Fil7603",
+    "top_5": [
+      {
+        "cand_id": "ILMYOL-004",
+        "cand_title": "Badiiy publitsistik diskursda ijod va subyektivlik muammosi: sun’iy intellekt va jurnalist faoliyatining qiyosiy tadqiqi",
+        "cand_title_orig": "Бадиий публицистик дискурсда ижод ва субъективлик муаммоси: сунъий интеллект ва журналист фаолиятининг қиёсий тадқиқи",
+        "cand_author": "Уринова Мадинабону Сарваровна",
+        "cand_institution": "Ўзбекистон журналистика ва оммавий коммуникациялар университети",
+        "cand_specialty": "10.00.09",
+        "cand_oak_id": "B2026.2.PhD/Fil7606",
+        "metrics": {
+          "title_sim": 21.1,
+          "semantic_sim": 90.0,
+          "domain_sim": 100.0,
+          "concept_sim": 100.0,
+          "final_score": 78
+        },
+        "expected_label": "HIGH",
+        "expected_band": "70-90",
+        "rationale": "Both combine AI and journalist activity; ethics vs comparative creativity/subjectivity.",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-005",
+        "cand_title": "Auditoriya ishonchi kontekstida onlayn media va audiovizual jurnalistikaning multimedia amaliyotlarida sun’iy intellekt integratsiyasi",
+        "cand_title_orig": "Аудитория ишончи контекстида онлайн медиа ва аудиовизуал журналистиканинг мультимедиа амалиётларида сунъий интеллект интеграцияси",
+        "cand_author": "Эргашева Умида Собиржон қизи",
+        "cand_institution": "Ўзбекистон журналистика ва оммавий коммуникациялар университети",
+        "cand_specialty": "10.00.09",
+        "cand_oak_id": "B2026.2.PhD/Fil7610",
+        "metrics": {
+          "title_sim": 15.9,
+          "semantic_sim": 90.0,
+          "domain_sim": 100.0,
+          "concept_sim": 100.0,
+          "final_score": 74
+        },
+        "expected_label": "HIGH",
+        "expected_band": "65-85",
+        "rationale": "AI + journalism/media overlap; audience trust and multimedia integration differentiate the second.",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-006",
+        "cand_title": "Onlayn mediada hamkorlik ekotizimi",
+        "cand_title_orig": "Онлайн медиада ҳамкорлик эко тизими",
+        "cand_author": "Бердиева Ойдин Тохировна",
+        "cand_institution": "Ўзбекистон журналистика ва оммавий коммуникациялар университети",
+        "cand_specialty": "10.00.09",
+        "cand_oak_id": "B2026.2.PhD/Fil7599",
+        "metrics": {
+          "title_sim": 1.6,
+          "semantic_sim": 53.3,
+          "domain_sim": 100.0,
+          "concept_sim": 33.3,
+          "final_score": 31
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-010",
+        "cand_title": "Yechimlar jurnalistikasi: talqin, tahlil va ta’sir",
+        "cand_title_orig": "Ечимлар журналистикаси: талқин, таҳлил ва таъсир",
+        "cand_author": "Сулеймонова Нодира Қобил қизи",
+        "cand_institution": "Ўзбекистон журналистика ва оммавий коммуникациялар университети",
+        "cand_specialty": "10.00.09",
+        "cand_oak_id": "B2026.2.PhD/Fil7605",
+        "metrics": {
+          "title_sim": 3.7,
+          "semantic_sim": 53.3,
+          "domain_sim": 100.0,
+          "concept_sim": 33.3,
+          "final_score": 31
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-011",
+        "cand_title": "Harbiy mass-mediadagi kontentlarning attraktivlik xususiyatlari",
+        "cand_title_orig": "Ҳарбий масс-медиадаги контентларнинг аттрактивлик хусусиятлари",
+        "cand_author": "Ҳакимов Ёшин Комилович",
+        "cand_institution": "Ўзбекистон журналистика ва оммавий коммуникациялар университети",
+        "cand_specialty": "10.00.09",
+        "cand_oak_id": "B2026.2.PhD/Fil7607",
+        "metrics": {
+          "title_sim": 4.7,
+          "semantic_sim": 53.3,
+          "domain_sim": 100.0,
+          "concept_sim": 33.3,
+          "final_score": 31
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      }
+    ],
+    "acceptance_checks": [
+      {
+        "rule": "AI + journalism topics should rank high, not classified as duplicates (<95%)",
+        "result": "Top ranks: ['ILMYOL-004 (78%)', 'ILMYOL-005 (74%)']",
+        "passed": true
+      }
+    ]
+  },
+  "ILMYOL-013": {
+    "source_id": "ILMYOL-013",
+    "source_title": "Media muhitdagi inqirozli vaziyatlarda PR kommunikatsiyalarni boshqarish muammolari (O‘zbekiston internet OAV va ijtimoiy tarmoqlar misolida)",
+    "source_specialty": "10.00.09",
+    "source_author": "Шукурова Гулмира Рустамовна",
+    "source_institution": "Ўзбекистон давлат жаҳон тиллари университети",
+    "source_oak_id": "B2026.2.PhD/Fil7609",
+    "top_5": [
+      {
+        "cand_id": "ILMYOL-014",
+        "cand_title": "O‘zbekistonda PR kommunikatsiyalarda axloqiy professional tamoyillarning ahamiyati (IIB hamda Sog‘liqni saqlash vazirligi tajribasi misolida)",
+        "cand_title_orig": "Ўзбекистонда ПР коммуникацияларда аҳлоқий профессиёнал тамойилларнинг аҳамияти (ИИБ ҳамда Соғлиқни сақлаш вазирлиги тажрибаси мисолида)",
+        "cand_author": "Юсупова Зулайхо Абдираимовна",
+        "cand_institution": "Ўзбекистон журналистика ва оммавий коммуникациялар университети",
+        "cand_specialty": "10.00.09",
+        "cand_oak_id": "B2026.2.PhD/Fil7611",
+        "metrics": {
+          "title_sim": 8.8,
+          "semantic_sim": 53.3,
+          "domain_sim": 100.0,
+          "concept_sim": 33.3,
+          "final_score": 50
+        },
+        "expected_label": "MEDIUM",
+        "expected_band": "35-60",
+        "rationale": "Both PR communication; crisis management vs ethical-professional principles.",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-015",
+        "cand_title": "Z avlod kommunikatsiyasida kreollashuv unsurlari: mediakontent xususiyatlari",
+        "cand_title_orig": "Z авлод коммуникациясида креоллашув унсурлари: медиаконтент хусусиятлари",
+        "cand_author": "Юсупова Наргиза Раҳмонбек қизи",
+        "cand_institution": "Ўзбекистон журналистика ва оммавий коммуникациялар университети",
+        "cand_specialty": "10.00.09",
+        "cand_oak_id": "B2026.2.PhD/Fil7612",
+        "metrics": {
+          "title_sim": 5.6,
+          "semantic_sim": 57.5,
+          "domain_sim": 100.0,
+          "concept_sim": 50.0,
+          "final_score": 34
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-006",
+        "cand_title": "Onlayn mediada hamkorlik ekotizimi",
+        "cand_title_orig": "Онлайн медиада ҳамкорлик эко тизими",
+        "cand_author": "Бердиева Ойдин Тохировна",
+        "cand_institution": "Ўзбекистон журналистика ва оммавий коммуникациялар университети",
+        "cand_specialty": "10.00.09",
+        "cand_oak_id": "B2026.2.PhD/Fil7599",
+        "metrics": {
+          "title_sim": 0.8,
+          "semantic_sim": 57.5,
+          "domain_sim": 100.0,
+          "concept_sim": 50.0,
+          "final_score": 33
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-010",
+        "cand_title": "Yechimlar jurnalistikasi: talqin, tahlil va ta’sir",
+        "cand_title_orig": "Ечимлар журналистикаси: талқин, таҳлил ва таъсир",
+        "cand_author": "Сулеймонова Нодира Қобил қизи",
+        "cand_institution": "Ўзбекистон журналистика ва оммавий коммуникациялар университети",
+        "cand_specialty": "10.00.09",
+        "cand_oak_id": "B2026.2.PhD/Fil7605",
+        "metrics": {
+          "title_sim": 1.0,
+          "semantic_sim": 57.5,
+          "domain_sim": 100.0,
+          "concept_sim": 50.0,
+          "final_score": 33
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-011",
+        "cand_title": "Harbiy mass-mediadagi kontentlarning attraktivlik xususiyatlari",
+        "cand_title_orig": "Ҳарбий масс-медиадаги контентларнинг аттрактивлик хусусиятлари",
+        "cand_author": "Ҳакимов Ёшин Комилович",
+        "cand_institution": "Ўзбекистон журналистика ва оммавий коммуникациялар университети",
+        "cand_specialty": "10.00.09",
+        "cand_oak_id": "B2026.2.PhD/Fil7607",
+        "metrics": {
+          "title_sim": 4.1,
+          "semantic_sim": 57.5,
+          "domain_sim": 100.0,
+          "concept_sim": 50.0,
+          "final_score": 33
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      }
+    ],
+    "acceptance_checks": [
+      {
+        "rule": "PR communication topics (ILMYOL-014) rank above unrelated media topics",
+        "result": "Top match is ILMYOL-014 (50%)",
+        "passed": true
+      }
+    ]
+  },
+  "ILMYOL-023": {
+    "source_id": "ILMYOL-023",
+    "source_title": "Ijtimoiy tarmoqdagi matnli ma’lumotlarni tahlil qilishning intellektual algoritmlari",
+    "source_specialty": "05.01.11",
+    "source_author": "Қўйлиева Ферузахон Алишер қизи",
+    "source_institution": "Самарқанд давлат университети",
+    "source_oak_id": "B2026.2.PhD/T6744",
+    "top_5": [
+      {
+        "cand_id": "ILMYOL-021",
+        "cand_title": "Noosfera hududi monitoringida axborot olish tizimlari, ma’lumotlar oqimlariga ishlov berish jarayonlari, algoritmlari va dasturiy vositasini yaratish",
+        "cand_title_orig": "Ноосфера ҳудуди мониторингида ахборот олиш тизимлари, маълумотлар оқимларига ишлов бериш жараёнлари, алгоритмлари ва дастурий воситасини яратиш",
+        "cand_author": "Абдураззоқов Жамшиджон Тургунбой ўғли",
+        "cand_institution": "Тошкент ахборот технологиялари университети",
+        "cand_specialty": "05.01.10",
+        "cand_oak_id": "B2026.2.PhD/T6742",
+        "metrics": {
+          "title_sim": 9.3,
+          "semantic_sim": 70.0,
+          "domain_sim": 75.0,
+          "concept_sim": 100.0,
+          "final_score": 38
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-022",
+        "cand_title": "Geologik ma’lumotlarni intellektual tahlil qilishning sun’iy intellektga asoslangan model va algoritmlari",
+        "cand_title_orig": "Геологик маълумотларни интеллектуал таҳлил қилишнинг сунъий интеллектга асосланган модел ва алгоритмлари",
+        "cand_author": "Бойтемиров Асрор Махмадўстович",
+        "cand_institution": "Тошкент ахборот технологиялари университети",
+        "cand_specialty": "05.01.11",
+        "cand_oak_id": "B2026.2.PhD/T6743",
+        "metrics": {
+          "title_sim": 35.4,
+          "semantic_sim": 70.0,
+          "domain_sim": 100.0,
+          "concept_sim": 100.0,
+          "final_score": 38
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-028",
+        "cand_title": "Hisoblash tizimlarida axborot resurslarini optimal taqsimlashning intellektual algoritmi va dasturiy majmuasi",
+        "cand_title_orig": "Ҳисоблаш тизимларида ахборот ресурсларини оптимал тақсимлашнинг интеллектуал алгоритми ва дастурий мажмуаси",
+        "cand_author": "Эргашев Шахбоз Тоштемир ўгли",
+        "cand_institution": "Денов тадбиркорлик ва педагогика институти",
+        "cand_specialty": "05.01.04",
+        "cand_oak_id": "B2026.2.PhD/T6726",
+        "metrics": {
+          "title_sim": 12.3,
+          "semantic_sim": 70.0,
+          "domain_sim": 75.0,
+          "concept_sim": 100.0,
+          "final_score": 38
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-018",
+        "cand_title": "Mashinali o‘qitish algoritmlari asosida maktab bitiruvchilarining yo‘nalishlarini aniqlash modeli va dasturiy majmuasi",
+        "cand_title_orig": "Машинали ўқитиш алгоритмлари асосида мактаб битирувчиларининг йўналишларини аниқлаш модели ва дастурий мажмуаси",
+        "cand_author": "Алиев Жалолиддин Қўқон ўғли",
+        "cand_institution": "Тошкент ахборот технологиялари университети",
+        "cand_specialty": "05.01.04",
+        "cand_oak_id": "B2026.2.PhD/T6716",
+        "metrics": {
+          "title_sim": 7.4,
+          "semantic_sim": 70.0,
+          "domain_sim": 75.0,
+          "concept_sim": 100.0,
+          "final_score": 37
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      },
+      {
+        "cand_id": "ILMYOL-026",
+        "cand_title": "Video oqimlari asosida shaxsni aniqlash, holatini baholash algoritmlarini va dasturiy majmuasini yaratish",
+        "cand_title_orig": "Видео оқимлари асосида шахсни аниқлаш, холатини баҳолаш алгоритмларини ва дастурий мажмуасини яратиш",
+        "cand_author": "Махмудова Шахзода Ёркиновна",
+        "cand_institution": "Тошкент ахборот технологиялари университети",
+        "cand_specialty": "05.01.04",
+        "cand_oak_id": "B2026.2.PhD/T6721",
+        "metrics": {
+          "title_sim": 3.1,
+          "semantic_sim": 70.0,
+          "domain_sim": 75.0,
+          "concept_sim": 100.0,
+          "final_score": 37
+        },
+        "expected_label": "N/A",
+        "expected_band": "N/A",
+        "rationale": "",
+        "status": "PASS"
+      }
+    ],
+    "acceptance_checks": [
+      {
+        "rule": "Lexical trap test: Media topics must not receive high similarity due to shared AI/text words (<=30%)",
+        "result": "Media topic max score is 22%",
+        "passed": true
+      }
+    ]
+  }
+}
