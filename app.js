@@ -192,8 +192,9 @@ function switchView(viewName) {
     'empirical', 
     'calendar', 
     'defense', 
-    'supervisor', 
-    'department'
+    'supervisor',
+    'department',
+    'mydata'
   ];
   
   views.forEach(v => {

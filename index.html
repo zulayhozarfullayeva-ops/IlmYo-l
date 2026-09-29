@@ -40,6 +40,47 @@
 </head>
 <body class="bg-[#080E1A] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
 
+  <!-- ================================================== -->
+  <!-- AUTH SCREEN (login / sign up) -->
+  <!-- ================================================== -->
+  <div id="authScreen" class="fixed inset-0 z-[60] bg-[#080E1A] flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-sm space-y-6 py-8">
+      <div class="text-center space-y-3">
+        <div class="w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+          <i data-lucide="graduation-cap" class="w-7 h-7 text-white"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-white">IlmYo‘l</h1>
+        <p class="text-sm text-slate-400">Doktorantlar, ilmiy rahbarlar va ilmiy bo‘lim uchun monitoring</p>
+      </div>
+
+      <div id="authLoading" class="text-center text-sm text-slate-400">Yuklanmoqda...</div>
+
+      <form id="authForm" data-mode="login" onsubmit="submitAuth(event)" class="hidden rounded-2xl p-5 bg-[#121E38] border border-[#1D3058] space-y-4">
+        <div class="grid grid-cols-2 p-1 rounded-xl bg-[#0C1427] border border-[#1D3058] text-sm">
+          <button type="button" id="authTabLogin" onclick="setAuthTab('login')" class="auth-tab auth-tab-active">Kirish</button>
+          <button type="button" id="authTabSignup" onclick="setAuthTab('signup')" class="auth-tab">Ro‘yxatdan o‘tish</button>
+        </div>
+        <div id="authNameRow" class="hidden">
+          <label class="live-label">F.I.Sh.</label>
+          <input id="authName" type="text" autocomplete="name" class="live-input" placeholder="Familiya Ism Sharif">
+        </div>
+        <div>
+          <label class="live-label">Email</label>
+          <input id="authEmail" type="email" required autocomplete="email" class="live-input" placeholder="siz@misol.uz">
+        </div>
+        <div>
+          <label class="live-label">Parol</label>
+          <input id="authPassword" type="password" required minlength="8" autocomplete="current-password" class="live-input" placeholder="Kamida 8 belgi">
+        </div>
+        <p id="authMsg" class="text-xs min-h-[1rem]"></p>
+        <button id="authSubmitBtn" class="btn-primary w-full">Kirish</button>
+        <button type="button" onclick="forgotPassword()" class="w-full text-xs text-slate-400 hover:text-slate-200">Parolni unutdingizmi?</button>
+      </form>
+
+      <button onclick="enterDemo()" class="w-full text-sm text-slate-400 hover:text-white">Demo versiyani ko‘rish →</button>
+    </div>
+  </div>
+
   <!-- Main Container -->
   <div class="flex h-screen overflow-hidden relative">
 
@@ -57,29 +98,41 @@
 
       <!-- Navigation -->
       <nav class="flex-1 w-full flex flex-col items-center gap-1 overflow-y-auto overflow-x-hidden px-2">
-        <button onclick="switchView('dashboard')" id="nav-dashboard" class="rail-item nav-item-active">
+        <button onclick="switchView('dashboard')" id="nav-dashboard" data-view="dashboard" class="rail-item nav-item-active">
           <span class="rail-icon"><i data-lucide="layout-grid" class="w-5 h-5"></i></span>
           <span>Asosiy</span>
         </button>
-        <button onclick="switchView('roadmap')" id="nav-roadmap" class="rail-item">
+        <button onclick="switchView('supervisor')" id="nav-supervisor" data-view="supervisor" class="rail-item hidden">
+          <span class="rail-icon"><i data-lucide="users" class="w-5 h-5"></i></span>
+          <span>Doktorantlar</span>
+        </button>
+        <button onclick="switchView('department')" id="nav-department" data-view="department" class="rail-item hidden">
+          <span class="rail-icon"><i data-lucide="building-2" class="w-5 h-5"></i></span>
+          <span>Bo‘lim</span>
+        </button>
+        <button onclick="switchView('roadmap')" id="nav-roadmap" data-view="roadmap" class="rail-item">
           <span class="rail-icon"><i data-lucide="map" class="w-5 h-5"></i></span>
           <span>Reja</span>
         </button>
-        <button onclick="switchView('topic_novelty')" id="nav-topic_novelty" class="rail-item">
+        <button onclick="switchView('topic_novelty')" id="nav-topic_novelty" data-view="topic_novelty" class="rail-item">
           <span class="rail-icon"><i data-lucide="sparkles" class="w-5 h-5"></i></span>
           <span>Mavzu</span>
         </button>
-        <button onclick="switchView('dissertation')" id="nav-dissertation" class="rail-item">
+        <button onclick="switchView('dissertation')" id="nav-dissertation" data-view="dissertation" class="rail-item">
           <span class="rail-icon"><i data-lucide="book-open" class="w-5 h-5"></i></span>
           <span>Ilmiy ish</span>
         </button>
-        <button onclick="switchView('calendar')" id="nav-calendar" class="rail-item">
+        <button onclick="switchView('calendar')" id="nav-calendar" data-view="calendar" class="rail-item">
           <span class="rail-icon"><i data-lucide="calendar" class="w-5 h-5"></i></span>
           <span>Kalendar</span>
         </button>
-        <button onclick="switchView('defense')" id="nav-defense" class="rail-item">
+        <button onclick="switchView('defense')" id="nav-defense" data-view="defense" class="rail-item">
           <span class="rail-icon"><i data-lucide="trophy" class="w-5 h-5"></i></span>
           <span>Himoya</span>
+        </button>
+        <button onclick="switchView('mydata')" id="nav-mydata" data-view="mydata" class="rail-item hidden">
+          <span class="rail-icon"><i data-lucide="square-pen" class="w-5 h-5"></i></span>
+          <span>Ma’lumotlar</span>
         </button>
         <button onclick="openAiAssistantModal()" id="nav-ai" class="rail-item">
           <span class="rail-icon"><i data-lucide="bot" class="w-5 h-5"></i></span>
@@ -92,6 +145,10 @@
         <button onclick="openSettingsModal()" class="rail-item">
           <span class="rail-icon"><i data-lucide="settings" class="w-5 h-5"></i></span>
           <span>Sozlamalar</span>
+        </button>
+        <button id="railAuthBtn" class="rail-item">
+          <span class="rail-icon"><i data-lucide="log-in" class="w-5 h-5"></i></span>
+          <span>Kirish</span>
         </button>
       </div>
     </aside>
@@ -110,6 +167,9 @@
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
           <span id="roleIndicatorBadge" class="hidden">Doktorant</span>
+          <button id="demoBanner" onclick="leaveDemo()" class="hidden text-xs font-medium px-3 py-1.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 truncate">
+            Demo rejim · Kirish →
+          </button>
         </div>
 
         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -117,7 +177,7 @@
             <i data-lucide="search" class="w-5 h-5"></i>
           </button>
 
-          <div class="relative">
+          <div class="relative" id="roleSelectorWrap">
             <select id="roleSelectorSelect" onchange="onRoleChange(this.value)" class="appearance-none bg-[#121E38] border border-[#1D3058] text-xs font-medium text-slate-200 rounded-full pl-3 pr-7 py-1.5 focus:outline-none focus:border-blue-500 cursor-pointer transition">
               <option value="DOCTORAL_STUDENT">Doktorant</option>
               <option value="SUPERVISOR">Ilmiy rahbar</option>
@@ -130,7 +190,7 @@
 
           <button onclick="openModal('notificationsModal')" class="relative p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Bildirishnomalar">
             <i data-lucide="bell" class="w-5 h-5"></i>
-            <span class="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-[10px] font-bold text-white flex items-center justify-center">3</span>
+            <span id="notifBadge" class="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-[10px] font-bold text-white flex items-center justify-center">3</span>
           </button>
 
           <div onclick="openProfileModal()" class="flex items-center gap-2 cursor-pointer hover:opacity-90 transition">
@@ -1154,6 +1214,9 @@
 
         </section>
 
+        <!-- VIEW: MY DATA (live mode only, rendered by live.js) -->
+        <section id="view-mydata" class="hidden space-y-6"></section>
+
       </main>
 
     </div>
@@ -1582,9 +1645,25 @@
     </div>
   </div>
 
+  <!-- Generic modal used by live.js -->
+  <div id="liveModal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#0F1A33] border border-[#1D3058] rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl animate-fade-in space-y-4 max-h-[calc(100dvh-2rem)] overflow-y-auto">
+      <div class="flex items-center justify-between gap-3 border-b border-[#1D3058] pb-3">
+        <h3 id="liveModalTitle" class="text-base font-bold text-white"></h3>
+        <button onclick="closeModal('liveModal')" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="liveModalBody" class="space-y-4 text-sm"></div>
+    </div>
+  </div>
+
   <!-- Scripts -->
-  <script src="data.js?v=4.0"></script>
-  <script src="app.js?v=4.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js?v=5.0"></script>
+  <script src="data.js?v=5.0"></script>
+  <script src="app.js?v=5.0"></script>
+  <script src="live.js?v=5.0"></script>
   <script>
     // Initialize Lucide icons on page load
     lucide.createIcons();
