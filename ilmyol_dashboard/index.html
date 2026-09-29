@@ -414,7 +414,7 @@
             </button>
             <button id="tab-btn-novelty-corpus" onclick="switchNoveltySubTab('corpus')" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-2 transition">
               <i data-lucide="database" class="w-4 h-4 text-cyan-400"></i>
-              <span>OAK Korpuslari (30 ta mavzu)</span>
+              <span>OAK Korpusi (byulleten 2026/2)</span>
               <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono">30</span>
             </button>
           </div>
@@ -432,7 +432,7 @@
                   Mavzu Yangiligini Tekshirish va Research Gap Tahlili
                 </h2>
                 <p class="text-xs text-slate-400">
-                  Sinov korpusi: 30 ta OAKda ro‘yxatdan o‘tgan real PhD mavzusi.
+                  Korpus: OAK byulleteni 2026/2 — 4 280 ta ro‘yxatdan o‘tgan PhD va DSc mavzusi.
                 </p>
 
                 <!-- Preset Quick Test Chips -->
@@ -522,7 +522,7 @@
                     <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i>
                     Mavzu Yangiligi Tahlili Natijasi
                   </h3>
-                  <p class="text-xs text-slate-400 mt-0.5" id="noveltyCorpusDesc">Sinov korpusi: 30 ta OAKda ro‘yxatdan o‘tgan real PhD mavzusi.</p>
+                  <p class="text-xs text-slate-400 mt-0.5" id="noveltyCorpusDesc">Korpus: OAK byulleteni 2026/2 — 4 280 ta ro‘yxatdan o‘tgan PhD va DSc mavzusi.</p>
                 </div>
                 <div class="flex items-center gap-2">
                   <span class="text-xs text-slate-400">Takrorlanish xavfi:</span>
@@ -789,7 +789,7 @@
                     <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                       OAK Bulletin 2026/2
                     </span>
-                    <span class="text-xs text-slate-400">30 ta rasmiy tasdiqlangan mavzu</span>
+                    <span class="text-xs text-slate-400">OAK byulleteni 2026/2 — 4 280 ta mavzu</span>
                   </div>
                   <h4 class="text-base font-bold text-white mt-0.5">OAK Dissertatsiya Mavzulari Reyestri</h4>
                 </div>
@@ -803,6 +803,7 @@
                     <option value="C_PARTIAL_OVERLAP">C: Qisman o‘xshash (Partial)</option>
                     <option value="D_LEXICAL_TRAP">D: Leksik tuzoqlar (Lexical Trap)</option>
                     <option value="E_NEGATIVE_CONTROL">E: Negativ nazorat (Control)</option>
+                    <option value="OAK_2026_2">OAK byulleteni 2026/2 (to‘liq)</option>
                   </select>
                   <input id="corpusSearchInput" onkeyup="filterCorpusTopics()" type="text" placeholder="Mavzu yoki muallif qidirish..." class="bg-[#0C1427] border border-[#1D3058] rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500">
                 </div>
@@ -1631,7 +1632,7 @@
           <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058] flex items-center justify-between">
             <div class="space-y-0.5">
               <div class="text-slate-200 font-medium">OAK Bulletin 2026/2</div>
-              <div class="text-[10px] text-slate-400">30 ta PhD dissertatsiya korpusi ulangan</div>
+              <div class="text-[10px] text-slate-400">4 280 ta PhD va DSc mavzusi ulangan</div>
             </div>
             <span class="text-xs text-cyan-400 font-bold font-mono">v1.0</span>
           </div>
@@ -1662,7 +1663,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=5.0"></script>
   <script src="data.js?v=5.0"></script>
-  <script src="app.js?v=5.0"></script>
+  <script src="app.js?v=5.1"></script>
+  <script src="corpus.js?v=5.2"></script>
   <script src="live.js?v=5.0"></script>
   <script>
     // Initialize Lucide icons on page load

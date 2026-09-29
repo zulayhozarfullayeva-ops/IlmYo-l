@@ -1119,13 +1119,14 @@ async function executeRealTopicNoveltyEngine() {
   // PROBLEM 7: Update corpus coverage
   const elCorpusCoverage = document.getElementById('corpusCoverageBox');
   if (elCorpusCoverage) {
+    const full = !!IlmYolData.oakBenchmarkCorpus.fullLoaded;
     elCorpusCoverage.innerHTML = `
       <div class="text-[10px] text-slate-400 space-y-0.5 font-mono">
-        <div><span class="text-slate-500">Ma'lumot qamrovi:</span> <span class="text-amber-300 font-bold">TEST CORPUS</span></div>
+        <div><span class="text-slate-500">Ma'lumot qamrovi:</span> <span class="${full ? 'text-emerald-300' : 'text-amber-300'} font-bold">${full ? 'OAK BYULLETENI (TO‘LIQ)' : 'TEST CORPUS'}</span></div>
         <div><span class="text-slate-500">Manba:</span> OAK Bulletin 2026/2</div>
-        <div><span class="text-slate-500">Tekshirilgan yozuvlar:</span> 30</div>
+        <div><span class="text-slate-500">Tekshirilgan yozuvlar:</span> ${IlmYolData.oakBenchmarkCorpus.topics.length}</div>
         <div><span class="text-slate-500">Tahlil darajasi:</span> Sarlavha + metadata</div>
-        <div><span class="text-slate-500">Ishonchlilik:</span> <span class="text-amber-300">CHEKLANGAN</span></div>
+        <div><span class="text-slate-500">Ishonchlilik:</span> <span class="text-amber-300">${full ? 'FAQAT SHU BYULLETEN' : 'CHEKLANGAN'}</span></div>
       </div>
     `;
   }
@@ -1715,6 +1716,10 @@ function renderCorpusTopics() {
     );
   }
 
+  const CORPUS_TABLE_LIMIT = 200;
+  const totalFound = topics.length;
+  topics = topics.slice(0, CORPUS_TABLE_LIMIT);
+
   tbody.innerHTML = topics.map(t => {
     let groupBadge = 'badge-blue';
     if (t.test_group === 'A_EXACT_DUPLICATE') groupBadge = 'badge-rose';
@@ -1746,7 +1751,10 @@ function renderCorpusTopics() {
         </td>
       </tr>
     `;
-  }).join('');
+  }).join('') + (totalFound > CORPUS_TABLE_LIMIT ? `
+      <tr><td colspan="7" class="py-3 px-3 text-center text-xs text-slate-400">
+        Jami ${totalFound} ta mavzu topildi — birinchi ${CORPUS_TABLE_LIMIT} tasi ko‘rsatilmoqda. Qidiruv orqali toraytiring.
+      </td></tr>` : '');
 
   lucide.createIcons();
 }
