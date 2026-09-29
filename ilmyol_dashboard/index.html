@@ -47,133 +47,52 @@
     <div id="sidebarBackdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity duration-300"></div>
 
     <!-- ================================================== -->
-    <!-- 1. LEFT SIDEBAR (COMPACT & COLLAPSIBLE) -->
+    <!-- 1. LEFT SIDEBAR (SLIM ICON RAIL) -->
     <!-- ================================================== -->
-    <aside id="mainSidebar" class="w-64 bg-[#0C1427] border-r border-[#1D3058] flex flex-col justify-between transition-all duration-300 z-30 shrink-0 select-none">
-      
-      <!-- Top: Logo & Nav items -->
-      <div class="flex flex-col h-full overflow-hidden">
-        <!-- Logo Header -->
-        <div class="h-16 px-4 flex items-center justify-between border-b border-[#1D3058]/80">
-          <div class="flex items-center space-x-3 overflow-hidden" id="brandLogoContainer">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
-              <i data-lucide="graduation-cap" class="w-5 h-5 text-white"></i>
-            </div>
-            <div class="sidebar-text leading-tight">
-              <span class="font-bold text-lg tracking-tight text-white flex items-center gap-1.5">
-                IlmYo‘l
-                <span class="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">AI</span>
-              </span>
-              <p class="text-[11px] text-slate-400 font-medium">Mavzudan himoyagacha.</p>
-            </div>
-          </div>
-          <!-- Collapse Toggle Button (Desktop: collapse, Mobile: close drawer) -->
-          <button id="sidebarToggleBtn" onclick="toggleSidebarCollapse()" class="hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Sidebarni qisqartirish">
-            <i data-lucide="chevron-left" id="sidebarCollapseIcon" class="w-4 h-4"></i>
-          </button>
-          <button id="sidebarMobileCloseBtn" onclick="toggleMobileSidebar()" class="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Yopish">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
-        </div>
+    <aside id="mainSidebar" class="w-[88px] bg-[#0C1427] border-r border-[#1D3058]/60 flex flex-col items-center py-4 z-30 shrink-0 select-none">
+      <!-- Logo -->
+      <button onclick="switchView('dashboard')" class="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30 mb-6" title="IlmYo‘l">
+        <i data-lucide="graduation-cap" class="w-5 h-5 text-white"></i>
+      </button>
 
-        <!-- Navigation Menu -->
-        <nav class="flex-1 overflow-y-auto px-2.5 py-3 space-y-1">
-          <div class="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 sidebar-text">Boshqaruv</div>
-          
-          <button onclick="switchView('dashboard')" id="nav-dashboard" class="nav-item-active w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
-            <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0 text-blue-400"></i>
-            <span class="sidebar-text truncate">Dashboard</span>
-          </button>
+      <!-- Navigation -->
+      <nav class="flex-1 w-full flex flex-col items-center gap-1 overflow-y-auto overflow-x-hidden px-2">
+        <button onclick="switchView('dashboard')" id="nav-dashboard" class="rail-item nav-item-active">
+          <span class="rail-icon"><i data-lucide="layout-grid" class="w-5 h-5"></i></span>
+          <span>Asosiy</span>
+        </button>
+        <button onclick="switchView('roadmap')" id="nav-roadmap" class="rail-item">
+          <span class="rail-icon"><i data-lucide="map" class="w-5 h-5"></i></span>
+          <span>Reja</span>
+        </button>
+        <button onclick="switchView('topic_novelty')" id="nav-topic_novelty" class="rail-item">
+          <span class="rail-icon"><i data-lucide="sparkles" class="w-5 h-5"></i></span>
+          <span>Mavzu</span>
+        </button>
+        <button onclick="switchView('dissertation')" id="nav-dissertation" class="rail-item">
+          <span class="rail-icon"><i data-lucide="book-open" class="w-5 h-5"></i></span>
+          <span>Ilmiy ish</span>
+        </button>
+        <button onclick="switchView('calendar')" id="nav-calendar" class="rail-item">
+          <span class="rail-icon"><i data-lucide="calendar" class="w-5 h-5"></i></span>
+          <span>Kalendar</span>
+        </button>
+        <button onclick="switchView('defense')" id="nav-defense" class="rail-item">
+          <span class="rail-icon"><i data-lucide="trophy" class="w-5 h-5"></i></span>
+          <span>Himoya</span>
+        </button>
+        <button onclick="openAiAssistantModal()" id="nav-ai" class="rail-item">
+          <span class="rail-icon"><i data-lucide="bot" class="w-5 h-5"></i></span>
+          <span>AI</span>
+        </button>
+      </nav>
 
-          <button onclick="switchView('roadmap')" id="nav-roadmap" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
-            <i data-lucide="git-commit" class="w-4 h-4 shrink-0 text-cyan-400"></i>
-            <span class="sidebar-text truncate">3 yillik reja</span>
-          </button>
-
-          <button onclick="switchView('topic_novelty')" id="nav-topic_novelty" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left relative">
-            <i data-lucide="sparkles" class="w-4 h-4 shrink-0 text-amber-400"></i>
-            <span class="sidebar-text truncate">Mavzu tekshiruvi</span>
-            <span class="sidebar-text ml-auto text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">SI</span>
-          </button>
-
-          <button onclick="switchView('dissertation')" id="nav-dissertation" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
-            <i data-lucide="book-open" class="w-4 h-4 shrink-0 text-indigo-400"></i>
-            <span class="sidebar-text truncate">Dissertatsiya</span>
-            <span class="sidebar-text ml-auto text-xs text-slate-400 font-mono">49%</span>
-          </button>
-
-          <button onclick="openModal('publicationsModal')" id="nav-publications" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
-            <i data-lucide="file-text" class="w-4 h-4 shrink-0 text-emerald-400"></i>
-            <span class="sidebar-text truncate">Maqolalar</span>
-            <span class="sidebar-text ml-auto text-[11px] px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400">2 / 4</span>
-          </button>
-
-          <button onclick="switchView('empirical')" id="nav-empirical" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
-            <i data-lucide="flask-conical" class="w-4 h-4 shrink-0 text-purple-400"></i>
-            <span class="sidebar-text truncate">Empirik tadqiqot</span>
-            <span class="sidebar-text ml-auto w-2 h-2 rounded-full bg-amber-400" title="Kechikish mavjud"></span>
-          </button>
-
-          <button onclick="openModal('documentsModal')" id="nav-documents" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
-            <i data-lucide="folder-check" class="w-4 h-4 shrink-0 text-teal-400"></i>
-            <span class="sidebar-text truncate">Hujjatlar</span>
-            <span class="sidebar-text ml-auto text-xs text-slate-400 font-mono">8/12</span>
-          </button>
-
-          <button onclick="switchView('calendar')" id="nav-calendar" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
-            <i data-lucide="calendar" class="w-4 h-4 shrink-0 text-slate-400"></i>
-            <span class="sidebar-text truncate">Kalendar</span>
-          </button>
-
-          <button onclick="openSupervisorContactModal()" id="nav-supervisor-contact" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
-            <i data-lucide="user-check" class="w-4 h-4 shrink-0 text-blue-400"></i>
-            <span class="sidebar-text truncate">Ilmiy rahbar</span>
-          </button>
-
-          <button onclick="openAiAssistantModal()" id="nav-ai" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
-            <i data-lucide="bot" class="w-4 h-4 shrink-0 text-cyan-400"></i>
-            <span class="sidebar-text truncate">AI yordamchi</span>
-          </button>
-
-          <button onclick="switchView('defense')" id="nav-defense" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
-            <i data-lucide="award" class="w-4 h-4 shrink-0 text-amber-400"></i>
-            <span class="sidebar-text truncate">Himoyaga tayyorlik</span>
-          </button>
-
-          <!-- Divider for Role Views -->
-          <div class="pt-3 pb-1 border-t border-[#1D3058]/60 mt-3">
-            <div class="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 sidebar-text">Rol kabinetlari</div>
-            
-            <button onclick="switchRoleAndNavigate('SUPERVISOR')" id="nav-supervisor-view" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
-              <i data-lucide="users" class="w-4 h-4 shrink-0 text-emerald-400"></i>
-              <span class="sidebar-text truncate">Rahbar ko‘rinishi</span>
-            </button>
-
-            <button onclick="switchRoleAndNavigate('SCIENTIFIC_DEPARTMENT')" id="nav-department-view" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition group text-left">
-              <i data-lucide="building" class="w-4 h-4 shrink-0 text-cyan-400"></i>
-              <span class="sidebar-text truncate">Ilmiy bo‘lim</span>
-            </button>
-          </div>
-        </nav>
-
-        <!-- Sidebar Footer -->
-        <div class="p-2 border-t border-[#1D3058]/80 bg-[#0A1121] space-y-1">
-          <button onclick="openModal('notificationsModal')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition relative text-left">
-            <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
-            <span class="sidebar-text truncate">Bildirishnomalar</span>
-            <span class="sidebar-text ml-auto w-2 h-2 rounded-full bg-blue-500"></span>
-          </button>
-
-          <button onclick="openSettingsModal()" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition text-left">
-            <i data-lucide="settings" class="w-4 h-4 shrink-0"></i>
-            <span class="sidebar-text truncate">Sozlamalar</span>
-          </button>
-
-          <button onclick="openProfileModal()" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition text-left">
-            <i data-lucide="user" class="w-4 h-4 shrink-0"></i>
-            <span class="sidebar-text truncate">Profil ma’lumotlari</span>
-          </button>
-        </div>
+      <!-- Bottom -->
+      <div class="w-full flex flex-col items-center gap-1 px-2 pt-2">
+        <button onclick="openSettingsModal()" class="rail-item">
+          <span class="rail-icon"><i data-lucide="settings" class="w-5 h-5"></i></span>
+          <span>Sozlamalar</span>
+        </button>
       </div>
     </aside>
 
@@ -183,519 +102,199 @@
     <div class="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-[#080E1A]">
 
       <!-- ================================================== -->
-      <!-- TOP DASHBOARD HEADER -->
+      <!-- TOP HEADER (MINIMAL) -->
       <!-- ================================================== -->
-      <header class="h-16 px-3 sm:px-6 bg-[#0B1327]/90 border-b border-[#1D3058] flex items-center justify-between z-20 shrink-0 backdrop-blur-md">
-        
-        <!-- Left: Greetings & Doctorant Day Context -->
-        <div class="flex items-center space-x-2.5 sm:space-x-4 min-w-0">
-          <!-- Mobile Sidebar Toggle -->
+      <header class="h-16 px-4 sm:px-8 flex items-center justify-between z-20 shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
           <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" aria-label="Menyuni ochish">
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
-          
-          <div class="min-w-0">
-            <div class="flex items-center gap-1.5 sm:gap-2">
-              <h1 class="text-sm sm:text-base font-semibold text-white tracking-tight truncate" id="headerGreetingText">
-                Xush kelibsiz, Zulayho
-              </h1>
-              <span id="roleIndicatorBadge" class="hidden sm:inline-flex text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 shrink-0">
-                Doktorant
-              </span>
-            </div>
-            <p class="text-xs text-slate-400 hidden sm:flex items-center gap-1.5 truncate">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block shrink-0"></span>
-              <span class="truncate">Bugun doktoranturangizning <span class="text-slate-200 font-semibold font-mono">624-kuni</span>. Rejangiz bo‘yicha <span class="text-slate-200 font-medium">2-yilning 8-oyidasiz</span>.</span>
-            </p>
-          </div>
+          <span id="roleIndicatorBadge" class="hidden">Doktorant</span>
         </div>
 
-        <!-- Center / Right: Global Search & Actions -->
-        <div class="flex items-center space-x-2 sm:space-x-3 shrink-0">
-          
-          <!-- Mobile Search Trigger Button -->
-          <button onclick="openGlobalSearchModal()" class="md:hidden p-2 rounded-lg bg-[#121E38] border border-[#1D3058] text-slate-400 hover:text-white hover:border-slate-600 transition" title="Qidiruv">
-            <i data-lucide="search" class="w-4 h-4"></i>
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          <button onclick="openGlobalSearchModal()" class="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Qidiruv (Ctrl+K)">
+            <i data-lucide="search" class="w-5 h-5"></i>
           </button>
 
-          <!-- Desktop Smart Global Search Trigger -->
-          <button onclick="openGlobalSearchModal()" class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-[#121E38] border border-[#1D3058] text-xs text-slate-400 hover:text-slate-200 hover:border-blue-500 transition w-44 lg:w-56 justify-between">
-            <span class="flex items-center gap-2 truncate">
-              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
-              <span class="truncate">Mavzu, hujjat yoki maqola...</span>
-            </span>
-            <kbd class="px-1.5 py-0.5 text-[10px] rounded bg-slate-800 border border-slate-700 text-slate-400 font-mono">⌘K</kbd>
-          </button>
-
-          <!-- Role Switcher Dropdown -->
-          <div class="relative max-w-[125px] sm:max-w-none">
-            <select id="roleSelectorSelect" onchange="onRoleChange(this.value)" class="w-full appearance-none bg-[#121E38] border border-[#1D3058] text-xs font-medium text-slate-200 rounded-lg pl-2.5 sm:pl-3 pr-7 sm:pr-8 py-1.5 focus:outline-none focus:border-blue-500 cursor-pointer transition truncate">
-              <option value="DOCTORAL_STUDENT">🎓 Doktorant</option>
-              <option value="SUPERVISOR">👨‍🏫 Ilmiy rahbar</option>
-              <option value="SCIENTIFIC_DEPARTMENT">🏛️ Ilmiy bo‘lim</option>
+          <div class="relative">
+            <select id="roleSelectorSelect" onchange="onRoleChange(this.value)" class="appearance-none bg-[#121E38] border border-[#1D3058] text-xs font-medium text-slate-200 rounded-full pl-3 pr-7 py-1.5 focus:outline-none focus:border-blue-500 cursor-pointer transition">
+              <option value="DOCTORAL_STUDENT">Doktorant</option>
+              <option value="SUPERVISOR">Ilmiy rahbar</option>
+              <option value="SCIENTIFIC_DEPARTMENT">Ilmiy bo‘lim</option>
             </select>
-            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 sm:px-2 text-slate-400">
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-slate-400">
               <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
             </div>
           </div>
 
-          <!-- Notification Bell -->
-          <button onclick="openModal('notificationsModal')" class="relative p-2 rounded-lg bg-[#121E38] border border-[#1D3058] text-slate-400 hover:text-white hover:border-slate-600 transition" title="Bildirishnomalar">
-            <i data-lucide="bell" class="w-4 h-4"></i>
-            <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-blue-500"></span>
+          <button onclick="openModal('notificationsModal')" class="relative p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Bildirishnomalar">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+            <span class="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-[10px] font-bold text-white flex items-center justify-center">3</span>
           </button>
 
-          <!-- User Profile Widget -->
-          <div onclick="openProfileModal()" class="flex items-center space-x-2 sm:pl-1 cursor-pointer hover:opacity-90 transition">
-            <img id="userAvatarImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Avatar" class="w-8 h-8 rounded-full border border-blue-500/40 object-cover shrink-0">
+          <div onclick="openProfileModal()" class="flex items-center gap-2 cursor-pointer hover:opacity-90 transition">
+            <img id="userAvatarImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Avatar" class="w-9 h-9 rounded-full border-2 border-blue-500/40 object-cover shrink-0">
             <div class="hidden xl:block text-left leading-tight">
               <div id="userNameDisplay" class="text-xs font-medium text-slate-200">Zulayho Qosimova</div>
               <div id="userStatusDisplay" class="text-[10px] text-slate-400">PhD tadqiqotchi • 2-yil</div>
             </div>
           </div>
-
         </div>
       </header>
 
       <!-- ================================================== -->
       <!-- DYNAMIC CONTENT SCROLL AREA -->
       <!-- ================================================== -->
-      <main id="mainScrollArea" class="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-6 space-y-6">
+      <main id="mainScrollArea" class="flex-1 overflow-y-auto px-4 sm:px-8 pb-8 pt-2 space-y-6">
 
         <!-- ============================================== -->
-        <!-- VIEW 1: DOCTORAL STUDENT DASHBOARD -->
+        <!-- VIEW 1: DOCTORAL STUDENT DASHBOARD (SIMPLE) -->
         <!-- ============================================== -->
-        <section id="view-dashboard" class="space-y-6">
+        <section id="view-dashboard" class="space-y-6 max-w-6xl">
 
-          <!-- ============================================ -->
-          <!-- TOP ROW: COGNITIVE FOCUS ZONE (MAX 5 CARDS) -->
-          <!-- Answers 5 core questions in 5 seconds: -->
-          <!-- 1. PhD Progress | 2. Current Stage | 3. Next Tasks | 4. Deadline | 5. Scientific Risk -->
-          <!-- ============================================ -->
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5">
-            
-            <!-- 1. ASOSIY PhD PROGRESS CARD (4 Cols) -->
-            <div class="xl:col-span-4 card-academic p-5 flex flex-col justify-between relative overflow-hidden bg-[#121E38]/90">
+          <h1 id="headerGreetingText" class="text-2xl sm:text-3xl font-bold text-white tracking-tight">Xush kelibsiz, Zulayho 👋</h1>
+
+          <!-- Row 1: Continue card + Today tasks -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+            <!-- Continue card -->
+            <div class="lg:col-span-2 rounded-2xl p-5 bg-gradient-to-br from-[#16264A] to-[#101B35] border border-[#1D3058] flex flex-col sm:flex-row gap-5">
+              <div class="sm:w-44 h-36 sm:h-auto rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 flex flex-col items-center justify-center text-white shrink-0 shadow-lg shadow-blue-900/40">
+                <i data-lucide="book-open-check" class="w-10 h-10 mb-2"></i>
+                <span class="text-sm font-bold">2-bob</span>
+              </div>
+
+              <div class="flex-1 flex flex-col justify-between min-w-0">
+                <div>
+                  <p class="text-xs text-slate-400">Hozirgi bosqich</p>
+                  <h2 class="text-xl font-bold text-white mt-1">Empirik tadqiqot</h2>
+
+                  <div class="flex items-center gap-3 mt-4">
+                    <div class="flex-1 bg-slate-800 h-2 rounded-full overflow-hidden">
+                      <div class="bg-gradient-to-r from-blue-500 to-cyan-400 h-full rounded-full" style="width: 60%"></div>
+                    </div>
+                    <span class="text-sm font-semibold text-slate-200 font-mono">60%</span>
+                  </div>
+
+                  <p class="text-sm text-slate-300 mt-3 truncate">
+                    <span class="text-slate-500">Keyingi:</span> Respondentlar ma’lumotlarini tahlil qilish
+                  </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3 mt-5">
+                  <button onclick="openCurrentStageTaskModal()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow-lg shadow-blue-600/30 transition active:scale-95">
+                    Davom etish
+                  </button>
+                  <span class="text-xs font-medium text-amber-400 flex items-center gap-1">
+                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> 5 kun qoldi
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Today tasks -->
+            <div class="rounded-2xl p-5 bg-[#121E38] border border-[#1D3058] flex flex-col">
               <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-2">
-                  <div class="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
-                    <i data-lucide="target" class="w-4 h-4"></i>
-                  </div>
-                  <h2 class="text-sm font-semibold text-white tracking-wide">PhD Progress</h2>
-                </div>
-                <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full badge-amber flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                  Biroz ortda
-                </span>
+                <h3 class="text-base font-semibold text-white">Bugungi vazifalar</h3>
+                <span id="tasksCounterLabel" class="text-xs text-slate-400 font-mono">1 / 4</span>
               </div>
-
-              <!-- Main Radial Progress Display -->
-              <div class="flex items-center justify-center my-3">
-                <div class="relative w-36 h-36 flex items-center justify-center">
-                  <svg class="w-full h-full" viewBox="0 0 100 100">
-                    <!-- Background Circle -->
-                    <circle class="text-slate-800/80 stroke-current" stroke-width="8" cx="50" cy="50" r="40" fill="transparent"></circle>
-                    <!-- Progress Circle -->
-                    <circle id="phdProgressRingCircle" class="progress-ring__circle text-blue-500 stroke-current" stroke-width="8" stroke-linecap="round" cx="50" cy="50" r="40" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="133.1"></circle>
-                  </svg>
-                  <div class="absolute flex flex-col items-center justify-center text-center">
-                    <span id="phdTotalPercentLabel" class="text-3xl font-extrabold text-white font-mono tracking-tight">47%</span>
-                    <span class="text-[11px] text-slate-400 font-medium">Bajarildi</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Yearly Progress Breakdown -->
-              <div class="space-y-2 pt-3 border-t border-[#1D3058]/80 text-xs">
-                <div class="flex items-center justify-between">
-                  <span class="text-slate-400 flex items-center gap-1.5">
-                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i>
-                    1-yil
-                  </span>
-                  <div class="flex items-center gap-2">
-                    <div class="w-20 bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                      <div class="bg-emerald-500 h-full rounded-full" style="width: 88%"></div>
-                    </div>
-                    <span class="font-mono text-slate-200 font-semibold w-8 text-right">88%</span>
-                  </div>
-                </div>
-
-                <div class="flex items-center justify-between">
-                  <span class="text-slate-300 font-medium flex items-center gap-1.5">
-                    <i data-lucide="disc" class="w-3.5 h-3.5 text-blue-400"></i>
-                    2-yil (Hozirgi)
-                  </span>
-                  <div class="flex items-center gap-2">
-                    <div class="w-20 bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                      <div class="bg-blue-500 h-full rounded-full" style="width: 42%"></div>
-                    </div>
-                    <span class="font-mono text-blue-400 font-semibold w-8 text-right">42%</span>
-                  </div>
-                </div>
-
-                <div class="flex items-center justify-between text-slate-500">
-                  <span class="flex items-center gap-1.5">
-                    <i data-lucide="circle" class="w-3.5 h-3.5 text-slate-600"></i>
-                    3-yil
-                  </span>
-                  <div class="flex items-center gap-2">
-                    <div class="w-20 bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                      <div class="bg-slate-700 h-full rounded-full" style="width: 0%"></div>
-                    </div>
-                    <span class="font-mono text-slate-500 w-8 text-right">0%</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Action button -->
-              <div class="pt-4">
-                <button onclick="switchView('roadmap')" class="w-full py-2 px-3 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-400 text-xs font-semibold flex items-center justify-center gap-2 transition">
-                  <span>3 yillik rejani ko‘rish</span>
-                  <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
+              <div class="space-y-1 flex-1" id="todayTasksListContainer"></div>
+              <button onclick="openAddTaskModal()" class="mt-3 w-full py-2 rounded-lg border border-dashed border-[#1D3058] hover:border-slate-500 text-xs text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5 transition">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Qo‘shish
+              </button>
             </div>
-
-            <!-- 2. CURRENT STAGE CARD (4 Cols - Eng muhim UX element) -->
-            <div class="xl:col-span-4 card-academic p-5 flex flex-col justify-between border-l-4 border-l-blue-500 bg-[#121E38]/90 relative">
-              <div>
-                <div class="flex items-center justify-between mb-3">
-                  <span class="text-[11px] font-bold uppercase tracking-wider text-blue-400 px-2 py-0.5 rounded bg-blue-500/10">
-                    Hozirgi Bosqich
-                  </span>
-                  <span class="text-xs text-slate-400 font-mono">
-                    6 / 10 vazifa (60%)
-                  </span>
-                </div>
-
-                <h3 class="text-base font-bold text-white leading-tight">
-                  2-bob: Empirik tadqiqot va tahlil
-                </h3>
-                <p class="text-xs text-slate-400 mt-1 line-clamp-2">
-                  Metodologik instrumentariy, respondentlar so‘rovi va korrelyatsion tahlil.
-                </p>
-
-                <!-- Progress Bar -->
-                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden my-3">
-                  <div class="bg-gradient-to-r from-blue-500 to-cyan-400 h-full rounded-full" style="width: 60%"></div>
-                </div>
-
-                <!-- Next Actionable Task Container -->
-                <div class="mt-4 p-3.5 rounded-xl bg-[#0C1427] border border-[#1D3058] space-y-2">
-                  <div class="flex items-center justify-between text-[11px]">
-                    <span class="text-slate-400 font-medium">Navbatdagi ustuvor vazifa:</span>
-                    <span class="text-amber-400 font-mono font-semibold flex items-center gap-1">
-                      <i data-lucide="clock" class="w-3 h-3"></i>
-                      5 kun qoldi
-                    </span>
-                  </div>
-                  <p class="text-xs font-semibold text-slate-200 leading-snug">
-                    “Respondentlar ma’lumotlarini tahlil qilish (SPSS / Jamovi orqali korrelyatsion tahlil)”
-                  </p>
-                  <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-                    <span>Muddati: <strong class="text-slate-300">28 sentabr 2026</strong></span>
-                    <span class="text-emerald-400 font-medium flex items-center gap-1">
-                      <i data-lucide="paperclip" class="w-3 h-3"></i>
-                      2 ta dalil fayli
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Primary Core Button: Davom etish -->
-              <div class="pt-4">
-                <button onclick="openCurrentStageTaskModal()" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-bold shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 transition transform active:scale-95">
-                  <i data-lucide="play-circle" class="w-4 h-4"></i>
-                  <span>Davom etish</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- 3. TODAY'S TASKS & QUICK CHECKLIST (4 Cols) -->
-            <div class="md:col-span-2 xl:col-span-4 card-academic p-5 flex flex-col justify-between bg-[#121E38]/90">
-              <div>
-                <div class="flex items-center justify-between mb-3">
-                  <div class="flex items-center gap-2">
-                    <i data-lucide="check-square" class="w-4 h-4 text-emerald-400"></i>
-                    <h3 class="text-sm font-semibold text-white">Bugun va bu hafta</h3>
-                  </div>
-                  <span id="tasksCounterLabel" class="text-xs text-slate-400 font-mono font-medium">1 / 4 bajarildi</span>
-                </div>
-
-                <!-- Interactive Checklist -->
-                <div class="space-y-2.5 mt-2" id="todayTasksListContainer">
-                  <!-- Dynamically Rendered Tasks -->
-                </div>
-              </div>
-
-              <!-- Add Quick Task -->
-              <div class="pt-3">
-                <button onclick="openAddTaskModal()" class="w-full py-2 px-3 rounded-lg border border-dashed border-[#1D3058] hover:border-slate-500 text-xs text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5 transition">
-                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                  <span>Yangi reja vazifasi qo‘shish</span>
-                </button>
-              </div>
-            </div>
-
           </div>
 
-          <!-- ============================================ -->
-          <!-- CRITICAL NOTIFICATIONS ROW: RISK & DEADLINE -->
-          <!-- ============================================ -->
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
-            
-            <!-- 4. SCIENTIFIC RISK CARD (7 Cols) -->
-            <div class="md:col-span-7 card-academic p-5 bg-[#121E38]/90 border border-amber-500/30 relative overflow-hidden">
-              <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none"></div>
-              <div class="flex items-start justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400">
-                    <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-                  </div>
-                  <div>
-                    <div class="flex items-center gap-2">
-                      <h3 class="text-sm font-bold text-white tracking-wide">Ilmiy Risk</h3>
-                      <span class="text-[10px] font-extrabold px-2 py-0.5 rounded badge-amber uppercase">
-                        O‘RTA RISK
-                      </span>
-                    </div>
-                    <p class="text-xs text-slate-400 mt-0.5">Avtomatlashtirilgan ilmiy monitoring tahlili</p>
-                  </div>
-                </div>
+          <!-- Warning (one line) -->
+          <button onclick="switchView('roadmap')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-left hover:bg-amber-500/15 transition">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-400 shrink-0"></i>
+            <span class="text-sm text-amber-100 flex-1">Empirik tadqiqot rejadan <b>12 kun</b> ortda</span>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-amber-400"></i>
+          </button>
 
-                <button onclick="switchView('roadmap')" class="text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center gap-1 transition">
-                  <span>Rejani ko‘rish</span>
-                  <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
-
-              <!-- Risk Reason & Actionable Recommendation -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-3 border-t border-[#1D3058]">
-                <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058]">
-                  <span class="text-[11px] font-semibold text-rose-400 flex items-center gap-1">
-                    <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
-                    Aniqlangan sabab:
-                  </span>
-                  <p class="text-xs text-slate-300 mt-1 font-medium">
-                    Empirik tadqiqot rejalashtirilgan muddatdan <strong>12 kun</strong> ortda qolmoqda.
-                  </p>
-                </div>
-
-                <div class="p-3 rounded-lg bg-[#0C1427] border border-[#1D3058]">
-                  <span class="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
-                    <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
-                    AI tavsiyasi:
-                  </span>
-                  <p class="text-xs text-slate-300 mt-1 font-medium">
-                    Keyingi 7 kun ichida ma’lumot yig‘ishni yakunlash va tahlil hisobotini yuklash.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- 5. NEXT CRITICAL DEADLINE CARD (5 Cols) -->
-            <div class="md:col-span-5 card-academic p-5 bg-[#121E38]/90 flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <div class="flex items-center gap-2">
-                    <div class="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
-                      <i data-lucide="alarm-clock" class="w-4 h-4"></i>
-                    </div>
-                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Keyingi Muhim Muddat</span>
-                  </div>
-                  <span class="text-xs font-mono font-bold text-amber-400 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
-                    18 kun qoldi
-                  </span>
-                </div>
-
-                <div class="mt-2">
-                  <h4 class="text-base font-bold text-white">Kuzgi attestatsiya</h4>
-                  <p class="text-xs text-slate-400 mt-0.5">Kafedra va OAK monitoring komissiyasi oldidagi hisobot</p>
-                </div>
-
-                <div class="mt-3 flex items-center justify-between text-xs">
-                  <span class="text-slate-400">Hujjatlar tayyorgarligi:</span>
-                  <span class="font-mono text-slate-200 font-semibold">3 / 5 hujjat tayyor</span>
-                </div>
-
-                <!-- Progress mini bar -->
-                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1.5">
-                  <div class="bg-blue-500 h-full rounded-full" style="width: 60%"></div>
-                </div>
-              </div>
-
-              <div class="pt-4">
-                <button onclick="openModal('attestationDocsModal')" class="w-full py-2 px-3 rounded-lg bg-[#0C1427] hover:bg-slate-800 border border-[#1D3058] text-xs font-semibold text-slate-200 flex items-center justify-center gap-2 transition">
-                  <span>Hujjatlarni ko‘rish</span>
-                  <i data-lucide="file-check" class="w-3.5 h-3.5 text-blue-400"></i>
-                </button>
-              </div>
-            </div>
-
+          <!-- Stat tiles -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button onclick="switchView('roadmap')" class="stat-tile">
+              <span class="stat-icon bg-blue-500/15 text-blue-400"><i data-lucide="target" class="w-5 h-5"></i></span>
+              <span class="stat-value">47%</span>
+              <span class="stat-label">PhD umumiy</span>
+            </button>
+            <button onclick="switchView('dissertation')" class="stat-tile">
+              <span class="stat-icon bg-indigo-500/15 text-indigo-400"><i data-lucide="book-marked" class="w-5 h-5"></i></span>
+              <span class="stat-value">49%</span>
+              <span class="stat-label">Dissertatsiya</span>
+            </button>
+            <button onclick="openModal('publicationsModal')" class="stat-tile">
+              <span class="stat-icon bg-emerald-500/15 text-emerald-400"><i data-lucide="newspaper" class="w-5 h-5"></i></span>
+              <span class="stat-value">2 / 4</span>
+              <span class="stat-label">Maqolalar</span>
+            </button>
+            <button onclick="openModal('documentsModal')" class="stat-tile">
+              <span class="stat-icon bg-teal-500/15 text-teal-400"><i data-lucide="folder-check" class="w-5 h-5"></i></span>
+              <span class="stat-value">8 / 12</span>
+              <span class="stat-label">Hujjatlar</span>
+            </button>
           </div>
 
-          <!-- ============================================ -->
-          <!-- SECONDARY ROW: DISSERTATION, ARTICLES, DOCS, TOPIC WIDGET -->
-          <!-- ============================================ -->
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-            
-            <!-- 11. DISSERTATSIYA PROGRESS CARD -->
-            <div class="card-academic p-5 bg-[#121E38]/90 flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between mb-3">
-                  <div class="flex items-center gap-2">
-                    <i data-lucide="book-marked" class="w-4 h-4 text-indigo-400"></i>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Dissertatsiya</h3>
-                  </div>
-                  <span class="text-xs font-mono font-bold text-indigo-400">49% umumiy</span>
-                </div>
-
-                <!-- Chapters Breakdown (Clickable) -->
-                <div class="space-y-2.5 mt-3 text-xs" id="dissertationChaptersContainer">
-                  <!-- Rendered via JS -->
-                </div>
-              </div>
-
-              <div class="pt-4">
-                <button onclick="openDissertationModal()" class="w-full py-1.5 px-3 rounded-lg bg-[#0C1427] hover:bg-slate-800 border border-[#1D3058] text-xs text-slate-300 font-medium flex items-center justify-center gap-1.5 transition">
-                  <span>Barcha boblarni ochish</span>
-                  <i data-lucide="external-link" class="w-3 h-3 text-slate-400"></i>
-                </button>
-              </div>
+          <!-- Roadmap steps (lesson-list style) -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-lg font-semibold text-white">Yo‘l xaritasi</h3>
+              <button onclick="switchView('roadmap')" class="text-xs font-medium text-blue-400 hover:text-blue-300">Hammasi →</button>
             </div>
 
-            <!-- 12. ILMIY MAQOLALAR CARD -->
-            <div class="card-academic p-5 bg-[#121E38]/90 flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between mb-3">
-                  <div class="flex items-center gap-2">
-                    <i data-lucide="newspaper" class="w-4 h-4 text-emerald-400"></i>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Ilmiy Maqolalar</h3>
-                  </div>
-                  <span class="text-[11px] font-mono text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-500/10">
-                    2 / 4 tayyor
-                  </span>
-                </div>
-
-                <!-- Metrics breakdown -->
-                <div class="grid grid-cols-3 gap-1.5 text-center text-[11px] py-2 border-y border-[#1D3058]/80 my-2">
-                  <div>
-                    <div class="text-slate-400">Talab</div>
-                    <div class="font-bold text-slate-200 font-mono">4 ta</div>
-                  </div>
-                  <div>
-                    <div class="text-slate-400">Jarayonda</div>
-                    <div class="font-bold text-blue-400 font-mono">1 ta</div>
-                  </div>
-                  <div>
-                    <div class="text-slate-400">Yetishmaydi</div>
-                    <div class="font-bold text-rose-400 font-mono">1 ta</div>
-                  </div>
-                </div>
-
-                <!-- Articles summary list -->
-                <div class="space-y-2 mt-2 text-xs">
-                  <div class="flex items-center gap-2 text-slate-300">
-                    <span class="text-emerald-400 font-bold">✓</span>
-                    <span class="truncate">1-maqola — O‘zMU Xabarlari (chop etilgan)</span>
-                  </div>
-                  <div class="flex items-center gap-2 text-slate-300">
-                    <span class="text-emerald-400 font-bold">✓</span>
-                    <span class="truncate">2-maqola — Xalqaro konf. to‘plami (chop etilgan)</span>
-                  </div>
-                  <div class="flex items-center gap-2 text-blue-300">
-                    <span class="text-blue-400 font-bold">●</span>
-                    <span class="truncate">3-maqola — Scopus Q2 (jurnalga yuborilgan)</span>
-                  </div>
-                  <div class="flex items-center gap-2 text-slate-500">
-                    <span class="text-slate-600 font-bold">○</span>
-                    <span class="truncate">4-maqola — rejalashtirilgan (boshlanmagan)</span>
-                  </div>
+            <div class="space-y-2.5">
+              <div class="step-row">
+                <span class="step-icon bg-emerald-500 text-white"><i data-lucide="check" class="w-5 h-5"></i></span>
+                <div class="min-w-0">
+                  <div class="step-meta">1-yil <span class="step-badge badge-emerald">Tugallangan</span></div>
+                  <div class="step-title">Nazariy asoslar va 1-bob</div>
                 </div>
               </div>
 
-              <div class="pt-4">
-                <button onclick="openModal('publicationsModal')" class="w-full py-1.5 px-3 rounded-lg bg-[#0C1427] hover:bg-slate-800 border border-[#1D3058] text-xs text-slate-300 font-medium flex items-center justify-center gap-1.5 transition">
-                  <span>Barcha maqolalar</span>
-                  <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
-                </button>
+              <div class="step-row">
+                <span class="step-icon bg-emerald-500 text-white"><i data-lucide="check" class="w-5 h-5"></i></span>
+                <div class="min-w-0">
+                  <div class="step-meta">2-yil <span class="step-badge badge-emerald">Tugallangan</span></div>
+                  <div class="step-title">Metodologiya va so‘rovnoma</div>
+                </div>
+              </div>
+
+              <button onclick="switchView('empirical')" class="step-row step-current w-full text-left">
+                <span class="step-icon bg-blue-600 text-white"><i data-lucide="play" class="w-5 h-5"></i></span>
+                <div class="min-w-0 flex-1">
+                  <div class="step-meta">2-yil <span class="step-badge badge-blue">Jarayonda</span></div>
+                  <div class="step-title">Empirik tadqiqot (420 respondent)</div>
+                </div>
+                <i data-lucide="chevron-right" class="w-5 h-5 text-slate-400 shrink-0"></i>
+              </button>
+
+              <button onclick="openModal('attestationDocsModal')" class="step-row w-full text-left">
+                <span class="step-icon bg-amber-500/20 text-amber-400"><i data-lucide="alarm-clock" class="w-5 h-5"></i></span>
+                <div class="min-w-0 flex-1">
+                  <div class="step-meta">Muddat <span class="step-badge badge-amber">18 kun qoldi</span></div>
+                  <div class="step-title">Kuzgi attestatsiya</div>
+                </div>
+                <i data-lucide="chevron-right" class="w-5 h-5 text-slate-400 shrink-0"></i>
+              </button>
+
+              <div class="step-row opacity-60">
+                <span class="step-icon bg-slate-700/60 text-slate-400"><i data-lucide="lock" class="w-5 h-5"></i></span>
+                <div class="min-w-0">
+                  <div class="step-meta">2-yil <span class="step-badge badge-slate">Qulflangan</span></div>
+                  <div class="step-title">2-bob va Scopus maqola</div>
+                </div>
+              </div>
+
+              <div class="step-row opacity-60">
+                <span class="step-icon bg-slate-700/60 text-slate-400"><i data-lucide="lock" class="w-5 h-5"></i></span>
+                <div class="min-w-0">
+                  <div class="step-meta">3-yil <span class="step-badge badge-slate">Qulflangan</span></div>
+                  <div class="step-title">3-bob, aprobatsiya va himoya</div>
+                </div>
               </div>
             </div>
-
-            <!-- 13. HUJJATLAR STATUSI CARD -->
-            <div class="card-academic p-5 bg-[#121E38]/90 flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between mb-3">
-                  <div class="flex items-center gap-2">
-                    <i data-lucide="archive" class="w-4 h-4 text-teal-400"></i>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Hujjatlar Statusi</h3>
-                  </div>
-                  <span class="text-xs font-mono font-bold text-teal-400">8 / 12 tayyor</span>
-                </div>
-
-                <!-- Document rows -->
-                <div class="space-y-2 mt-3 text-xs">
-                  <div class="flex items-center justify-between text-slate-300">
-                    <span class="truncate">Individual reja</span>
-                    <span class="text-emerald-400 font-bold">✓</span>
-                  </div>
-                  <div class="flex items-center justify-between text-slate-300">
-                    <span class="truncate">Attestatsiya</span>
-                    <span class="text-emerald-400 font-bold">✓</span>
-                  </div>
-                  <div class="flex items-center justify-between text-slate-300">
-                    <span class="truncate">Konferensiya sertifikati</span>
-                    <span class="text-emerald-400 font-bold">✓</span>
-                  </div>
-                  <div class="flex items-center justify-between text-amber-300">
-                    <span class="truncate">Aprobatsiya dalolatnomasi</span>
-                    <span class="text-amber-400 font-bold">!</span>
-                  </div>
-                  <div class="flex items-center justify-between text-slate-500">
-                    <span class="truncate">Ilmiy seminar bayonnomasi</span>
-                    <span class="text-slate-600 font-bold">○</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="pt-4">
-                <button onclick="openModal('documentsModal')" class="w-full py-1.5 px-3 rounded-lg bg-[#0C1427] hover:bg-slate-800 border border-[#1D3058] text-xs text-slate-300 font-medium flex items-center justify-center gap-1.5 transition">
-                  <span>Hujjatlar portfeli</span>
-                  <i data-lucide="folder" class="w-3.5 h-3.5 text-slate-400"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- 14. TOPIC NOVELTY QUICK WIDGET -->
-            <div class="card-academic p-5 bg-gradient-to-b from-[#162547] to-[#121E38] border border-blue-500/30 flex flex-col justify-between relative overflow-hidden">
-              <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl pointer-events-none"></div>
-              <div>
-                <div class="flex items-center gap-2 mb-2">
-                  <div class="p-1.5 rounded-lg bg-cyan-500/15 text-cyan-400">
-                    <i data-lucide="sparkles" class="w-4 h-4"></i>
-                  </div>
-                  <h3 class="text-xs font-bold uppercase tracking-wider text-cyan-300">Mavzu Yangiligini Tekshirish</h3>
-                </div>
-                <p class="text-xs text-slate-300 leading-relaxed mt-1">
-                  Mavzuingizni OAK va xalqaro dissertatsiyalar bilan semantik taqqoslang.
-                </p>
-
-                <!-- Input box -->
-                <div class="mt-3">
-                  <label class="text-[10px] text-slate-400 font-medium block mb-1">Mavzuni kiritish:</label>
-                  <input id="quickTopicInput" type="text" placeholder="Dissertatsiya mavzuingizni kiriting" value="O‘zbekistonda korporativ ekologik kommunikatsiyaning tashkilot imijiga ta’siri" class="w-full px-3 py-2 text-xs bg-[#090F1D] border border-[#1D3058] rounded-lg text-slate-200 focus:outline-none focus:border-cyan-400 truncate">
-                </div>
-              </div>
-
-              <!-- Button to Topic Novelty Page -->
-              <div class="pt-4">
-                <button onclick="handleQuickTopicSearch()" class="w-full py-2 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-md shadow-cyan-600/20 transition">
-                  <i data-lucide="brain-circuit" class="w-3.5 h-3.5"></i>
-                  <span>SI bilan tekshirish</span>
-                </button>
-              </div>
-            </div>
-
           </div>
 
         </section>

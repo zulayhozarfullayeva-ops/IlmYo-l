@@ -257,7 +257,7 @@ function onRoleChange(role) {
   const userAvatar = document.getElementById('userAvatarImg');
 
   if (role === 'DOCTORAL_STUDENT') {
-    greeting.innerText = 'Xush kelibsiz, Zulayho';
+    greeting.innerText = 'Xush kelibsiz, Zulayho 👋';
     roleBadge.innerText = 'Doktorant';
     roleBadge.className = 'text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30';
     userName.innerText = 'Zulayho Qosimova';
@@ -334,7 +334,7 @@ function renderTodayTasks() {
   
   // Update task count indicator
   const counter = document.getElementById('tasksCounterLabel');
-  if (counter) counter.innerText = `${completedCount} / ${tasks.length} bajarildi`;
+  if (counter) counter.innerText = `${completedCount} / ${tasks.length}`;
 
   container.innerHTML = tasks.map(task => `
     <div class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-slate-800/40 transition group ${task.done ? 'opacity-60' : ''}">
