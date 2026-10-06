@@ -245,7 +245,7 @@
         else setAuthMsg('Emailingizga tasdiqlash xati yuborildi. Havolani bosing, keyin shu yerda kiring.');
       } else {
         const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) throw new Error(error.message === 'Invalid login credentials' ? 'Email yoki parol noto‘g‘ri' :
+        if (error) throw new Error(error.message === 'Invalid login credentials' ? 'Email yoki parol noto‘g‘ri. Parolni eslay olmasangiz, pastdagi “Parolni unutdingizmi? — tiklash” tugmasini bosing.' :
           error.message === 'Email not confirmed' ? 'Email hali tasdiqlanmagan — pochtangizni tekshiring' : error.message);
         await enterLive(data.user);
       }
