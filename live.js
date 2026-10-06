@@ -302,6 +302,19 @@
     const needsProfile = role() === 'doctoral_student' && (!L.me.topic || !L.me.start_date);
     if (needsProfile) { L.myDataTab = 'profile'; switchView('mydata'); }
     else switchView(landingView());
+    if (L.recovery) showRecoveryModal();
+  }
+
+  function showRecoveryModal() {
+    L.recovery = false;
+    openLiveModal('Yangi parol o‘rnating', `
+      <p class="text-sm text-slate-300">Parolni tiklash havolasi orqali kirdingiz. Endi yangi parol yozing — keyingi safar shu parol bilan kirasiz.</p>
+      <form onsubmit="liveChangePassword(event)" class="space-y-3">
+        <div><label class="live-label">Yangi parol</label>
+          <input id="newPassword" type="password" minlength="8" required autocomplete="new-password" class="live-input" placeholder="Kamida 8 belgi"></div>
+        <button class="btn-primary w-full">Parolni saqlash</button>
+      </form>`);
+    setTimeout(() => { const el = document.getElementById('newPassword'); if (el) el.focus(); }, 50);
   }
 
   function landingView() {
@@ -1223,7 +1236,9 @@
   document.addEventListener('DOMContentLoaded', async () => {
     sb.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
-        setTimeout(() => window.openSettingsModal(), 300);
+        // The recovery link signs the user in; ask for a new password once live data is loaded.
+        L.recovery = true;
+        if (L.mode === 'live') showRecoveryModal();
       }
     });
     let demo = false;
