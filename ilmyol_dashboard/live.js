@@ -25,6 +25,7 @@
     profiles: [],
     plan: [], tasks: [], chapters: [], pubs: [], docs: [], evidence: [], comments: [],
     myDataTab: 'profile',
+    config: {},
     deptFilterYear: 'ALL',
     deptFilterRisk: 'ALL'
   };
@@ -140,7 +141,7 @@
   }
 
   async function loadAll() {
-    const [profiles, plan, tasks, chapters, pubs, docs, evidence, comments] = await Promise.all([
+    const [profiles, plan, tasks, chapters, pubs, docs, evidence, comments, config] = await Promise.all([
       q(sb.from('profiles').select('*').order('full_name')),
       q(sb.from('plan_items').select('*')),
       q(sb.from('tasks').select('*').order('created_at', { ascending: false })),
@@ -148,9 +149,11 @@
       q(sb.from('publications').select('*').order('created_at')),
       q(sb.from('documents').select('*').order('created_at')),
       q(sb.from('evidence_files').select('*').order('created_at', { ascending: false })),
-      q(sb.from('comments').select('*').order('created_at', { ascending: false }).limit(500))
+      q(sb.from('comments').select('*').order('created_at', { ascending: false }).limit(500)),
+      q(sb.from('app_config').select('*'))
     ]);
     Object.assign(L, { profiles, plan, tasks, chapters, pubs, docs, evidence, comments });
+    L.config = Object.fromEntries(config.map(c => [c.key, c.value]));
     L.me = byId(profiles, L.user.id) || null;
   }
 
@@ -421,11 +424,59 @@
         <input id="newPassword" type="password" minlength="8" required class="live-input" placeholder="Kamida 8 belgi">
         <button class="btn-primary">Parolni o‘zgartirish</button>
       </form>
-      <div class="p-3 rounded-xl bg-[#0C1427] border border-[#1D3058] text-xs text-slate-400">
-        Telegram eslatmalari keyingi bosqichda qo‘shiladi.
-      </div>
+      ${telegramBox()}
       <button onclick="liveSignOut()" class="btn-ghost w-full">Chiqish</button>
     `);
+  };
+
+  // ---- Telegram linking ----
+  function telegramBox() {
+    const bot = L.config.telegram_bot_username;
+    const linked = !!L.me.telegram_chat_id;
+    let body;
+    if (!bot) {
+      body = '<p class="text-xs text-slate-400">Telegram bot hali sozlanmagan.</p>';
+    } else if (linked) {
+      body = `<p class="text-sm text-emerald-300 flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4"></i> Ulangan — eslatmalar @${esc(bot)} orqali keladi</p>
+        <button onclick="unlinkTelegram()" class="text-xs text-slate-400 hover:text-rose-300">Uzish</button>`;
+    } else {
+      body = `<p class="text-xs text-slate-400">Muddat eslatmalari va rahbar javoblari Telegram’ga keladi. Rahbarlar ishni bot ichida bir bosishda tasdiqlaydi.</p>
+        <button onclick="linkTelegram()" class="btn-primary">Telegram’ni ulash</button>`;
+    }
+    return `<div class="p-3 rounded-xl bg-[#0C1427] border border-[#1D3058] space-y-2">
+      <div class="text-slate-400 text-xs">Telegram eslatmalari</div>${body}</div>`;
+  }
+
+  window.linkTelegram = async function () {
+    const bot = L.config.telegram_bot_username;
+    const code = [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, '0')).join('');
+    await sb.from('telegram_link_codes').delete().eq('user_id', L.me.id);
+    const { error } = await sb.from('telegram_link_codes').insert({ code });
+    if (error) return fail(error);
+    openLiveModal('Telegram’ni ulash', `
+      <ol class="text-sm text-slate-300 space-y-2 list-decimal list-inside">
+        <li>Pastdagi tugma orqali botni oching.</li>
+        <li>Telegram’da <b>START</b> (Boshlash) tugmasini bosing.</li>
+        <li>Bot “Ulandi” deb javob bergach, shu yerga qaytib <b>Tekshirish</b> ni bosing.</li>
+      </ol>
+      <a href="https://t.me/${esc(bot)}?start=${code}" target="_blank" rel="noopener" class="btn-primary block text-center">@${esc(bot)} ni ochish</a>
+      <button onclick="checkTelegramLinked()" class="btn-ghost w-full">Tekshirish</button>
+      <p class="text-xs text-slate-500">Havola 15 daqiqa amal qiladi.</p>`);
+  };
+
+  window.checkTelegramLinked = async function () {
+    await reload();
+    if (L.me.telegram_chat_id) { toast('Telegram ulandi'); window.openSettingsModal(); }
+    else toast('Hali ulanmagan — botda START ni bosing', 'error');
+  };
+
+  window.unlinkTelegram = async function () {
+    if (!confirm('Telegram eslatmalari uzilsinmi?')) return;
+    const { error } = await sb.from('profiles').update({ telegram_chat_id: null }).eq('id', L.me.id);
+    if (error) return fail(error);
+    await reload();
+    toast('Uzildi');
+    window.openSettingsModal();
   };
   window.liveChangePassword = async function (e) {
     e.preventDefault();
@@ -566,7 +617,7 @@
         </button>
       </div>`;
 
-    let alerts = '';
+    let alerts = telegramNudge();
     if (s.returned.length) alerts += alertRow('rotate-ccw', 'rose', `Rahbar <b>${s.returned.length} ta</b> bandni qayta ishlashga qaytardi`, `openPlanItem('${s.returned[0].id}')`);
     if (s.overdue.length) alerts += alertRow('alert-triangle', 'amber', `<b>${s.overdue.length} ta</b> reja bandining muddati o‘tgan (eng ko‘pi ${s.maxLate} kun)`, `switchView('roadmap')`);
 
@@ -592,6 +643,11 @@
     return `${hello}
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">${hero}${tasksCard}</div>
       ${alerts}${tiles}${road}`;
+  }
+
+  function telegramNudge() {
+    if (!L.config.telegram_bot_username || L.me.telegram_chat_id) return '';
+    return alertRow('send', 'blue', 'Telegram’ni ulang — muddat eslatmalari va rahbar javoblari telefoningizga keladi', 'openSettingsModal()');
   }
 
   function alertRow(icon, color, html, onclick) {
@@ -874,7 +930,7 @@
     if (role() === 'department') return renderSupervisorsForDepartment();
     const students = L.profiles.filter(p => p.supervisor_id === L.me.id);
     const pending = L.plan.filter(p => p.status === 'submitted' && students.some(s => s.id === p.student_id));
-    let html = header('Mening doktorantlarim', `${students.length} ta doktorant biriktirilgan`);
+    let html = header('Mening doktorantlarim', `${students.length} ta doktorant biriktirilgan`) + telegramNudge();
     if (!students.length) return html + emptyCard('Sizga hali doktorant biriktirilmagan. Ilmiy bo‘lim biriktirgandan keyin shu yerda ko‘rinadi.', '');
     if (pending.length) {
       html += `<div class="space-y-2"><h3 class="text-lg font-semibold text-white">Tekshirishni kutayotganlar · ${pending.length}</h3>
