@@ -1,0 +1,25 @@
+name: Supabase keepalive
+
+# Supabase pauses free-plan projects after about a week without activity.
+# This sends one small read request per day so the IlmYo'l project stays active.
+# The key below is the public "publishable" key (the same one shipped in supabase-config.js).
+
+on:
+  schedule:
+    - cron: "17 5 * * *"   # every day, 05:17 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_URL: https://cjjqmzgldfjvobelpkov.supabase.co
+          SUPABASE_KEY: sb_publishable_gJpnZUlESV_prxX0_x2U8w_VJFJY5i5
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            "$SUPABASE_URL/rest/v1/topics?select=id&limit=1" \
+            -H "apikey: $SUPABASE_KEY" -H "Authorization: Bearer $SUPABASE_KEY")
+          echo "HTTP $code"
+          test "$code" = "200"
