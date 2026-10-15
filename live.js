@@ -454,14 +454,29 @@
     const { error } = await sb.from('telegram_link_codes').insert({ code });
     if (error) return fail(error);
     openLiveModal('Telegram’ni ulash', `
-      <ol class="text-sm text-slate-300 space-y-2 list-decimal list-inside">
-        <li>Pastdagi tugma orqali botni oching.</li>
-        <li>Telegram’da <b>START</b> (Boshlash) tugmasini bosing.</li>
-        <li>Bot “Ulandi” deb javob bergach, shu yerga qaytib <b>Tekshirish</b> ni bosing.</li>
-      </ol>
-      <a href="https://t.me/${esc(bot)}?start=${code}" target="_blank" rel="noopener" class="btn-primary block text-center">@${esc(bot)} ni ochish</a>
-      <button onclick="checkTelegramLinked()" class="btn-ghost w-full">Tekshirish</button>
-      <p class="text-xs text-slate-500">Havola 15 daqiqa amal qiladi.</p>`);
+      <div class="space-y-2">
+        <div class="text-sm font-semibold text-white">1. Shu buyruqni nusxalang</div>
+        <div class="flex gap-2">
+          <input id="tgStartCmd" readonly value="/start ${code}" class="live-input font-mono text-xs" onclick="this.select()">
+          <button onclick="copyTgCommand()" class="btn-primary shrink-0">Nusxalash</button>
+        </div>
+      </div>
+      <div class="space-y-1">
+        <div class="text-sm font-semibold text-white">2. Telegram’da @${esc(bot)} botiga yuboring</div>
+        <p class="text-xs text-slate-400">Telegram’da <b>@${esc(bot)}</b> ni oching, xabar maydoniga joylang (Ctrl+V) va yuboring. Bot “✅ Ulandi” deb javob beradi.</p>
+        <a href="https://t.me/${esc(bot)}?start=${code}" target="_blank" rel="noopener" class="text-xs text-blue-400 hover:text-blue-300">Yoki botni shu havola orqali oching →</a>
+      </div>
+      <div class="space-y-1">
+        <div class="text-sm font-semibold text-white">3. Shu yerga qaytib tekshiring</div>
+        <button onclick="checkTelegramLinked()" class="btn-ghost w-full">Tekshirish</button>
+      </div>
+      <p class="text-xs text-slate-500">Buyruq 15 daqiqa amal qiladi. Bot tokenini emas, aynan shu buyruqni yuboring.</p>`);
+  };
+
+  window.copyTgCommand = async function () {
+    const el = document.getElementById('tgStartCmd');
+    try { await navigator.clipboard.writeText(el.value); toast('Nusxalandi — endi botga joylang'); }
+    catch (e) { el.select(); document.execCommand('copy'); toast('Nusxalandi'); }
   };
 
   window.checkTelegramLinked = async function () {

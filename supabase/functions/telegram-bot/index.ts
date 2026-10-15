@@ -141,9 +141,20 @@ Deno.serve(async (req: Request) => {
     if (url.searchParams.has("setup")) return await setup();
     if (!TOKEN) return json({ ok: false, error: "TELEGRAM_BOT_TOKEN secret is not set" });
     if (url.searchParams.has("process")) return json({ ok: true, sent: await processQueue() });
+    if (url.searchParams.has("info")) {
+      const info = await tg("getWebhookInfo", {});
+      const me = await tg("getMe", {});
+      const r = info.result ?? {};
+      return json({
+        ok: !!info.ok, bot: me.result?.username ?? null, webhook_url: r.url ?? null,
+        pending_updates: r.pending_update_count ?? null, last_error_date: r.last_error_date ?? null,
+        last_error_message: r.last_error_message ?? null,
+      });
+    }
 
     if (req.method !== "POST") return json({ ok: true, service: "ilmyol-telegram-bot" });
     if (req.headers.get("x-telegram-bot-api-secret-token") !== await webhookSecret()) {
+      console.warn("webhook secret mismatch — re-run ?setup=1 after changing the bot token");
       return json({ ok: false, error: "unauthorized" }, 401);
     }
     const update = await req.json();
