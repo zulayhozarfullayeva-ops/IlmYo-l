@@ -23,7 +23,7 @@
     user: null,
     me: null,
     profiles: [],
-    plan: [], tasks: [], chapters: [], pubs: [], docs: [], evidence: [], comments: [], schol: [],
+    plan: [], tasks: [], chapters: [], pubs: [], docs: [], evidence: [], comments: [], schol: [], plag: [],
     myDataTab: 'profile',
     config: {},
     deptFilterYear: 'ALL',
@@ -141,7 +141,7 @@
   }
 
   async function loadAll() {
-    const [profiles, plan, tasks, chapters, pubs, docs, evidence, comments, config, schol] = await Promise.all([
+    const [profiles, plan, tasks, chapters, pubs, docs, evidence, comments, config, schol, plag] = await Promise.all([
       q(sb.from('profiles').select('*').order('full_name')),
       q(sb.from('plan_items').select('*')),
       q(sb.from('tasks').select('*').order('created_at', { ascending: false })),
@@ -151,9 +151,10 @@
       q(sb.from('evidence_files').select('*').order('created_at', { ascending: false })),
       q(sb.from('comments').select('*').order('created_at', { ascending: false }).limit(500)),
       q(sb.from('app_config').select('*')),
-      q(sb.from('scholarship_items').select('*').order('created_at'))
+      q(sb.from('scholarship_items').select('*').order('created_at')),
+      q(sb.from('plagiarism_services').select('*').order('sort_order'))
     ]);
-    Object.assign(L, { profiles, plan, tasks, chapters, pubs, docs, evidence, comments, schol });
+    Object.assign(L, { profiles, plan, tasks, chapters, pubs, docs, evidence, comments, schol, plag });
     L.config = Object.fromEntries(config.map(c => [c.key, c.value]));
     L.me = byId(profiles, L.user.id) || null;
   }
@@ -1195,7 +1196,24 @@
               '<tr><td colspan="8" class="py-6 text-center text-slate-500">Doktorant topilmadi</td></tr>'}
           </tbody></table></div>
       </div>
-      ${renderUsersAdmin()}`;
+      ${renderUsersAdmin()}
+      ${renderPlagiarismAdmin()}`;
+  }
+
+  function renderPlagiarismAdmin() {
+    return `<div class="rounded-2xl p-5 bg-[#121E38] border border-[#1D3058] space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div><h3 class="text-base font-semibold text-white">Antiplagiat tizimlari</h3>
+          <p class="text-xs text-slate-400 mt-1">Doktorantlar shu ro‘yxatdan tanlaydi. Universitet rasmiy qabul qiladigan tizimni belgilang.</p></div>
+        <button onclick="openForm('plagiarism_services')" class="btn-primary">+ Qo‘shish</button>
+      </div>
+      <div class="space-y-2">${L.plag.map(s => `<div class="step-row">
+        <div class="flex-1 min-w-0"><div class="step-title truncate">${esc(s.name)} ${s.official ? '<span class="step-badge badge-emerald">rasmiy</span>' : ''}</div>
+          <div class="text-xs text-slate-400 truncate">${esc(s.url)} · ${esc(s.pricing || '')}</div></div>
+        <button onclick="openForm('plagiarism_services','${s.id}')" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800" title="Tahrirlash"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+        <button onclick="deleteRow('plagiarism_services','${s.id}')" class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800" title="O‘chirish"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+      </div>`).join('') || '<p class="text-sm text-slate-500">Ro‘yxat bo‘sh.</p>'}</div>
+    </div>`;
   }
   function deptStat(label, value, cls) {
     return `<div class="stat-tile !cursor-default"><span class="stat-label">${label}</span><span class="stat-value ${cls}">${value}</span></div>`;
@@ -1291,7 +1309,21 @@
         { k: 'indexing', l: 'Turi', type: 'select', options: ['', 'OAK ro‘yxatidagi jurnal', 'Scopus', 'Web of Science', 'Xalqaro konferensiya', 'Respublika konferensiyasi', 'Boshqa'].map(v => [v, v || '—']) },
         { k: 'year', l: 'Yil', type: 'number', num: true },
         { k: 'status', l: 'Holat', type: 'select', options: Object.entries(PUB_STATUS) },
-        { k: 'url', l: 'Havola (URL)', type: 'url' }
+        { k: 'url', l: 'Havola (URL)', type: 'url' },
+        { k: 'plagiarism_service', l: 'Antiplagiat tizimi', type: 'select', options: () => [['', '— tekshirilmagan —'], ...L.plag.map(s => [s.name, s.name]), ['Boshqa', 'Boshqa']] },
+        { k: 'originality', l: 'Originallik, %', type: 'number', num: true, max: 100, step: '0.1' },
+        { k: 'originality_required', l: 'Talab qilingan originallik, % (jurnal yoki OTM talabi)', type: 'number', num: true, max: 100, step: '0.1' },
+        { k: 'plagiarism_checked_at', l: 'Tekshirilgan sana', type: 'date' }
+      ]
+    },
+    plagiarism_services: {
+      label: 'Antiplagiat tizimlari', single: 'Antiplagiat tizimi', global: true, fields: [
+        { k: 'name', l: 'Nomi', type: 'text', req: true },
+        { k: 'url', l: 'Sayt manzili (https://...)', type: 'url', req: true },
+        { k: 'description', l: 'Qisqa tavsif', type: 'text' },
+        { k: 'pricing', l: 'Narxi (masalan: bepul / pullik / universitet orqali)', type: 'text' },
+        { k: 'official', l: 'Universitet natijasini qabul qiladimi?', type: 'select', options: [['false', 'Yo‘q / noma’lum'], ['true', 'Ha, rasmiy qabul qilinadi']], bool: true },
+        { k: 'sort_order', l: 'Tartib raqami', type: 'number', num: true }
       ]
     },
     documents: {
@@ -1314,7 +1346,7 @@
       { k: 'note', l: 'Izoh', type: 'text' }
     ]
   };
-  const LIST_KEY = { plan_items: 'plan', tasks: 'tasks', chapters: 'chapters', publications: 'pubs', documents: 'docs', scholarship_items: 'schol' };
+  const LIST_KEY = { plan_items: 'plan', tasks: 'tasks', chapters: 'chapters', publications: 'pubs', documents: 'docs', scholarship_items: 'schol', plagiarism_services: 'plag' };
 
   function renderMyDataView() {
     const isStudent = role() === 'doctoral_student';
@@ -1359,12 +1391,51 @@
     reload();
   };
 
+  // ---- Antiplagiat: free link-out to external systems + recorded result per article ----
+  function plagiarismState(p) {
+    if (p.originality === null || p.originality === undefined) return { text: '', low: false };
+    const val = Number(p.originality), req = p.originality_required !== null && p.originality_required !== undefined ? Number(p.originality_required) : null;
+    return {
+      text: `Antiplagiat: ${val}%${req !== null ? ` (talab ≥${req}%)` : ''}${p.plagiarism_service ? ` · ${p.plagiarism_service}` : ''}`,
+      low: req !== null && val < req
+    };
+  }
+
+  window.openPlagiarismServices = function () {
+    const list = L.plag.length ? L.plag.map(s => `
+      <div class="p-3 rounded-xl bg-[#0C1427] border ${s.official ? 'border-emerald-500/40' : 'border-[#1D3058]'} space-y-1.5">
+        <div class="flex items-center justify-between gap-2">
+          <div class="font-semibold text-white">${esc(s.name)}</div>
+          ${s.official ? '<span class="step-badge badge-emerald">Universitet qabul qiladi</span>' : ''}
+        </div>
+        ${s.description ? `<div class="text-xs text-slate-400">${esc(s.description)}</div>` : ''}
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs text-amber-300">${esc(s.pricing || '')}</span>
+          <a href="${esc(s.url)}" target="_blank" rel="noopener" class="btn-primary !py-1 !px-3 text-xs">Ochish ↗</a>
+        </div>
+      </div>`).join('') : '<p class="text-sm text-slate-400">Ro‘yxat hali bo‘sh — ilmiy bo‘lim qo‘shadi.</p>';
+    openLiveModal('Antiplagiat tekshiruvi', `
+      <ol class="text-sm text-slate-300 space-y-1 list-decimal list-inside">
+        <li>Tizimni tanlang va saytida maqolangizni tekshiring (pullik tizimlarda to‘lov tizimning o‘zida).</li>
+        <li>Natijani <b>Ma’lumotlar → Maqolalar</b>da maqola ✏️ orqali kiriting: tizim, originallik %, talab %.</li>
+      </ol>
+      <div class="space-y-2">${list}</div>
+      <p class="text-xs text-slate-500">Rasmiy hisoblanadigan natija universitet va jurnal talabiga bog‘liq. Ba’zi tizimlar tekshirilgan matnni bazasiga saqlaydi — chop etilmagan maqolani yuborishdan oldin bu sozlamani tekshiring.</p>`);
+  };
+
   function cellValue(tableKey, row) {
     switch (tableKey) {
       case 'plan_items': return { main: row.title, sub: `${row.year}-yil · ${row.due_date ? fmtDate(row.due_date) : 'muddat yo‘q'}`, badge: [PLAN_STATUS[row.status].label, PLAN_STATUS[row.status].badge] };
       case 'tasks': return { main: row.title, sub: row.due_date ? fmtDate(row.due_date) : 'muddat yo‘q', badge: row.done ? ['Bajarildi', 'badge-emerald'] : ['Ochiq', 'badge-slate'] };
       case 'chapters': return { main: row.title, sub: `${row.pages_done} / ${row.pages_total} bet`, badge: [row.status, 'badge-slate'] };
-      case 'publications': return { main: row.title, sub: [row.journal, row.indexing, row.year].filter(Boolean).join(' · ') || '—', badge: [PUB_STATUS[row.status], row.status === 'published' ? 'badge-emerald' : 'badge-blue'] };
+      case 'publications': {
+        const pl = plagiarismState(row);
+        return {
+          main: row.title,
+          sub: [row.journal, row.indexing, row.year, pl.text].filter(Boolean).join(' · ') || '—',
+          badge: pl.low ? ['Originallik past', 'badge-rose'] : [PUB_STATUS[row.status], row.status === 'published' ? 'badge-emerald' : 'badge-blue']
+        };
+      }
       case 'documents': return { main: row.title, sub: [row.due_date ? fmtDate(row.due_date) : '', row.note].filter(Boolean).join(' · ') || '—', badge: [DOC_STATUS[row.status], row.status === 'ready' ? 'badge-emerald' : row.status === 'in_progress' ? 'badge-amber' : 'badge-slate'] };
       case 'scholarship_items': return {
         main: row.title,
@@ -1378,8 +1449,9 @@
     const spec = TABLES[tableKey];
     let rows = L[LIST_KEY[tableKey]].filter(r => r.student_id === L.me.id);
     if (tableKey === 'plan_items') rows = sortPlan(rows);
-    const templ = ['plan_items', 'chapters', 'documents'].includes(tableKey) && !rows.length
+    let templ = ['plan_items', 'chapters', 'documents'].includes(tableKey) && !rows.length
       ? `<button onclick="applyTemplate('${tableKey}')" class="btn-ghost">Andozadan qo‘shish</button>` : '';
+    if (tableKey === 'publications') templ += `<button onclick="openPlagiarismServices()" class="btn-ghost">🔍 Antiplagiat</button>`;
     return `<div class="space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <h3 class="text-lg font-semibold text-white">${spec.label} <span class="text-slate-500 text-sm font-normal">· ${rows.length}</span></h3>
@@ -1407,7 +1479,7 @@
       const options = typeof f.options === 'function' ? f.options() : f.options;
       if (f.type === 'select') input = `<select id="ff_${f.k}" class="live-input">${options.map(([v, l]) => `<option value="${esc(v)}" ${String(val(f.k)) === String(v) ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
       else if (f.type === 'textarea') input = `<textarea id="ff_${f.k}" rows="3" class="live-input">${esc(val(f.k))}</textarea>`;
-      else input = `<input id="ff_${f.k}" type="${f.type}" ${f.req ? 'required' : ''} ${f.type === 'number' ? 'min="0"' : ''} value="${esc(val(f.k))}" class="live-input">`;
+      else input = `<input id="ff_${f.k}" type="${f.type}" ${f.req ? 'required' : ''} ${f.type === 'number' ? `min="0" ${f.max ? `max="${f.max}"` : ''} step="${f.step || 1}"` : ''} value="${esc(val(f.k))}" class="live-input">`;
       return `<div><label class="live-label">${f.l}${f.req ? ' *' : ''}</label>${input}</div>`;
     }).join('');
     openLiveModal(`${spec.single}${id ? ' — tahrirlash' : ' qo‘shish'}`, `
@@ -1426,7 +1498,7 @@
     ['pages_done', 'pages_total', 'sort_order'].forEach(k => { if (k in rec && rec[k] === null) rec[k] = 0; });
     const res = id
       ? await sb.from(tableKey).update(rec).eq('id', id)
-      : await sb.from(tableKey).insert({ ...rec, student_id: L.me.id });
+      : await sb.from(tableKey).insert(spec.global ? rec : { ...rec, student_id: L.me.id });
     if (res.error) return fail(res.error);
     closeLiveModal(); toast('Saqlandi'); reload();
   };
