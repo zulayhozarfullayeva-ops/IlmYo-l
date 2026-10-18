@@ -1,4 +1,4 @@
-// IlmYo'l Telegram bot (Supabase Edge Function).
+// Ilmyo'li Telegram bot (Supabase Edge Function).
 //
 //   POST (from Telegram)   webhook: /start <code>, /holat, approve / return buttons, return reason
 //   ?process=1             send queued rows from public.notifications
@@ -36,7 +36,7 @@ const send = (chatId: number, text: string, extra: Record<string, unknown> = {})
   tg("sendMessage", { chat_id: chatId, text, parse_mode: "HTML", disable_web_page_preview: true, ...extra });
 
 const HELP =
-  "Bu IlmYo‘l boti. Akkauntingizni ulash uchun saytda <b>Sozlamalar → Telegram’ni ulash</b> tugmasini bosing.\n\n" +
+  "Bu Ilmyo‘li boti. Akkauntingizni ulash uchun saytda <b>Sozlamalar → Telegram’ni ulash</b> tugmasini bosing.\n\n" +
   "Buyruqlar:\n/holat — mening holatim";
 
 async function processQueue(): Promise<number> {

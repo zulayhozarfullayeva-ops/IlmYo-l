@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IlmYo‘l — Doktorantlar uchun AI Ilmiy Monitoring va Boshqaruv Platformasi</title>
+  <title>Ilmyo‘li — Doktorantlar uchun AI Ilmiy Monitoring va Boshqaruv Platformasi</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -49,7 +49,7 @@
         <div class="w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
           <i data-lucide="graduation-cap" class="w-7 h-7 text-white"></i>
         </div>
-        <h1 class="text-2xl font-bold text-white">IlmYo‘l</h1>
+        <h1 class="text-2xl font-bold text-white">Ilmyo‘li</h1>
         <p class="text-sm text-slate-400">Doktorantlar, ilmiy rahbarlar va ilmiy bo‘lim uchun monitoring</p>
       </div>
 
@@ -92,7 +92,7 @@
     <!-- ================================================== -->
     <aside id="mainSidebar" class="w-[88px] bg-[#0C1427] border-r border-[#1D3058]/60 flex flex-col items-center py-4 z-30 shrink-0 select-none">
       <!-- Logo -->
-      <button onclick="switchView('dashboard')" class="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30 mb-6" title="IlmYo‘l">
+      <button onclick="switchView('dashboard')" class="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30 mb-6" title="Ilmyo‘li">
         <i data-lucide="graduation-cap" class="w-5 h-5 text-white"></i>
       </button>
 
@@ -129,6 +129,10 @@
         <button onclick="switchView('defense')" id="nav-defense" data-view="defense" class="rail-item">
           <span class="rail-icon"><i data-lucide="trophy" class="w-5 h-5"></i></span>
           <span>Himoya</span>
+        </button>
+        <button onclick="switchView('scholarship')" id="nav-scholarship" data-view="scholarship" class="rail-item hidden">
+          <span class="rail-icon"><i data-lucide="award" class="w-5 h-5"></i></span>
+          <span>Stipendiya</span>
         </button>
         <button onclick="switchView('mydata')" id="nav-mydata" data-view="mydata" class="rail-item hidden">
           <span class="rail-icon"><i data-lucide="square-pen" class="w-5 h-5"></i></span>
@@ -1217,6 +1221,7 @@
 
         <!-- VIEW: MY DATA (live mode only, rendered by live.js) -->
         <section id="view-mydata" class="hidden space-y-6"></section>
+        <section id="view-scholarship" class="hidden space-y-6"></section>
 
       </main>
 
@@ -1551,7 +1556,7 @@
       <div class="flex items-center justify-between border-b border-[#1D3058] pb-3">
         <div>
           <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-            IlmYo‘l AI Yordamchi
+            Ilmyo‘li AI Yordamchi
           </span>
           <h3 class="text-base font-bold text-white mt-1">Sun’iy Intellekt Asosidagi Ilmiy Yordamchi</h3>
         </div>
@@ -1580,7 +1585,7 @@
 
       <div id="aiAssistantResultBox">
         <div class="p-4 rounded-xl bg-[#0C1427] border border-[#1D3058] text-xs text-slate-400 text-center">
-          Yuqoridagi vositalardan birini tanlang va IlmYo‘l AI tahlilini ishga tushiring.
+          Yuqoridagi vositalardan birini tanlang va Ilmyo‘li AI tahlilini ishga tushiring.
         </div>
       </div>
 
@@ -1663,9 +1668,9 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=5.0"></script>
   <script src="data.js?v=5.0"></script>
-  <script src="app.js?v=5.1"></script>
+  <script src="app.js?v=6.0"></script>
   <script src="corpus.js?v=5.2"></script>
-  <script src="live.js?v=5.6"></script>
+  <script src="live.js?v=6.0"></script>
   <script>
     // Initialize Lucide icons on page load
     lucide.createIcons();

@@ -23,7 +23,7 @@
     user: null,
     me: null,
     profiles: [],
-    plan: [], tasks: [], chapters: [], pubs: [], docs: [], evidence: [], comments: [],
+    plan: [], tasks: [], chapters: [], pubs: [], docs: [], evidence: [], comments: [], schol: [],
     myDataTab: 'profile',
     config: {},
     deptFilterYear: 'ALL',
@@ -141,7 +141,7 @@
   }
 
   async function loadAll() {
-    const [profiles, plan, tasks, chapters, pubs, docs, evidence, comments, config] = await Promise.all([
+    const [profiles, plan, tasks, chapters, pubs, docs, evidence, comments, config, schol] = await Promise.all([
       q(sb.from('profiles').select('*').order('full_name')),
       q(sb.from('plan_items').select('*')),
       q(sb.from('tasks').select('*').order('created_at', { ascending: false })),
@@ -150,9 +150,10 @@
       q(sb.from('documents').select('*').order('created_at')),
       q(sb.from('evidence_files').select('*').order('created_at', { ascending: false })),
       q(sb.from('comments').select('*').order('created_at', { ascending: false }).limit(500)),
-      q(sb.from('app_config').select('*'))
+      q(sb.from('app_config').select('*')),
+      q(sb.from('scholarship_items').select('*').order('created_at'))
     ]);
-    Object.assign(L, { profiles, plan, tasks, chapters, pubs, docs, evidence, comments });
+    Object.assign(L, { profiles, plan, tasks, chapters, pubs, docs, evidence, comments, schol });
     L.config = Object.fromEntries(config.map(c => [c.key, c.value]));
     L.me = byId(profiles, L.user.id) || null;
   }
@@ -326,7 +327,7 @@
   function allowedViews() {
     if (role() === 'supervisor') return ['supervisor', 'topic_novelty', 'mydata'];
     if (role() === 'department') return ['department', 'supervisor', 'topic_novelty', 'mydata'];
-    return ['dashboard', 'roadmap', 'topic_novelty', 'dissertation', 'calendar', 'defense', 'mydata'];
+    return ['dashboard', 'roadmap', 'topic_novelty', 'dissertation', 'calendar', 'defense', 'scholarship', 'mydata'];
   }
 
   function applyRoleUi() {
@@ -387,6 +388,7 @@
     dissertation: renderChaptersView,
     calendar: renderCalendarView,
     defense: renderDefenseView,
+    scholarship: renderScholarshipView,
     supervisor: renderSupervisorView,
     department: renderDepartmentView,
     mydata: renderMyDataView
@@ -939,6 +941,153 @@
   }
 
   // =====================================================================
+  // President's scholarship readiness (CoM resolution No. 226, Appendix 1)
+  // =====================================================================
+  const SCHOL_KIND = {
+    exam: 'Malakaviy imtihon',
+    language_cert: 'Chet tili sertifikati',
+    test_prep: 'Test tayyorgarligi (til, AT, tarix)',
+    expert_opinion: 'Yetakchi mutaxassis fikri',
+    annotation: 'Ilmiy ish annotatsiyasi',
+    council_discussion: 'Ilmiy kengashda muhokama',
+    author_cert: 'Mualliflik guvohnomasi',
+    implementation_act: 'Joriy etish dalolatnomasi',
+    other: 'Boshqa'
+  };
+  const LEAD_INDEXING = ['OAK ro‘yxatidagi jurnal', 'Scopus', 'Web of Science'];
+  const LEX_URL = 'https://lex.uz/acts/-1399382';
+
+  // "a'lo" written in any apostrophe style, or 5
+  const isExcellent = g => /^a\s*['‘’`ʼ]?\s*lo$|^5$|^excellent$|^отлично$/i.test(String(g || '').trim());
+
+  function scholarshipApplyYear(start) {
+    if (!start) return null;
+    const d = parseDate(start);
+    d.setFullYear(d.getFullYear() + 2); // final (3rd) year of tayanch doktorantura
+    return d.getMonth() + 1 <= 10 ? d.getFullYear() : d.getFullYear() + 1;
+  }
+
+  function scholarship(sid) {
+    const s = stats(sid);
+    const items = L.schol.filter(x => x.student_id === sid);
+    const of = k => items.filter(x => x.kind === k);
+    const applyYear = scholarshipApplyYear(s.profile.start_date);
+    const testEnd = applyYear ? `${applyYear}-12-01` : null;
+    const leadPubs = s.pubs.filter(x => x.status === 'published' && LEAD_INDEXING.includes(x.indexing)).length;
+    const confPubs = s.pubs.filter(x => x.status === 'published' && x.indexing === 'Xalqaro konferensiya').length;
+    const exams = of('exam').filter(e => e.done);
+    const badExams = exams.filter(e => !isExcellent(e.grade));
+    const certs = of('language_cert').filter(c => c.done);
+    const validCert = certs.find(c => !c.expires_at || !testEnd || c.expires_at >= testEnd);
+    const doneOf = k => of(k).some(x => x.done);
+
+    const rows = [
+      { req: true, title: 'Yetakchi ilmiy nashrlarda kamida 2 ta maqola', value: `${leadPubs} / 2`, ok: leadPubs >= 2,
+        hint: '“Maqolalar”da turini OAK / Scopus / Web of Science va holatini “Chop etilgan” qilib belgilang.', action: "goMyData('publications')" },
+      { req: true, title: 'Xalqaro konferensiya to‘plamida maqola', value: String(confPubs), ok: confPubs >= 1,
+        hint: '“Maqolalar”da turini “Xalqaro konferensiya” qilib belgilang.', action: "goMyData('publications')" },
+      { req: true, title: 'Dissertatsiya kamida 70% tayyor', value: s.pagesTotal ? `${s.dissPct}%` : 'kiritilmagan', ok: s.pagesTotal > 0 && s.dissPct >= 70,
+        hint: '“Boblar”dagi yozilgan / rejadagi betlar asosida. Muassasa xulosasi ham kerak.', action: "goMyData('chapters')" },
+      { req: true, title: 'Malakaviy imtihonlar faqat “a’lo”', kind: 'exam',
+        value: exams.length ? `${exams.length - badExams.length} / ${exams.length} a’lo` : 'kiritilmagan', ok: exams.length > 0 && badExams.length === 0,
+        warn: badExams.length ? '“A’lo” bo‘lmagan baho bor — bu talab bajarilmaydi.' : '' },
+      { req: true, title: 'Chet tili (MDH davlatlari tili bo‘lmagan)', kind: 'language_cert',
+        value: validCert ? (validCert.grade || 'bor') : certs.length ? 'muddati yetmaydi' : 'yo‘q', ok: !!validCert,
+        warn: certs.length && !validCert && applyYear ? `Sertifikat ${applyYear}-yil noyabr testigacha amal qilmaydi.` : '',
+        hint: 'Talab qilinadigan darajani vazirlik belgilaydi — ilmiy bo‘limdan aniqlang.' },
+      { req: true, title: 'Davlat test markazidagi test: chet tili, AT, O‘zbekiston tarixi', kind: 'test_prep', value: doneOf('test_prep') ? 'tayyor' : '', ok: doneOf('test_prep'),
+        hint: 'Test 3-kursning 1–30 noyabrida o‘tkaziladi.' },
+      { req: true, final: true, title: 'Yetakchi mutaxassislar fikri', kind: 'expert_opinion', ok: doneOf('expert_opinion') },
+      { req: true, final: true, title: 'Ilmiy ish annotatsiyasi (2 nusxada, rasmlar bilan)', kind: 'annotation', ok: doneOf('annotation') },
+      { req: true, final: true, title: 'Ilmiy kengashda ochiq muhokama va tavsiya', kind: 'council_discussion', ok: doneOf('council_discussion') },
+      { req: false, title: 'Mualliflik guvohnomalari (masalan, EHM dasturi uchun)', kind: 'author_cert', value: String(of('author_cert').filter(x => x.done).length), ok: doneOf('author_cert'),
+        hint: 'Hujjatlar ro‘yxatida bor bo‘lsa ilova qilinadi.' },
+      { req: false, title: 'Ilmiy natijalardan foydalanish (joriy etish) dalolatnomalari', kind: 'implementation_act', value: String(of('implementation_act').filter(x => x.done).length), ok: doneOf('implementation_act') }
+    ];
+    const req = rows.filter(r => r.req);
+    return { s, items, applyYear, rows, readiness: pct(req.filter(r => r.ok).length, req.length) };
+  }
+
+  function renderScholarshipView() {
+    const h = header('Prezident stipendiyasi', 'Tayanch doktorantura · Vazirlar Mahkamasining 226-son qarori, 1-ilova');
+    if (!L.me.start_date) {
+      return h + emptyCard('Taymer va reja uchun profilga doktoranturaga kirgan sanani kiriting.', `<button onclick="goMyData('profile')" class="btn-primary">Profilni to‘ldirish</button>`);
+    }
+    const sc = scholarship(L.me.id);
+    const y = sc.applyYear;
+    const open = `${y}-10-01`, close = `${y}-10-31`;
+    const daysToOpen = daysUntil(open), daysToClose = daysUntil(close);
+    let phase;
+    if (daysToOpen > 0) phase = `<div class="text-4xl font-extrabold text-white font-mono">${daysToOpen}</div><div class="text-sm text-slate-300">kun qoldi — hujjat qabuli ${fmtDate(open)} da boshlanadi</div>`;
+    else if (daysToClose >= 0) phase = `<div class="text-2xl font-extrabold text-amber-300">Hujjat qabuli davom etmoqda</div><div class="text-sm text-slate-300">Muddat: ${fmtDate(close)} (${daysLabel(close)})</div>`;
+    else phase = `<div class="text-xl font-bold text-slate-300">${y}-yilgi qabul yakunlangan</div><div class="text-sm text-slate-400">Test: 1–30 noyabr, qaror: dekabr</div>`;
+
+    const curYear = studyYear(L.me.start_date) || 1;
+    const rowHtml = r => {
+      const icon = r.ok ? '<span class="step-icon bg-emerald-500 text-white"><i data-lucide="check" class="w-5 h-5"></i></span>'
+        : r.warn ? '<span class="step-icon bg-rose-500/20 text-rose-400"><i data-lucide="alert-triangle" class="w-5 h-5"></i></span>'
+        : '<span class="step-icon bg-slate-700/60 text-slate-300"><i data-lucide="circle" class="w-5 h-5"></i></span>';
+      const btn = r.kind ? `<button onclick="openForm('scholarship_items', null, '${r.kind}')" class="btn-ghost !py-1 !px-3 text-xs shrink-0">+ Qo‘shish</button>`
+        : r.action ? `<button onclick="${r.action}" class="btn-ghost !py-1 !px-3 text-xs shrink-0">Ochish</button>` : '';
+      return `<div class="step-row">${icon}
+        <div class="flex-1 min-w-0">
+          <div class="step-title">${r.title}${r.final ? ' <span class="text-[10px] font-medium text-slate-500 uppercase">· 3-kurs</span>' : ''}</div>
+          ${r.warn ? `<div class="text-xs text-rose-300 mt-0.5">${r.warn}</div>` : r.hint ? `<div class="text-xs text-slate-400 mt-0.5">${r.hint}</div>` : ''}
+        </div>
+        ${r.value ? `<span class="text-sm font-mono text-slate-300 shrink-0">${esc(r.value)}</span>` : ''}${btn}</div>`;
+    };
+
+    const timeline = [
+      [1, ['Malakaviy imtihonlarni faqat “a’lo”ga topshirish', '1-maqola yetakchi nashrda', 'Chet tili tayyorgarligi (kerakli darajani aniqlash)', 'Birinchi xalqaro konferensiya']],
+      [2, ['2-maqola (iloji bo‘lsa Scopus / Web of Science)', 'Xalqaro konferensiya to‘plamida maqola', 'Til sertifikati — 3-kurs noyabrigacha amal qiladigan', 'Dissertatsiya 40–60%', 'Mualliflik guvohnomasi, joriy etish dalolatnomasi']],
+      [3, ['Dissertatsiya ≥70% va muassasa xulosasi', 'Annotatsiya va mutaxassislar fikri', 'Ilmiy kengashda muhokama', `Hujjat topshirish: 1–31 oktabr ${y}`, `Test: 1–30 noyabr ${y}`]]
+    ];
+
+    const myItems = sc.items.slice().sort((a, b) => Object.keys(SCHOL_KIND).indexOf(a.kind) - Object.keys(SCHOL_KIND).indexOf(b.kind));
+    return h + `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="rounded-2xl p-6 bg-gradient-to-br from-[#16264A] to-[#101B35] border border-[#1D3058] flex flex-col justify-center gap-1">${phase}</div>
+        <div class="rounded-2xl p-6 bg-[#121E38] border border-[#1D3058] flex items-center gap-5">
+          <div class="text-4xl font-extrabold font-mono ${sc.readiness >= 80 ? 'text-emerald-400' : 'text-white'}">${sc.readiness}%</div>
+          <div><div class="text-sm text-slate-300">Majburiy talablar bajarilishi</div>
+            <div class="text-xs text-slate-500 mt-1">Hozir ${curYear}-kurs · ariza ${y}-yil oktabrida</div></div>
+        </div>
+      </div>
+
+      <div class="space-y-2.5">
+        <h3 class="text-lg font-semibold text-white">Majburiy talablar</h3>
+        ${sc.rows.filter(r => r.req).map(rowHtml).join('')}
+      </div>
+      <div class="space-y-2.5">
+        <h3 class="text-lg font-semibold text-white">Qo‘shimcha (hujjatlar ro‘yxatida)</h3>
+        ${sc.rows.filter(r => !r.req).map(rowHtml).join('')}
+      </div>
+
+      <div class="space-y-3">
+        <h3 class="text-lg font-semibold text-white">Tayyorgarlik rejasi</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          ${timeline.map(([n, list]) => `<div class="rounded-2xl p-4 border ${n === curYear ? 'bg-[#16264A] border-blue-500/50' : 'bg-[#121E38] border-[#1D3058]'}">
+            <div class="flex items-center justify-between mb-2"><span class="font-semibold text-white">${n}-kurs</span>${n === curYear ? '<span class="step-badge badge-blue">Hozir</span>' : ''}</div>
+            <ul class="space-y-1.5 text-sm text-slate-300">${list.map(t => `<li class="flex gap-2"><span class="text-slate-500">•</span><span>${esc(t)}</span></li>`).join('')}</ul></div>`).join('')}
+        </div>
+      </div>
+
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between"><h3 class="text-lg font-semibold text-white">Mening yozuvlarim <span class="text-slate-500 text-sm font-normal">· ${myItems.length}</span></h3>
+          <button onclick="openForm('scholarship_items')" class="btn-primary">+ Qo‘shish</button></div>
+        ${myItems.length ? myItems.map(r => {
+          const v = cellValue('scholarship_items', r);
+          return `<div class="step-row"><div class="flex-1 min-w-0"><div class="step-title truncate">${esc(v.main)}</div><div class="text-xs text-slate-400 truncate">${esc(v.sub)}</div></div>
+            <span class="step-badge ${v.badge[1]} shrink-0 hidden sm:inline">${v.badge[0]}</span>
+            <button onclick="openForm('scholarship_items','${r.id}')" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800" title="Tahrirlash"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+            <button onclick="deleteRow('scholarship_items','${r.id}')" class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800" title="O‘chirish"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
+        }).join('') : '<p class="text-sm text-slate-500">Imtihonlar, til sertifikati, guvohnomalar va boshqalarni shu yerga kiriting.</p>'}
+      </div>
+
+      <p class="text-xs text-slate-500">Talablar <a href="${LEX_URL}" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300">VM 226-son qarori</a> (2025-yil 30-dekabrdagi tahriri) asosida. Qoidalar o‘zgarishi mumkin — har yili rasmiy matnni tekshiring. Saralash respublika miqyosida (10 ta stipendiya), shuning uchun talablarni bajarish g‘alabani kafolatlamaydi.</p>`;
+  }
+
+  // =====================================================================
   // Supervisor view
   // =====================================================================
   function renderSupervisorView() {
@@ -991,6 +1140,7 @@
         <span class="step-badge ${RISK[s.risk].badge}">${RISK[s.risk].label}</span>
         <span class="text-slate-300">Reja ${s.progress}% · Dissertatsiya ${s.pagesTotal ? s.dissPct + '%' : '—'} · Maqolalar ${s.pubsDone}/${s.pubs.length} · Hujjatlar ${s.docsReady}/${s.docs.length}</span>
       </div>
+      ${(() => { const sc = scholarship(id); return sc.applyYear ? `<div class="text-xs text-slate-300 p-2.5 rounded-lg bg-[#0C1427] border border-[#1D3058]">🏅 Prezident stipendiyasi (${sc.applyYear}): majburiy talablar <b>${sc.readiness}%</b> · ${sc.rows.filter(r => r.req && !r.ok).map(r => esc(r.title)).slice(0, 3).join('; ') || 'hammasi bajarilgan'}</div>` : ''; })()}
       <div class="space-y-2">${s.plan.map(pl => planRow(pl, s.current && pl.id === s.current.id)).join('') || '<p class="text-xs text-slate-500">Reja kiritilmagan.</p>'}</div>
       <button onclick="quickAddTask('${id}')" class="btn-primary">+ Vazifa berish</button>`);
   };
@@ -1031,7 +1181,7 @@
         <div class="overflow-x-auto"><table class="w-full min-w-[700px] text-xs text-left">
           <thead class="text-slate-400 uppercase border-b border-[#1D3058]"><tr>
             <th class="py-2 px-2">F.I.Sh.</th><th class="py-2 px-2">Yil</th><th class="py-2 px-2">Ixtisoslik</th><th class="py-2 px-2">Rahbar</th>
-            <th class="py-2 px-2">Reja</th><th class="py-2 px-2">Muddati o‘tgan</th><th class="py-2 px-2">Holat</th></tr></thead>
+            <th class="py-2 px-2">Reja</th><th class="py-2 px-2">Muddati o‘tgan</th><th class="py-2 px-2">Stipendiya</th><th class="py-2 px-2">Holat</th></tr></thead>
           <tbody class="divide-y divide-[#1D3058]/60">
             ${rows.map(({ p, s }) => `<tr class="hover:bg-slate-800/30 cursor-pointer" onclick="openStudent('${p.id}')">
               <td class="py-2.5 px-2 font-semibold text-slate-200">${esc(p.full_name || p.email)}</td>
@@ -1040,8 +1190,9 @@
               <td class="py-2.5 px-2 text-slate-300">${esc(p.supervisor_id ? profileName(p.supervisor_id) : '—')}</td>
               <td class="py-2.5 px-2 font-mono text-blue-400">${s.progress}%</td>
               <td class="py-2.5 px-2 font-mono ${s.overdue.length ? 'text-rose-400' : 'text-slate-500'}">${s.overdue.length}</td>
+              <td class="py-2.5 px-2 font-mono text-amber-300">${(() => { const sc = scholarship(p.id); return sc.applyYear ? `${sc.readiness}% · ${sc.applyYear}` : '—'; })()}</td>
               <td class="py-2.5 px-2"><span class="step-badge ${RISK[s.risk].badge}">${RISK[s.risk].label}</span></td></tr>`).join('') ||
-              '<tr><td colspan="7" class="py-6 text-center text-slate-500">Doktorant topilmadi</td></tr>'}
+              '<tr><td colspan="8" class="py-6 text-center text-slate-500">Doktorant topilmadi</td></tr>'}
           </tbody></table></div>
       </div>
       ${renderUsersAdmin()}`;
@@ -1152,7 +1303,18 @@
       ]
     }
   };
-  const LIST_KEY = { plan_items: 'plan', tasks: 'tasks', chapters: 'chapters', publications: 'pubs', documents: 'docs' };
+  TABLES.scholarship_items = {
+    label: 'Stipendiya hujjatlari', single: 'Yozuv', fields: [
+      { k: 'kind', l: 'Turi', type: 'select', options: () => Object.entries(SCHOL_KIND), req: true },
+      { k: 'title', l: 'Nomi (masalan: Mutaxassislik fanidan malakaviy imtihon, IELTS)', type: 'text', req: true },
+      { k: 'grade', l: 'Baho yoki daraja (a’lo, yaxshi / B2, C1 / IELTS 7.0)', type: 'text' },
+      { k: 'done', l: 'Holat', type: 'select', options: [['true', 'Bajarildi / bor'], ['false', 'Rejada']], bool: true },
+      { k: 'event_date', l: 'Sana', type: 'date' },
+      { k: 'expires_at', l: 'Amal qilish muddati (sertifikat uchun)', type: 'date' },
+      { k: 'note', l: 'Izoh', type: 'text' }
+    ]
+  };
+  const LIST_KEY = { plan_items: 'plan', tasks: 'tasks', chapters: 'chapters', publications: 'pubs', documents: 'docs', scholarship_items: 'schol' };
 
   function renderMyDataView() {
     const isStudent = role() === 'doctoral_student';
@@ -1178,7 +1340,7 @@
       ${f('specialty_name', 'Ixtisoslik nomi', 'text')}
       ${f('university', 'OTM / ilmiy muassasa', 'text')}
       ${f('department', 'Kafedra', 'text')}
-      ${isStudent ? f('start_date', 'Doktoranturaga kirgan sana', 'date') : ''}
+      ${isStudent ? f('start_date', 'Doktoranturaga kirgan sana (reja muddatlari va stipendiya taymeri shundan hisoblanadi)', 'date') : ''}
       ${f('phone', 'Telefon', 'tel')}
       ${isStudent ? `<div><label class="live-label">Ilmiy rahbar</label><input value="${esc(sup)}" disabled class="live-input opacity-60"></div>` : ''}
       <div class="md:col-span-2 flex justify-end"><button class="btn-primary">Saqlash</button></div>
@@ -1204,6 +1366,11 @@
       case 'chapters': return { main: row.title, sub: `${row.pages_done} / ${row.pages_total} bet`, badge: [row.status, 'badge-slate'] };
       case 'publications': return { main: row.title, sub: [row.journal, row.indexing, row.year].filter(Boolean).join(' · ') || '—', badge: [PUB_STATUS[row.status], row.status === 'published' ? 'badge-emerald' : 'badge-blue'] };
       case 'documents': return { main: row.title, sub: [row.due_date ? fmtDate(row.due_date) : '', row.note].filter(Boolean).join(' · ') || '—', badge: [DOC_STATUS[row.status], row.status === 'ready' ? 'badge-emerald' : row.status === 'in_progress' ? 'badge-amber' : 'badge-slate'] };
+      case 'scholarship_items': return {
+        main: row.title,
+        sub: [SCHOL_KIND[row.kind], row.grade, row.event_date ? fmtDate(row.event_date) : '', row.expires_at ? `amal qiladi: ${fmtDate(row.expires_at)} gacha` : ''].filter(Boolean).join(' · '),
+        badge: row.done ? ['Bajarildi', 'badge-emerald'] : ['Rejada', 'badge-slate']
+      };
     }
   }
 
@@ -1230,14 +1397,15 @@
     </div>`;
   }
 
-  window.openForm = function (tableKey, id) {
+  window.openForm = function (tableKey, id, presetKind) {
     const spec = TABLES[tableKey];
     const row = id ? byId(L[LIST_KEY[tableKey]], id) : {};
-    const defaults = { year: 1, status: tableKey === 'publications' ? 'planned' : tableKey === 'documents' ? 'missing' : 'Boshlanmagan', pages_done: 0, pages_total: 0, sort_order: 0 };
+    const defaults = { year: 1, status: tableKey === 'publications' ? 'planned' : tableKey === 'documents' ? 'missing' : 'Boshlanmagan', pages_done: 0, pages_total: 0, sort_order: 0, done: true, kind: presetKind || 'exam' };
     const val = k => (row[k] !== undefined && row[k] !== null ? row[k] : (id ? '' : (defaults[k] !== undefined ? defaults[k] : '')));
     const fields = spec.fields.map(f => {
       let input;
-      if (f.type === 'select') input = `<select id="ff_${f.k}" class="live-input">${f.options.map(([v, l]) => `<option value="${esc(v)}" ${String(val(f.k)) === String(v) ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
+      const options = typeof f.options === 'function' ? f.options() : f.options;
+      if (f.type === 'select') input = `<select id="ff_${f.k}" class="live-input">${options.map(([v, l]) => `<option value="${esc(v)}" ${String(val(f.k)) === String(v) ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
       else if (f.type === 'textarea') input = `<textarea id="ff_${f.k}" rows="3" class="live-input">${esc(val(f.k))}</textarea>`;
       else input = `<input id="ff_${f.k}" type="${f.type}" ${f.req ? 'required' : ''} ${f.type === 'number' ? 'min="0"' : ''} value="${esc(val(f.k))}" class="live-input">`;
       return `<div><label class="live-label">${f.l}${f.req ? ' *' : ''}</label>${input}</div>`;
@@ -1253,7 +1421,7 @@
     const rec = {};
     spec.fields.forEach(f => {
       const raw = document.getElementById(`ff_${f.k}`).value.trim();
-      rec[f.k] = raw === '' ? null : (f.num ? Number(raw) : raw);
+      rec[f.k] = f.bool ? raw === 'true' : raw === '' ? null : (f.num ? Number(raw) : raw);
     });
     ['pages_done', 'pages_total', 'sort_order'].forEach(k => { if (k in rec && rec[k] === null) rec[k] = 0; });
     const res = id
@@ -1300,6 +1468,11 @@
     toast('Andoza qo‘shildi — o‘zingizga moslab tahrirlang');
     reload();
   };
+
+  // Local-only hook for testing views with mock data (never exposed on the deployed site)
+  if (['localhost', '127.0.0.1'].includes(location.hostname)) {
+    window.__liveTest = { L, scholarship, renderScholarshipView, renderDashboard, renderDepartmentView, renderSupervisorView, renderMyDataView };
+  }
 
   // =====================================================================
   // Start

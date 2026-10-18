@@ -1,6 +1,6 @@
-﻿# IlmYo‘l — Doktorantlar uchun AI Ilmiy Monitoring va Boshqaruv Platformasi
+# Ilmyo‘li — Doktorantlar uchun AI Ilmiy Monitoring va Boshqaruv Platformasi
 
-IlmYo‘l — tayanch doktorantlar, ilmiy rahbarlar va ilmiy bo‘limlar uchun mo‘ljallangan kompleks monitoring, 3 yillik reja boshqaruvi, dissertatsiya tuzilmasi tahlili hamda sun’iy intellektga asoslangan **Topic Novelty Engine (Mavzu Yangiligi Tahlili)** platformasi.
+Ilmyo‘li — tayanch doktorantlar, ilmiy rahbarlar va ilmiy bo‘limlar uchun mo‘ljallangan kompleks monitoring, 3 yillik reja boshqaruvi, dissertatsiya tuzilmasi tahlili hamda sun’iy intellektga asoslangan **Topic Novelty Engine (Mavzu Yangiligi Tahlili)** platformasi.
 
 ---
 
