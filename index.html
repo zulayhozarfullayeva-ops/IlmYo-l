@@ -118,6 +118,10 @@
           <span class="rail-icon"><i data-lucide="sparkles" class="w-5 h-5"></i></span>
           <span>Mavzu</span>
         </button>
+        <button onclick="switchView('journals')" id="nav-journals" data-view="journals" class="rail-item hidden">
+          <span class="rail-icon"><i data-lucide="library" class="w-5 h-5"></i></span>
+          <span>Jurnallar</span>
+        </button>
         <button onclick="switchView('dissertation')" id="nav-dissertation" data-view="dissertation" class="rail-item">
           <span class="rail-icon"><i data-lucide="book-open" class="w-5 h-5"></i></span>
           <span>Ilmiy ish</span>
@@ -1222,6 +1226,7 @@
         <!-- VIEW: MY DATA (live mode only, rendered by live.js) -->
         <section id="view-mydata" class="hidden space-y-6"></section>
         <section id="view-scholarship" class="hidden space-y-6"></section>
+        <section id="view-journals" class="hidden space-y-6"></section>
 
       </main>
 
@@ -1668,9 +1673,9 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=5.0"></script>
   <script src="data.js?v=5.0"></script>
-  <script src="app.js?v=6.0"></script>
+  <script src="app.js?v=6.2"></script>
   <script src="corpus.js?v=5.2"></script>
-  <script src="live.js?v=6.1"></script>
+  <script src="live.js?v=6.2"></script>
   <script>
     // Initialize Lucide icons on page load
     lucide.createIcons();

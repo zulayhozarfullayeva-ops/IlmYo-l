@@ -326,9 +326,9 @@
     return role() === 'supervisor' ? 'supervisor' : role() === 'department' ? 'department' : 'dashboard';
   }
   function allowedViews() {
-    if (role() === 'supervisor') return ['supervisor', 'topic_novelty', 'mydata'];
-    if (role() === 'department') return ['department', 'supervisor', 'topic_novelty', 'mydata'];
-    return ['dashboard', 'roadmap', 'topic_novelty', 'dissertation', 'calendar', 'defense', 'scholarship', 'mydata'];
+    if (role() === 'supervisor') return ['supervisor', 'journals', 'topic_novelty', 'mydata'];
+    if (role() === 'department') return ['department', 'supervisor', 'journals', 'topic_novelty', 'mydata'];
+    return ['dashboard', 'roadmap', 'topic_novelty', 'journals', 'dissertation', 'calendar', 'defense', 'scholarship', 'mydata'];
   }
 
   function applyRoleUi() {
@@ -390,6 +390,7 @@
     calendar: renderCalendarView,
     defense: renderDefenseView,
     scholarship: renderScholarshipView,
+    journals: renderJournalsView,
     supervisor: renderSupervisorView,
     department: renderDepartmentView,
     mydata: renderMyDataView
@@ -1089,6 +1090,135 @@
   }
 
   // =====================================================================
+  // OAK journals finder (data/oak_journals.json, parsed from the OAK list)
+  // =====================================================================
+  const J = { doc: null, loading: false, q: '', field: null, type: 'ALL', showRemoved: false, limit: 40 };
+  const ACTIVE_STATUSES = ['Aktiv', 'Qo‘shildi', 'O‘zgartirildi'];
+
+  function loadJournals() {
+    if (J.doc || J.loading) return;
+    J.loading = true;
+    fetch('data/oak_journals.json?v=2026-08-03')
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then(doc => { J.doc = doc; J.loading = false; if (AppState.currentView === 'journals') rerender(); })
+      .catch(err => { J.loading = false; fail(err); });
+  }
+
+  // Cyrillic → Latin (app.js cyrillicToLatin), drop apostrophes, keep an 8-letter stem so
+  // "jurnalistika", "журналистикаси" and "jurnalistikasi" match (while "jurnali" stays different).
+  const stems = s => cyrillicToLatin(String(s || '').toLowerCase())
+    .replace(/[‘’'`ʼ]/g, '')
+    .split(/[^a-z0-9]+/)
+    .filter(w => w.length >= 4)
+    .map(w => w.slice(0, 8));
+  const JOURNAL_STOP = new Set(stems(
+    'ilmiy jurnal jurnali journal xabarlari axborotnomasi axborot international science scientific university universiteti ' +
+    'davlat fanlar muammolari zamonaviy vestnik научный вестник известия исследования research bulletin tadqiqotlar ' +
+    'хабарлари ахборотномаси dolzarb ta’lim fan uchun bilan'));
+  const normWords = s => stems(s).filter(w => !JOURNAL_STOP.has(w));
+
+  function myFieldCode() {
+    const code = (L.me && L.me.specialty_code) || '';
+    const m = code.match(/^(\d{2})\./);
+    return m ? `${m[1]}.00.00` : null;
+  }
+
+  function renderJournalsView() {
+    loadJournals();
+    const h = header('Jurnallar', 'OAK tavsiya etgan ilmiy nashrlar — yo‘nalishingiz bo‘yicha');
+    if (!J.doc) return h + emptyCard('Ro‘yxat yuklanmoqda...', '');
+    if (J.field === null) J.field = myFieldCode() || 'ALL';
+    const fieldNames = J.doc.field_names || {};
+    const topicWords = new Set(normWords(L.me && L.me.topic));
+
+    let list = J.doc.journals.filter(j => J.showRemoved || ACTIVE_STATUSES.includes(j.status));
+    if (J.field !== 'ALL') list = list.filter(j => j.fields.some(f => f[0] === J.field));
+    if (J.type !== 'ALL') list = list.filter(j => j.type === J.type);
+    const q = J.q.trim().toLowerCase();
+    if (q) list = list.filter(j => (j.name + ' ' + j.publisher + ' ' + j.place).toLowerCase().includes(q));
+    // rank: overlap of the student's topic words with the journal name/publisher, then national first
+    const scored = list.map(j => {
+      const words = normWords(j.name + ' ' + j.publisher);
+      const score = words.reduce((a, w) => a + (topicWords.has(w) ? 1 : 0), 0);
+      return { j, score };
+    }).sort((a, b) => (b.score - a.score) || ((a.j.type === 'Milliy') === (b.j.type === 'Milliy') ? a.j.no - b.j.no : (a.j.type === 'Milliy' ? -1 : 1)));
+
+    const mine = myFieldCode();
+    const banner = mine
+      ? `<div class="px-4 py-3 rounded-xl bg-blue-500/10 border border-blue-500/25 text-sm text-blue-100">Ixtisosligingiz <b>${esc(L.me.specialty_code)}</b> → <b>${esc(mine)} ${esc(fieldNames[mine] || '')}</b>. Mavzuingizdagi so‘zlarga mos jurnallar yuqorida turadi.</div>`
+      : `<div class="px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-sm text-amber-100">Profilga ixtisoslik shifrini kiritsangiz, yo‘nalishingiz bo‘yicha jurnallar avtomatik tanlanadi. <button onclick="goMyData('profile')" class="underline">Profil</button></div>`;
+
+    const card = ({ j, score }) => {
+      const removed = !ACTIVE_STATUSES.includes(j.status);
+      const wos = `https://mjl.clarivate.com/search-results?search=${encodeURIComponent(j.name)}`;
+      const google = `https://www.google.com/search?q=${encodeURIComponent(`"${j.name}" journal submission`)}`;
+      return `<div class="rounded-2xl p-4 bg-[#121E38] border ${removed ? 'border-rose-500/40' : 'border-[#1D3058]'} space-y-2">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="font-semibold text-white">${esc(j.name)}</div>
+            <div class="text-xs text-slate-400">${esc([j.place, j.publisher].filter(Boolean).join(' · '))}</div>
+          </div>
+          <div class="flex flex-col items-end gap-1 shrink-0">
+            <span class="step-badge ${j.type === 'Milliy' ? 'badge-emerald' : j.type === 'MDH' ? 'badge-blue' : 'badge-amber'}">${esc(j.type)}</span>
+            ${removed ? `<span class="step-badge badge-rose">${esc(j.status)}${j.removed ? ' ' + esc(j.removed) : ''}</span>` : score ? '<span class="step-badge badge-cyan">Mavzuga mos</span>' : ''}
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-1">${j.fields.map(f => `<span class="text-[10px] px-2 py-0.5 rounded-full ${f[0] === J.field ? 'bg-blue-500/20 text-blue-200' : 'bg-slate-700/50 text-slate-300'}">${esc(f[0])} ${esc(f[1])}</span>`).join('')}</div>
+        <div class="flex flex-wrap items-center gap-2 pt-1">
+          <span class="text-[11px] text-slate-500">Ro‘yxatda: ${esc(j.added || '—')}${j.decision ? ' · qaror ' + esc(j.decision) : ''}</span>
+          <span class="flex-1"></span>
+          <a href="${wos}" target="_blank" rel="noopener" class="text-xs text-blue-400 hover:text-blue-300">Web of Science’da tekshirish ↗</a>
+          <a href="${google}" target="_blank" rel="noopener" class="text-xs text-blue-400 hover:text-blue-300">Jurnal sayti ↗</a>
+          ${role() === 'doctoral_student' && !removed ? `<button onclick="addJournalToPlan(${j.no})" class="btn-ghost !py-1 !px-3 text-xs">+ Maqola rejasiga</button>` : ''}
+        </div>
+      </div>`;
+    };
+
+    const fieldOptions = [['ALL', 'Barcha fan tarmoqlari'], ...Object.entries(fieldNames).sort().map(([c, n]) => [c, `${c} ${n}`])];
+    return h + banner + `
+      <div class="flex flex-col md:flex-row gap-2">
+        <input value="${esc(J.q)}" oninput="journalFilter('q', this.value)" placeholder="Jurnal nomi, nashriyot yoki davlat..." class="live-input md:flex-1">
+        <select onchange="journalFilter('field', this.value)" class="live-input md:!w-72">${fieldOptions.map(([v, l]) => `<option value="${v}" ${J.field === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>
+        <select onchange="journalFilter('type', this.value)" class="live-input md:!w-40">${[['ALL', 'Hammasi'], ['Milliy', 'Milliy'], ['MDH', 'MDH'], ['Xorijiy', 'Xorijiy']].map(([v, l]) => `<option value="${v}" ${J.type === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      </div>
+      <label class="flex items-center gap-2 text-xs text-slate-400"><input type="checkbox" ${J.showRemoved ? 'checked' : ''} onchange="journalFilter('showRemoved', this.checked)" class="custom-checkbox"> Ro‘yxatdan chiqarilgan jurnallarni ham ko‘rsatish</label>
+      <div id="journalCount" class="text-sm text-slate-400">${scored.length} ta jurnal</div>
+      <div class="space-y-3" id="journalList">${scored.slice(0, J.limit).map(card).join('')}</div>
+      ${scored.length > J.limit ? `<button onclick="journalFilter('more')" class="btn-ghost w-full">Yana ko‘rsatish (${scored.length - J.limit} ta qoldi)</button>` : ''}
+      <p class="text-xs text-slate-500">${esc(J.doc.source || '')} Ro‘yxat sanasi: ${esc(fmtDate(J.doc.as_of))}. “Web of Science’da tekshirish” Clarivate’ning rasmiy qidiruvini ochadi — jurnal u yerda bo‘lsa, WoS’da indekslangan. Jurnalga maqola uning o‘z saytidagi tizim orqali yuboriladi.</p>`;
+  }
+
+  let journalTimer = null;
+  window.journalFilter = function (key, value) {
+    if (key === 'more') { J.limit += 40; return rerender(); }
+    J[key] = value;
+    J.limit = 40;
+    if (key === 'q') {
+      clearTimeout(journalTimer);
+      journalTimer = setTimeout(() => {
+        const input = document.activeElement; const pos = input && input.selectionStart;
+        rerender();
+        const again = document.querySelector('#view-journals input[placeholder^="Jurnal"]');
+        if (again) { again.focus(); try { again.setSelectionRange(pos, pos); } catch (e) { /* ignore */ } }
+      }, 250);
+      return;
+    }
+    rerender();
+  };
+
+  window.addJournalToPlan = async function (no) {
+    const j = J.doc.journals.find(x => x.no === no);
+    const { data, error } = await sb.from('publications').insert({
+      student_id: L.me.id, title: 'Yangi maqola (nomini kiriting)', journal: j.name,
+      indexing: 'OAK ro‘yxatidagi jurnal', status: 'planned'
+    }).select('id').single();
+    if (error) return fail(error);
+    toast('Maqolalar rejasiga qo‘shildi');
+    await reload();
+    openForm('publications', data.id);
+  };
+
+  // =====================================================================
   // Supervisor view
   // =====================================================================
   function renderSupervisorView() {
@@ -1543,7 +1673,7 @@
 
   // Local-only hook for testing views with mock data (never exposed on the deployed site)
   if (['localhost', '127.0.0.1'].includes(location.hostname)) {
-    window.__liveTest = { L, scholarship, renderScholarshipView, renderDashboard, renderDepartmentView, renderSupervisorView, renderMyDataView };
+    window.__liveTest = { L, J, renderJournalsView, scholarship, renderScholarshipView, renderDashboard, renderDepartmentView, renderSupervisorView, renderMyDataView };
   }
 
   // =====================================================================

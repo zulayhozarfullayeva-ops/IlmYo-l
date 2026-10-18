@@ -195,7 +195,8 @@ function switchView(viewName) {
     'supervisor',
     'department',
     'mydata',
-    'scholarship'
+    'scholarship',
+    'journals'
   ];
   
   views.forEach(v => {
