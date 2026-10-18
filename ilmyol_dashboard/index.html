@@ -55,22 +55,28 @@
 
       <div id="authLoading" class="text-center text-sm text-slate-400">Yuklanmoqda...</div>
 
-      <form id="authForm" data-mode="login" onsubmit="submitAuth(event)" class="hidden rounded-2xl p-5 bg-[#121E38] border border-[#1D3058] space-y-4">
+      <form id="authForm" data-mode="login" method="post" action="#" autocomplete="on" onsubmit="submitAuth(event)" class="hidden rounded-2xl p-5 bg-[#121E38] border border-[#1D3058] space-y-4">
         <div class="grid grid-cols-2 p-1 rounded-xl bg-[#0C1427] border border-[#1D3058] text-sm">
           <button type="button" id="authTabLogin" onclick="setAuthTab('login')" class="auth-tab auth-tab-active">Kirish</button>
           <button type="button" id="authTabSignup" onclick="setAuthTab('signup')" class="auth-tab">Ro‘yxatdan o‘tish</button>
         </div>
         <div id="authNameRow" class="hidden">
           <label class="live-label">F.I.Sh.</label>
-          <input id="authName" type="text" autocomplete="name" class="live-input" placeholder="Familiya Ism Sharif">
+          <input id="authName" name="name" type="text" autocomplete="name" class="live-input" placeholder="Familiya Ism Sharif">
         </div>
         <div>
           <label class="live-label">Email</label>
-          <input id="authEmail" type="email" required autocomplete="email" class="live-input" placeholder="siz@misol.uz">
+          <input id="authEmail" name="email" type="email" required autocomplete="username" class="live-input" placeholder="siz@misol.uz">
         </div>
         <div>
           <label class="live-label">Parol</label>
-          <input id="authPassword" type="password" required minlength="8" autocomplete="current-password" class="live-input" placeholder="Kamida 8 belgi">
+          <input id="authPassword" name="password" type="password" required minlength="8" autocomplete="current-password" class="live-input" placeholder="Kamida 8 belgi">
+        </div>
+        <div>
+          <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+            <input id="authRemember" type="checkbox" checked class="custom-checkbox">
+            Meni eslab qol (shu qurilmada)
+          </label>
         </div>
         <p id="authMsg" class="text-xs min-h-[1rem]"></p>
         <button id="authSubmitBtn" class="btn-primary w-full">Kirish</button>
@@ -1675,7 +1681,7 @@
   <script src="data.js?v=5.0"></script>
   <script src="app.js?v=6.2"></script>
   <script src="corpus.js?v=5.2"></script>
-  <script src="live.js?v=6.2"></script>
+  <script src="live.js?v=6.3"></script>
   <script>
     // Initialize Lucide icons on page load
     lucide.createIcons();

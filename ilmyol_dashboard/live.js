@@ -227,8 +227,34 @@
     document.getElementById('authTabLogin').classList.toggle('auth-tab-active', !signup);
     document.getElementById('authTabSignup').classList.toggle('auth-tab-active', signup);
     document.getElementById('authForm').dataset.mode = tab;
+    // lets the browser's password manager offer a saved password (login) or a new strong one (sign up)
+    document.getElementById('authPassword').setAttribute('autocomplete', signup ? 'new-password' : 'current-password');
     setAuthMsg('');
   };
+
+  // ---- "Remember me": email is remembered here; the password only by the browser's own password manager ----
+  const REMEMBER_EMAIL = 'ilmyol_email', SESSION_ONLY = 'ilmyol_session_only', SESSION_ALIVE = 'ilmyol_alive';
+  const store = {
+    get: (s, k) => { try { return window[s].getItem(k); } catch (e) { return null; } },
+    set: (s, k, v) => { try { window[s].setItem(k, v); } catch (e) { /* storage blocked */ } },
+    del: (s, k) => { try { window[s].removeItem(k); } catch (e) { /* storage blocked */ } }
+  };
+
+  async function rememberLogin(email, password, name) {
+    const remember = document.getElementById('authRemember').checked;
+    if (remember) {
+      store.set('localStorage', REMEMBER_EMAIL, email);
+      store.del('localStorage', SESSION_ONLY);
+    } else {
+      store.del('localStorage', REMEMBER_EMAIL);
+      store.set('localStorage', SESSION_ONLY, '1');
+      store.set('sessionStorage', SESSION_ALIVE, '1');
+    }
+    // Ask the browser to save the password (Chrome/Edge); other browsers detect the form themselves.
+    if (remember && window.PasswordCredential && navigator.credentials) {
+      try { await navigator.credentials.store(new PasswordCredential({ id: email, password, name: name || email })); } catch (e) { /* user declined */ }
+    }
+  }
 
   window.submitAuth = async function (e) {
     e.preventDefault();
@@ -246,12 +272,14 @@
           options: { data: { full_name: fullName }, emailRedirectTo: location.origin + location.pathname }
         });
         if (error) throw error;
+        await rememberLogin(email, password, fullName);
         if (data.session) { await enterLive(data.session.user); }
         else setAuthMsg('Emailingizga tasdiqlash xati yuborildi. Havolani bosing, keyin shu yerda kiring.');
       } else {
         const { data, error } = await sb.auth.signInWithPassword({ email, password });
         if (error) throw new Error(error.message === 'Invalid login credentials' ? 'Email yoki parol noto‘g‘ri. Parolni eslay olmasangiz, pastdagi “Parolni unutdingizmi? — tiklash” tugmasini bosing.' :
           error.message === 'Email not confirmed' ? 'Email hali tasdiqlanmagan — pochtangizni tekshiring' : error.message);
+        await rememberLogin(email, password);
         await enterLive(data.user);
       }
     } catch (err) {
@@ -1689,7 +1717,17 @@
     });
     let demo = false;
     try { demo = sessionStorage.getItem('ilmyol_demo') === '1'; } catch (e) { /* ignore */ }
+    const savedEmail = store.get('localStorage', REMEMBER_EMAIL);
+    if (savedEmail) {
+      document.getElementById('authEmail').value = savedEmail;
+      document.getElementById('authPassword').focus();
+    }
     try {
+      // "Remember me" was off: the login lasts only until the browser is closed
+      if (store.get('localStorage', SESSION_ONLY) === '1' && !store.get('sessionStorage', SESSION_ALIVE)) {
+        await sb.auth.signOut({ scope: 'local' });
+        store.del('localStorage', SESSION_ONLY);
+      }
       const { data: { session } } = await sb.auth.getSession();
       if (session) return await enterLive(session.user);
     } catch (e) { fail(e); }
