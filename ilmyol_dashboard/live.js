@@ -159,8 +159,63 @@
     ]);
     Object.assign(L, { profiles, plan, tasks, chapters, pubs, docs, evidence, comments, schol, plag, specs, orders, depts });
     L.config = Object.fromEntries(config.map(c => [c.key, c.value]));
+    await loadAvatars();
     L.me = byId(profiles, L.user.id) || null;
   }
+
+  // ---- Profile photos (private "avatars" bucket, short-lived signed URLs) ----
+  L.avatarUrls = {};
+  async function loadAvatars() {
+    const withPhoto = L.profiles.filter(p => p.avatar_path);
+    L.avatarUrls = {};
+    if (!withPhoto.length) return;
+    const { data } = await sb.storage.from('avatars').createSignedUrls(withPhoto.map(p => p.avatar_path), 3600);
+    (data || []).forEach((d, i) => { if (d && d.signedUrl) L.avatarUrls[withPhoto[i].id] = d.signedUrl; });
+  }
+  function avatarFor(p) {
+    return (p && L.avatarUrls[p.id]) || avatarUrl(p ? (p.full_name || p.email) : '');
+  }
+
+  // Crop to a centred square and shrink to 320 px JPEG before upload
+  function resizeImage(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const side = Math.min(img.width, img.height);
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = 320;
+        canvas.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, 320, 320);
+        canvas.toBlob(b => (b ? resolve(b) : reject(new Error('Rasmni o‘qib bo‘lmadi'))), 'image/jpeg', 0.85);
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror = () => reject(new Error('Bu fayl rasm emas yoki buzilgan'));
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  window.uploadAvatar = async function (input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    if (!/^image\//.test(file.type)) return toast('Faqat rasm fayli (JPG, PNG)', 'error');
+    try {
+      const blob = await resizeImage(file);
+      const path = `${L.me.id}/avatar.jpg`;
+      const up = await sb.storage.from('avatars').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
+      if (up.error) throw up.error;
+      const { error } = await sb.from('profiles').update({ avatar_path: path }).eq('id', L.me.id);
+      if (error) throw error;
+      toast('Rasm saqlandi');
+      reload();
+    } catch (e) { fail(e); }
+  };
+
+  window.removeAvatar = async function () {
+    if (!confirm('Profil rasmi o‘chirilsinmi?')) return;
+    await sb.storage.from('avatars').remove([`${L.me.id}/avatar.jpg`]);
+    const { error } = await sb.from('profiles').update({ avatar_path: null }).eq('id', L.me.id);
+    if (error) return fail(error);
+    toast('Rasm o‘chirildi'); reload();
+  };
 
   async function reload() {
     try {
@@ -398,7 +453,7 @@
     document.getElementById('userNameDisplay').textContent = name;
     document.getElementById('userStatusDisplay').textContent =
       ROLE_LABEL[L.me.role] + (L.me.role === 'doctoral_student' && y ? ` • ${y}-yil` : '');
-    document.getElementById('userAvatarImg').src = avatarUrl(name);
+    document.getElementById('userAvatarImg').src = avatarFor(L.me);
     const badge = document.getElementById('notifBadge');
     const n = notificationItems().length;
     if (badge) { badge.textContent = n; badge.classList.toggle('hidden', n === 0); }
@@ -550,7 +605,7 @@
     }
     openLiveModal('Ilmiy rahbar', `
       <div class="flex items-center gap-3">
-        <img src="${avatarUrl(s.full_name)}" class="w-12 h-12 rounded-full" alt="">
+        <img src="${avatarFor(s)}" class="w-12 h-12 rounded-full object-cover" alt="">
         <div><div class="font-semibold text-white">${esc(s.full_name)}</div><div class="text-xs text-slate-400">${esc(s.academic_title || '')}</div></div>
       </div>
       <div class="p-3 rounded-xl bg-[#0C1427] border border-[#1D3058] text-sm space-y-1.5">
@@ -803,6 +858,16 @@
       </div>
       ${p.description ? `<p class="text-sm text-slate-300 bg-[#090F1D] p-3 rounded-xl border border-[#1D3058] whitespace-pre-line">${esc(p.description)}</p>` : ''}
       <div>
+        <div class="live-label">Bajarilgan ish (rahbar shu matnni ko‘radi)</div>
+        ${isOwner && p.status !== 'approved'
+          ? `<textarea id="planReport" rows="5" maxlength="8000" class="live-input" placeholder="Nima qilindi: masalan, “Mavzu kafedra yig‘ilishida muhokama qilindi (12.01.2026, 5-son bayonnoma), Ilmiy kengashga tavsiya etildi.”">${esc(p.report || '')}</textarea>
+             <div class="flex items-center justify-between mt-2">
+               <span class="text-[11px] text-slate-500">Hujjat bo‘lsa, pastda fayl sifatida biriktiring.</span>
+               <button onclick="savePlanReport('${id}')" class="btn-ghost !py-1 !px-3 text-xs">Saqlash</button>
+             </div>`
+          : `<p class="text-sm text-slate-200 bg-[#090F1D] p-3 rounded-xl border border-[#1D3058] whitespace-pre-line">${p.report ? esc(p.report) : '<span class="text-slate-500">Hali yozilmagan.</span>'}</p>`}
+      </div>
+      <div>
         <div class="live-label">Dalil fayllari</div>
         <div class="space-y-1.5">
           ${files.map(f => `<div class="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-[#0C1427] border border-[#1D3058] text-xs">
@@ -830,7 +895,24 @@
     `);
   };
 
+  window.savePlanReport = async function (id, silent) {
+    const el = document.getElementById('planReport');
+    if (!el) return true;
+    const report = el.value.trim() || null;
+    const { error } = await sb.from('plan_items').update({ report }).eq('id', id);
+    if (error) { fail(error); return false; }
+    const p = byId(L.plan, id); if (p) p.report = report;
+    if (!silent) toast('Saqlandi');
+    return true;
+  };
+
   window.setPlanStatus = async function (id, status) {
+    // keep what was typed in "Bajarilgan ish" and warn if submitting without it
+    if (document.getElementById('planReport')) {
+      if (!(await window.savePlanReport(id, true))) return;
+      if (status === 'submitted' && !byId(L.plan, id).report && !L.evidence.some(f => f.plan_item_id === id)
+          && !confirm('“Bajarilgan ish” yozilmagan va fayl biriktirilmagan. Baribir rahbarga yuborilsinmi?')) return;
+    }
     const { error } = await sb.from('plan_items').update({ status }).eq('id', id);
     if (error) return fail(error);
     toast(status === 'submitted' ? 'Rahbarga yuborildi' : 'Holat yangilandi');
@@ -1517,7 +1599,7 @@
     const s = stats(p.id);
     return `<button onclick="openStudent('${p.id}')" class="text-left rounded-2xl p-5 bg-[#121E38] border border-[#1D3058] hover:border-blue-500 transition space-y-3">
       <div class="flex items-center justify-between gap-2">
-        <div class="flex items-center gap-3 min-w-0"><img src="${avatarUrl(p.full_name)}" class="w-10 h-10 rounded-full" alt="">
+        <div class="flex items-center gap-3 min-w-0"><img src="${avatarFor(p)}" class="w-10 h-10 rounded-full object-cover" alt="">
           <div class="min-w-0"><div class="font-semibold text-white truncate">${esc(p.full_name || p.email)}</div><div class="text-xs text-slate-400">${s.year ? `${s.year}-yil` : 'Yil noma’lum'} · ${esc(p.specialty_code || '')}</div></div></div>
         <span class="step-badge ${RISK[s.risk].badge} shrink-0">${RISK[s.risk].label}</span>
       </div>
@@ -1734,7 +1816,7 @@
     return header('Ilmiy rahbarlar', `${supervisors.length} ta rahbar`) + (supervisors.length ? `<div class="space-y-2.5">${supervisors.map(s => {
       const studs = L.profiles.filter(p => p.supervisor_id === s.id);
       const pending = L.plan.filter(p => p.status === 'submitted' && studs.some(x => x.id === p.student_id)).length;
-      return `<div class="step-row"><img src="${avatarUrl(s.full_name)}" class="w-11 h-11 rounded-full" alt="">
+      return `<div class="step-row"><img src="${avatarFor(s)}" class="w-11 h-11 rounded-full object-cover" alt="">
         <div class="flex-1 min-w-0"><div class="step-title">${esc(s.full_name || s.email)}</div>
           <div class="text-xs text-slate-400">${studs.length} ta doktorant${pending ? ` · <span class="text-amber-400">${pending} ta tekshiruv kutmoqda</span>` : ''}</div></div></div>`;
     }).join('')}</div>` : emptyCard('Hali ilmiy rahbar yo‘q. “Ilmiy bo‘lim” sahifasida foydalanuvchiga “Ilmiy rahbar” rolini bering.', ''));
@@ -1860,6 +1942,15 @@
       <div id="pfDirty" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-[65] px-4 py-3 rounded-2xl bg-amber-500 text-[#0F1B33] shadow-2xl flex items-center gap-3">
         <span class="text-sm font-semibold">Saqlanmagan o‘zgarishlar bor</span>
         <button class="px-4 py-1.5 rounded-xl bg-[#0F1B33] text-white text-sm font-semibold">Saqlash</button>
+      </div>
+      <div class="md:col-span-2 flex items-center gap-4">
+        <img src="${avatarFor(p)}" alt="Profil rasmi" class="w-20 h-20 rounded-full object-cover border-2 border-blue-500/40 shrink-0">
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="btn-ghost cursor-pointer text-sm">📷 Rasm yuklash
+            <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" oninput="event.stopPropagation()" onchange="event.stopPropagation(); uploadAvatar(this)"></label>
+          ${p.avatar_path ? '<button type="button" onclick="removeAvatar()" class="text-xs text-slate-400 hover:text-rose-300">O‘chirish</button>' : ''}
+          <span class="text-[11px] text-slate-500 w-full">JPG yoki PNG. Rasm kvadrat qilib qirqiladi; uni faqat saytga kirgan foydalanuvchilar ko‘radi.</span>
+        </div>
       </div>
       ${f('full_name', 'F.I.Sh.', 'text')}
       <div><label class="live-label">Email</label><input value="${esc(p.email || '')}" disabled class="live-input opacity-60"></div>
