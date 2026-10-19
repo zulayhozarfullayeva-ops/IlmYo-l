@@ -358,7 +358,7 @@
   function allowedViews() {
     if (role() === 'supervisor') return ['supervisor', 'journals', 'topic_novelty', 'mydata'];
     if (role() === 'department') return ['department', 'supervisor', 'journals', 'topic_novelty', 'mydata'];
-    return ['dashboard', 'roadmap', 'topic_novelty', 'journals', 'dissertation', 'calendar', 'defense', 'scholarship', 'mydata'];
+    return ['dashboard', 'roadmap', 'topic_novelty', 'journals', 'dissertation', 'calendar', 'defense', 'scholarship', 'formatting', 'mydata'];
   }
 
   function applyRoleUi() {
@@ -421,6 +421,7 @@
     defense: renderDefenseView,
     scholarship: renderScholarshipView,
     journals: renderJournalsView,
+    formatting: renderFormattingView,
     supervisor: renderSupervisorView,
     department: renderDepartmentView,
     mydata: renderMyDataView
@@ -900,7 +901,7 @@
 
   function renderChaptersView() {
     const s = stats(L.me.id);
-    const btn = `<button onclick="goMyData('chapters')" class="btn-primary self-start">Tahrirlash</button>`;
+    const btn = `<div class="flex gap-2 self-start"><button onclick="switchView('formatting')" class="btn-ghost">📐 Rasmiylashtirish talablari</button><button onclick="goMyData('chapters')" class="btn-primary">Tahrirlash</button></div>`;
     if (!s.chapters.length) return header('Dissertatsiya', '', btn) + emptyCard('Boblar hali kiritilmagan.', `<button onclick="applyTemplate('chapters')" class="btn-primary">Andoza tuzilmani qo‘shish</button>`);
     return header('Dissertatsiya', `${s.pagesDone} / ${s.pagesTotal} bet · ${s.dissPct}%`, btn) + `<div class="space-y-2.5">` +
       s.chapters.map(c => {
@@ -948,7 +949,8 @@
       ['Individual reja bandlari tasdiqlangan', s.approved, s.plan.length],
       ['Dissertatsiya qo‘lyozmasi (bet)', s.pagesDone, s.pagesTotal],
       ['Rejadagi maqolalar chop etilgan', s.pubsDone, s.pubs.length],
-      ['Hujjatlar tayyor', s.docsReady, s.docs.length]
+      ['Hujjatlar tayyor', s.docsReady, s.docs.length],
+      ['Rasmiylashtirish talablari (OAK qoidalari)', formatDone(L.me), FORMAT_TOTAL]
     ];
     const valid = rows.filter(r => r[2] > 0);
     const overall = valid.length ? Math.round(valid.reduce((a, r) => a + Math.min(100, pct(r[1], r[2])), 0) / valid.length) : 0;
@@ -1118,6 +1120,148 @@
 
       <p class="text-xs text-slate-500">Talablar <a href="${LEX_URL}" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300">VM 226-son qarori</a> (2025-yil 30-dekabrdagi tahriri) asosida. Qoidalar o‘zgarishi mumkin — har yili rasmiy matnni tekshiring. Saralash respublika miqyosida (10 ta stipendiya), shuning uchun talablarni bajarish g‘alabani kafolatlamaydi.</p>`;
   }
+
+  // =====================================================================
+  // Dissertation & autoreferat formatting rules (OAK Presidium 214/8, 2015; amended 239/8, 2017)
+  // =====================================================================
+  const FORMAT_SOURCE = 'OAK Rayosatining 2015-yil 20-martdagi 214/8-son qarori bilan tasdiqlangan, 2017-yil 31-maydagi 239/8-son qarori bilan o‘zgartirilgan “Dissertatsiya va dissertatsiya avtoreferatini rasmiylashtirish qoidalari” (Adliya vazirligi, 2665 va 2665-1).';
+  const FORMAT_RULES = [
+    { id: 'struct', title: 'Dissertatsiya tarkibi', items: [
+      ['s1', 'Mundarija — boblar, paragraflar nomi va betlari ko‘rsatilgan'],
+      ['s2', 'Kirish (dissertatsiya annotatsiyasi)'],
+      ['s3', 'Asosiy qism: PhD — kamida 3 bob (DSc — kamida 4 bob)'],
+      ['s4', 'Xulosa — qisqa, aniq, bandlangan (raqamlangan)'],
+      ['s5', 'Foydalanilgan adabiyotlar: 1) normativ-huquqiy va metodologik; 2) monografiya, maqola, patent, to‘plamlar; 3) boshqa adabiyotlar'],
+      ['s6', 'Ro‘yxatda faqat matnda havola qilingan adabiyotlar'],
+      ['s7', 'Shartli belgilar va atamalar ro‘yxati (bo‘lsa), ilovalar (bo‘lsa)'],
+      ['s8', 'Har bir bob oxirida xulosa va takliflar']
+    ] },
+    { id: 'intro', title: 'Kirish qismida yoritiladi', items: [
+      ['i1', 'Mavzuning dolzarbligi va zarurati'], ['i2', 'Respublika fan va texnologiyalari ustuvor yo‘nalishlariga mosligi'],
+      ['i3', 'Muammoning o‘rganilganlik darajasi'], ['i4', 'Muassasa ilmiy-tadqiqot rejalari bilan bog‘liqligi'],
+      ['i5', 'Maqsad va vazifalar'], ['i6', 'Obyekt va predmet'], ['i7', 'Tadqiqot usullari'],
+      ['i8', 'Ilmiy yangilik va amaliy natijalar'], ['i9', 'Natijalarning ishonchliligi, ilmiy va amaliy ahamiyati'],
+      ['i10', 'Natijalarning joriy qilinishi va aprobatsiyasi'], ['i11', 'Natijalarning e’lon qilinganligi'],
+      ['i12', 'Dissertatsiyaning tuzilishi va hajmi']
+    ] },
+    { id: 'text', title: 'Matnni rasmiylashtirish', items: [
+      ['t1', 'Hajm: PhD — 60 varaqdan oshmasin (ikki tomonlama); ijtimoiy-gumanitar fanlarda ko‘pi bilan +30%. Mundarija, adabiyotlar, ilovalar hajmga kirmaydi'],
+      ['t2', 'A4, varaqning ikki tomonida, 1,5 qator oralig‘i'],
+      ['t3', 'Hoshiyalar: yuqori va past 2 sm, chap 3 sm, o‘ng 1,5 sm; xatboshi 1,27 sm'],
+      ['t4', 'Times New Roman, 14 o‘lcham (Microsoft Word)'],
+      ['t5', 'Bet raqami pastki o‘ng burchakda, 2 dan boshlab (titul varag‘iga qo‘yilmaydi)'],
+      ['t6', 'Mundarija, kirish, har bir bob, xulosa, adabiyotlar — yangi betdan'],
+      ['t7', 'Asosiy sarlavhalar (MUNDARIJA, KIRISH, XULOSA…) bosh harflarda'],
+      ['t8', 'Boblar rim raqamlari bilan; paragraflar “§” va arab raqamlari bilan; sarlavha atrofida 12 pt oraliq'],
+      ['t9', 'Havola: sahifa ostida yoki matnda [1; 25–26-b.] ko‘rinishida'],
+      ['t10', 'Rasm: ostida markazda “1.1-rasm.” va nomi'],
+      ['t11', 'Jadval: tepa o‘ng burchakda “1.1-jadval.”, nomi jadval ustida'],
+      ['t12', 'Formula: Word “Formula” yoki LaTeX; o‘ng tomonda (1.1); atrofida 12 pt'],
+      ['t13', 'Matnda havola: “(1.3-jadvalga qarang)”; izohlar “Izoh 1.:”'],
+      ['t14', 'Ilovalar alohida betda: “1-ilova” va sarlavha']
+    ] },
+    { id: 'title', title: 'Titul varag‘i (1-ilova)', items: [
+      ['ti1', 'Muassasa nomi; o‘ngda “Qo‘lyozma huquqida” va UDK'],
+      ['ti2', 'Muallif F.I.Sh., mavzu, ixtisoslik shifri va nomi'],
+      ['ti3', '“… fanlari bo‘yicha falsafa doktori (PhD) ilmiy darajasini olish uchun yozilgan DISSERTATSIYA”'],
+      ['ti4', 'Ilmiy rahbar (F.I.Sh., ilmiy daraja, unvon); pastda shahar – yil'],
+      ['ti5', 'Times New Roman 14 (bosh harflarda) va 12 — namunadagi oraliqlar bilan']
+    ] },
+    { id: 'auto', title: 'Avtoreferat', items: [
+      ['a1', 'Risola 21 × 14,5 sm; asosiy muqova oq-yaltiroq qog‘ozda (2-ilova), orqasida mundarija'],
+      ['a2', 'Ichki muqovalar o‘zbek, rus va ingliz tilida; orqa tomoni 3-ilova shaklida'],
+      ['a3', 'Tarkibi: kirish (dissertatsiya kirishi bilan aynan bir xil), asosiy mazmun, xulosa, e’lon qilingan ishlar'],
+      ['a4', 'Hajm (PhD): o‘zbek va rus/ingliz tilida 2 bosma taboq (har tilda 1) + uchinchi tilda qisqacha; gumanitar fanlarda +30% gacha'],
+      ['a5', 'A4 bir tomonlama, 1 qator oralig‘i, hoshiyalar dissertatsiyadagidek, xatboshi 1 sm'],
+      ['a6', 'Bet raqami pastki o‘ng burchakda “5” dan (muqovalarga qo‘yilmaydi)'],
+      ['a7', 'E’lon qilingan ishlar: 1-bo‘lim — OAK ro‘yxatidagi nashrlar va patentlar, har biriga (fan shifri; № ro‘yxatdagi raqam); 2-bo‘lim — boshqa nashrlar'],
+      ['a8', 'Tartib: monografiya, patent, ilmiy maqola, to‘plamlar; avtoreferat uch tilda Ilmiy kengash sayti va ziyonet.uz da']
+    ] }
+  ];
+  const HUMANITIES = ['07', '08', '09', '10', '12', '13', '17', '19', '22', '23', '24'];
+  const FORMAT_TOTAL = FORMAT_RULES.reduce((n, g) => n + g.items.length, 0);
+
+  function formatAuto(sid) {
+    const p = byId(L.profiles, sid) || {};
+    const s = stats(sid);
+    const mainChapters = s.chapters.filter(c => /bob/i.test(c.title)).length;
+    const human = HUMANITIES.includes(String(p.specialty_code || '').slice(0, 2));
+    const maxPages = human ? 156 : 120; // 60 sheets two-sided = 120 pages; +30% = 78 sheets = 156 pages
+    return { mainChapters, human, maxPages, pages: s.pagesTotal };
+  }
+  function formatDone(p) { const c = p.format_checks || {}; return FORMAT_RULES.reduce((n, g) => n + g.items.filter(([id]) => c[id]).length, 0); }
+
+  function renderFormattingView() {
+    const p = L.me;
+    const checks = p.format_checks || {};
+    const a = formatAuto(p.id);
+    const done = formatDone(p);
+    const autoRows = `
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        ${tile("switchView('dissertation')", 'book-open', a.mainChapters >= 3 ? 'emerald' : 'amber', `${a.mainChapters} / 3`, 'Asosiy boblar (PhD — kamida 3)')}
+        ${tile("switchView('dissertation')", 'file-text', a.pages && a.pages > a.maxPages ? 'rose' : 'blue', a.pages ? `${a.pages} / ${a.maxPages}` : '—', `Rejadagi bet / chegara${a.human ? ' (gumanitar +30%)' : ''}`)}
+        ${tile('', 'list-checks', 'indigo', `${pct(done, FORMAT_TOTAL)}%`, `Belgilangan bandlar: ${done} / ${FORMAT_TOTAL}`)}
+      </div>
+      <p class="text-xs text-slate-500">Bet chegarasi taxminiy: 1 varaq = 2 bet (ikki tomonlama). Mundarija, adabiyotlar va ilovalar hajmga kirmaydi.</p>`;
+    const groups = FORMAT_RULES.map(g => `
+      <div class="rounded-2xl p-5 bg-[#121E38] border border-[#1D3058] space-y-2">
+        <div class="flex items-center justify-between"><h3 class="text-base font-semibold text-white">${g.title}</h3>
+          <span class="text-xs text-slate-400 font-mono">${g.items.filter(([id]) => checks[id]).length} / ${g.items.length}</span></div>
+        ${g.items.map(([id, text]) => `<label class="flex items-start gap-3 p-2 rounded-lg hover:bg-slate-800/40 cursor-pointer">
+          <input type="checkbox" ${checks[id] ? 'checked' : ''} onchange="toggleFormatCheck('${id}', this.checked)" class="custom-checkbox mt-0.5">
+          <span class="text-sm ${checks[id] ? 'text-slate-400 line-through' : 'text-slate-200'}">${esc(text)}</span></label>`).join('')}
+      </div>`).join('');
+    return header('Rasmiylashtirish talablari', 'Dissertatsiya va avtoreferat — bandma-band tekshirish',
+      `<div class="flex gap-2 self-start"><button onclick="switchView('dissertation')" class="btn-ghost">← Ilmiy ish</button><button onclick="openAutoreferatList()" class="btn-primary">📄 E’lon qilingan ishlar ro‘yxati</button></div>`) +
+      autoRows + groups +
+      `<p class="text-xs text-slate-500">Manba: ${esc(FORMAT_SOURCE)} Keyinroq o‘zgartirishlar kiritilgan bo‘lishi mumkin — himoyadan oldin amaldagi tahririni ilmiy kengash kotibidan aniqlang.</p>`;
+  }
+
+  window.toggleFormatCheck = async function (id, on) {
+    const checks = { ...(L.me.format_checks || {}) };
+    if (on) checks[id] = true; else delete checks[id];
+    const { error } = await sb.from('profiles').update({ format_checks: checks }).eq('id', L.me.id);
+    if (error) return fail(error);
+    L.me.format_checks = checks;
+    const me = byId(L.profiles, L.me.id); if (me) me.format_checks = checks;
+    rerender();
+  };
+
+  // Autoreferat "published works" list in the order the rules require
+  const PUB_ORDER = ['Monografiya', 'Patent'];
+  window.openAutoreferatList = async function () {
+    if (!J.doc) {
+      try { J.doc = await (await fetch('data/oak_journals.json?v=2026-08-03')).json(); } catch (e) { /* list works without OAK numbers */ }
+    }
+    const key = s => cyrillicToLatin(String(s || '').toLowerCase()).replace(/[^a-z0-9]+/g, '');
+    const oakByName = new Map((J.doc ? J.doc.journals : []).map(j => [key(j.name), j]));
+    const myField = myFieldCode();
+    const pubs = L.pubs.filter(x => x.student_id === L.me.id && ['published', 'accepted'].includes(x.status));
+    const rank = x => { const i = PUB_ORDER.indexOf(x.indexing); return i === -1 ? 2 + (x.indexing === 'Xalqaro konferensiya' || x.indexing === 'Respublika konferensiyasi' ? 1 : 0) : i; };
+    const oakOf = x => oakByName.get(key(x.journal));
+    const first = pubs.filter(x => x.indexing === 'Patent' || x.indexing === 'OAK ro‘yxatidagi jurnal' || oakOf(x));
+    const second = pubs.filter(x => !first.includes(x));
+    const sortFn = (a, b) => (rank(a) - rank(b)) || ((a.year || 0) - (b.year || 0));
+    let n = 0;
+    const line = x => {
+      n += 1;
+      const j = oakOf(x);
+      const field = j ? (j.fields.find(f => f[0] === myField) || j.fields[0])[0] : (myField || '__.00.00');
+      const tag = (x.indexing === 'Patent') ? '' : ` (${field}; № ${j ? j.no : '___'})`;
+      const dot = s => String(s || '').trim().replace(/\.+$/, '');
+      return `${n}. ${dot(L.me.full_name)}. ${dot(x.title)} // ${dot(x.journal) || '[jurnal]'}. — ${x.year || '[yil]'}.${first.includes(x) ? tag : ''}`;
+    };
+    const text = ['I bo‘lim (I часть; I part)', ...first.sort(sortFn).map(line), '', 'II bo‘lim (II часть; II part)', ...second.sort(sortFn).map(line)].join('\n');
+    openLiveModal('Avtoreferat: e’lon qilingan ishlar ro‘yxati', `
+      <p class="text-xs text-slate-400">“Chop etilgan” va “Qabul qilingan” maqolalaringizdan tuzildi. 1-bo‘lim — OAK ro‘yxatidagi nashrlar va patentlar; № — OAK ro‘yxatidagi tartib raqami (jurnal nomi ro‘yxatdagiga aynan mos kelsa avtomatik; “___” bo‘lsa qo‘lda yozing va oak.uz da tekshiring).</p>
+      <textarea id="autorefList" rows="14" readonly class="live-input font-mono text-xs">${esc(text)}</textarea>
+      <button onclick="copyAutorefList()" class="btn-primary w-full">Nusxalash</button>`);
+  };
+  window.copyAutorefList = async function () {
+    const el = document.getElementById('autorefList');
+    try { await navigator.clipboard.writeText(el.value); } catch (e) { el.select(); document.execCommand('copy'); }
+    toast('Nusxalandi');
+  };
 
   // =====================================================================
   // OAK journals finder (data/oak_journals.json, parsed from the OAK list)
@@ -1508,7 +1652,7 @@
       label: 'Maqolalar', single: 'Maqola', fields: [
         { k: 'title', l: 'Maqola nomi', type: 'text', req: true },
         { k: 'journal', l: 'Jurnal / to‘plam', type: 'text' },
-        { k: 'indexing', l: 'Turi', type: 'select', options: ['', 'OAK ro‘yxatidagi jurnal', 'Scopus', 'Web of Science', 'Xalqaro konferensiya', 'Respublika konferensiyasi', 'Boshqa'].map(v => [v, v || '—']) },
+        { k: 'indexing', l: 'Turi', type: 'select', options: ['', 'OAK ro‘yxatidagi jurnal', 'Scopus', 'Web of Science', 'Xalqaro konferensiya', 'Respublika konferensiyasi', 'Monografiya', 'Patent', 'Boshqa'].map(v => [v, v || '—']) },
         { k: 'year', l: 'Yil', type: 'number', num: true },
         { k: 'status', l: 'Holat', type: 'select', options: Object.entries(PUB_STATUS) },
         { k: 'url', l: 'Havola (URL)', type: 'url' },
@@ -1814,7 +1958,7 @@
 
   // Local-only hook for testing views with mock data (never exposed on the deployed site)
   if (['localhost', '127.0.0.1'].includes(location.hostname)) {
-    window.__liveTest = { L, J, renderJournalsView, scholarship, renderScholarshipView, renderDashboard, renderDepartmentView, renderSupervisorView, renderMyDataView };
+    window.__liveTest = { L, J, renderFormattingView, renderDefenseView, renderChaptersView, renderJournalsView, scholarship, renderScholarshipView, renderDashboard, renderDepartmentView, renderSupervisorView, renderMyDataView };
   }
 
   // =====================================================================
