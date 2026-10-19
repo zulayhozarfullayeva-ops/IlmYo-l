@@ -197,7 +197,8 @@ function switchView(viewName) {
     'mydata',
     'scholarship',
     'journals',
-    'formatting'
+    'formatting',
+    'plagiarism'
   ];
   
   views.forEach(v => {

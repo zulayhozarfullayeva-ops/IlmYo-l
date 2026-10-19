@@ -358,7 +358,7 @@
   function allowedViews() {
     if (role() === 'supervisor') return ['supervisor', 'journals', 'topic_novelty', 'mydata'];
     if (role() === 'department') return ['department', 'supervisor', 'journals', 'topic_novelty', 'mydata'];
-    return ['dashboard', 'roadmap', 'topic_novelty', 'journals', 'dissertation', 'calendar', 'defense', 'scholarship', 'formatting', 'mydata'];
+    return ['dashboard', 'roadmap', 'topic_novelty', 'journals', 'plagiarism', 'dissertation', 'calendar', 'defense', 'scholarship', 'formatting', 'mydata'];
   }
 
   function applyRoleUi() {
@@ -422,6 +422,7 @@
     scholarship: renderScholarshipView,
     journals: renderJournalsView,
     formatting: renderFormattingView,
+    plagiarism: renderPlagiarismView,
     supervisor: renderSupervisorView,
     department: renderDepartmentView,
     mydata: renderMyDataView
@@ -1838,6 +1839,54 @@
       <p class="text-xs text-slate-500">Rasmiy hisoblanadigan natija universitet va jurnal talabiga bog‘liq. Ba’zi tizimlar tekshirilgan matnni bazasiga saqlaydi — chop etilmagan maqolani yuborishdan oldin bu sozlamani tekshiring.</p>`);
   };
 
+  // Dedicated "Antiplagiat" page: systems (link-out) + each article's recorded result
+  function renderPlagiarismView() {
+    const mine = L.pubs.filter(x => x.student_id === L.me.id);
+    const checked = mine.filter(x => x.originality !== null && x.originality !== undefined);
+    const low = checked.filter(x => plagiarismState(x).low);
+    const services = L.plag.map(s => `
+      <div class="rounded-2xl p-4 bg-[#121E38] border ${s.official ? 'border-emerald-500/40' : 'border-[#1D3058]'} flex flex-col gap-2">
+        <div class="flex items-center justify-between gap-2">
+          <div class="font-semibold text-white">${esc(s.name)}</div>
+          ${s.official ? '<span class="step-badge badge-emerald">Universitet qabul qiladi</span>' : ''}
+        </div>
+        ${s.description ? `<div class="text-xs text-slate-400 flex-1">${esc(s.description)}</div>` : '<div class="flex-1"></div>'}
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs text-amber-300">${esc(s.pricing || '')}</span>
+          <a href="${esc(s.url)}" target="_blank" rel="noopener" class="btn-primary !py-1 !px-3 text-xs">Ochish ↗</a>
+        </div>
+      </div>`).join('') || '<p class="text-sm text-slate-400">Ro‘yxat hali bo‘sh — ilmiy bo‘lim qo‘shadi.</p>';
+
+    const articles = mine.length ? mine.map(x => {
+      const pl = plagiarismState(x);
+      const has = x.originality !== null && x.originality !== undefined;
+      return `<div class="step-row">
+        <span class="step-icon ${!has ? 'bg-slate-700/60 text-slate-300' : pl.low ? 'bg-rose-500/20 text-rose-400' : 'bg-emerald-500 text-white'}"><i data-lucide="${!has ? 'circle' : pl.low ? 'alert-triangle' : 'check'}" class="w-5 h-5"></i></span>
+        <div class="flex-1 min-w-0">
+          <div class="step-title truncate">${esc(x.title)}</div>
+          <div class="text-xs ${pl.low ? 'text-rose-300' : 'text-slate-400'} truncate">${has ? esc(pl.text) + (x.plagiarism_checked_at ? ' · ' + fmtDate(x.plagiarism_checked_at) : '') + (pl.low ? ' — talabdan past' : '') : 'Hali tekshirilmagan'}</div>
+        </div>
+        <button onclick="openForm('publications','${x.id}')" class="btn-ghost !py-1 !px-3 text-xs shrink-0">${has ? 'Tahrirlash' : 'Natija kiritish'}</button>
+      </div>`;
+    }).join('') : emptyCard('Hali maqola kiritilmagan.', `<button onclick="openForm('publications')" class="btn-primary">+ Maqola qo‘shish</button>`);
+
+    return header('Antiplagiat', 'Maqolani tekshirish va natijani qayd etish') + `
+      <div class="grid grid-cols-3 gap-4">
+        ${tile('', 'file-text', 'blue', String(mine.length), 'Maqolalar')}
+        ${tile('', 'check-circle-2', 'emerald', `${checked.length} / ${mine.length}`, 'Tekshirilgan')}
+        ${tile('', 'alert-triangle', low.length ? 'rose' : 'slate', String(low.length), 'Talabdan past')}
+      </div>
+      <div class="rounded-2xl p-5 bg-[#16264A] border border-[#1D3058] text-sm text-slate-300 space-y-1">
+        <div class="font-semibold text-white">Qanday ishlaydi</div>
+        <div>1. Pastdagi tizimlardan birini tanlang va uning saytida maqolangizni tekshiring (pullik bo‘lsa, to‘lov tizimning o‘zida).</div>
+        <div>2. Natijani shu sahifada maqola qarshisidagi <b>“Natija kiritish”</b> orqali yozing: tizim, originallik %, talab qilingan %.</div>
+      </div>
+      <div class="space-y-3"><h3 class="text-lg font-semibold text-white">Maqolalarim</h3>${articles}</div>
+      <div class="space-y-3"><h3 class="text-lg font-semibold text-white">Antiplagiat tizimlari</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">${services}</div></div>
+      <p class="text-xs text-slate-500">Rasmiy hisoblanadigan natija universitet va jurnal talabiga bog‘liq. Ba’zi tizimlar tekshirilgan matnni o‘z bazasiga saqlaydi — chop etilmagan maqolani yuborishdan oldin bu sozlamani tekshiring.</p>`;
+  }
+
   function cellValue(tableKey, row) {
     switch (tableKey) {
       case 'plan_items': return { main: row.title, sub: `${row.year}-yil · ${row.due_date ? fmtDate(row.due_date) : 'muddat yo‘q'}`, badge: [PLAN_STATUS[row.status].label, PLAN_STATUS[row.status].badge] };
@@ -1958,7 +2007,7 @@
 
   // Local-only hook for testing views with mock data (never exposed on the deployed site)
   if (['localhost', '127.0.0.1'].includes(location.hostname)) {
-    window.__liveTest = { L, J, renderFormattingView, renderDefenseView, renderChaptersView, renderJournalsView, scholarship, renderScholarshipView, renderDashboard, renderDepartmentView, renderSupervisorView, renderMyDataView };
+    window.__liveTest = { L, J, renderPlagiarismView, renderFormattingView, renderDefenseView, renderChaptersView, renderJournalsView, scholarship, renderScholarshipView, renderDashboard, renderDepartmentView, renderSupervisorView, renderMyDataView };
   }
 
   // =====================================================================
