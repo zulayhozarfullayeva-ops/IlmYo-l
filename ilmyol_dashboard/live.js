@@ -999,11 +999,15 @@
   // "a'lo" written in any apostrophe style, or 5
   const isExcellent = g => /^a\s*['‘’`ʼ]?\s*lo$|^5$|^excellent$|^отлично$/i.test(String(g || '').trim());
 
+  // VM 226, App. 1: awarded "for the study period of the final course" (cl. 10), decided in December (cl. 7).
+  // Final course starts F = start + 2 years. F in Jan–Mar (January cohorts): apply in the October BEFORE it,
+  // so the December decision covers the whole final course; otherwise apply in October of F's year.
+  // Must match private.scholarship_apply_year() in the database.
   function scholarshipApplyYear(start) {
     if (!start) return null;
     const d = parseDate(start);
-    d.setFullYear(d.getFullYear() + 2); // final (3rd) year of tayanch doktorantura
-    return d.getMonth() + 1 <= 10 ? d.getFullYear() : d.getFullYear() + 1;
+    d.setFullYear(d.getFullYear() + 2);
+    return d.getMonth() + 1 <= 3 ? d.getFullYear() - 1 : d.getFullYear();
   }
 
   function scholarship(sid) {
@@ -1035,7 +1039,7 @@
         warn: certs.length && !validCert && applyYear ? `Sertifikat ${applyYear}-yil noyabr testigacha amal qilmaydi.` : '',
         hint: 'Talab qilinadigan darajani vazirlik belgilaydi — ilmiy bo‘limdan aniqlang.' },
       { req: true, title: 'Davlat test markazidagi test: chet tili, AT, O‘zbekiston tarixi', kind: 'test_prep', value: doneOf('test_prep') ? 'tayyor' : '', ok: doneOf('test_prep'),
-        hint: 'Test 3-kursning 1–30 noyabrida o‘tkaziladi.' },
+        hint: applyYear ? `Test ${applyYear}-yil 1–30 noyabrda o‘tkaziladi.` : 'Test ariza yilining 1–30 noyabrida o‘tkaziladi.' },
       { req: true, final: true, title: 'Yetakchi mutaxassislar fikri', kind: 'expert_opinion', ok: doneOf('expert_opinion') },
       { req: true, final: true, title: 'Ilmiy ish annotatsiyasi (2 nusxada, rasmlar bilan)', kind: 'annotation', ok: doneOf('annotation') },
       { req: true, final: true, title: 'Ilmiy kengashda ochiq muhokama va tavsiya', kind: 'council_discussion', ok: doneOf('council_discussion') },
@@ -1070,7 +1074,7 @@
         : r.action ? `<button onclick="${r.action}" class="btn-ghost !py-1 !px-3 text-xs shrink-0">Ochish</button>` : '';
       return `<div class="step-row">${icon}
         <div class="flex-1 min-w-0">
-          <div class="step-title">${r.title}${r.final ? ' <span class="text-[10px] font-medium text-slate-500 uppercase">· 3-kurs</span>' : ''}</div>
+          <div class="step-title">${r.title}${r.final ? ` <span class="text-[10px] font-medium text-slate-500 uppercase">· ariza yili (${y})</span>` : ''}</div>
           ${r.warn ? `<div class="text-xs text-rose-300 mt-0.5">${r.warn}</div>` : r.hint ? `<div class="text-xs text-slate-400 mt-0.5">${r.hint}</div>` : ''}
         </div>
         ${r.value ? `<span class="text-sm font-mono text-slate-300 shrink-0">${esc(r.value)}</span>` : ''}${btn}</div>`;
@@ -1080,16 +1084,18 @@
     const courseFrom = n => addMonths(L.me.start_date, 12 * (n - 1));
     const courseTo = n => { const d = parseDate(addMonths(L.me.start_date, 12 * n)); d.setDate(d.getDate() - 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
     const short = s => { const d = parseDate(s); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`; };
-    const timeline = [
-      [1, ['Malakaviy imtihonlarni faqat “a’lo”ga topshirish', `1-maqola yetakchi nashrda — ${short(courseTo(1))} gacha`, 'Chet tili: kerakli darajani aniqlash va tayyorgarlik', 'Birinchi xalqaro konferensiya']],
-      [2, [`2-maqola (iloji bo‘lsa Scopus / Web of Science) — ${short(courseTo(2))} gacha`, 'Xalqaro konferensiya to‘plamida maqola', `Til sertifikati — 01.12.${y} dan keyin ham amal qiladigan`, 'Dissertatsiya 40–60%', 'Mualliflik guvohnomasi, joriy etish dalolatnomasi']],
-      [3, [`Dissertatsiya ≥70% va muassasa xulosasi — 01.10.${y} gacha`, 'Annotatsiya va mutaxassislar fikri', 'Ilmiy kengashda muhokama va tavsiya', `Hujjat topshirish: 01.10–31.10.${y}`, `Davlat test markazida test: 01.11–30.11.${y}`, `Vazirlik qarori: dekabr ${y}`]]
-    ];
+    // Which course the October application falls in (2 for January cohorts, 3 for September cohorts)
+    const applyDate = `${y}-10-01`;
+    const applyCourse = Math.min(3, Math.floor(-daysUntil(L.me.start_date) / 365.25 + (daysUntil(applyDate) / 365.25)) + 1);
+    const prep = ['Malakaviy imtihonlarni faqat “a’lo”ga topshirish', '1-maqola yetakchi nashrda', 'Xalqaro konferensiya to‘plamida maqola', 'Chet tili: kerakli darajani aniqlash va tayyorgarlik'];
+    const applyItems = [`2-maqola yetakchi nashrda — 01.10.${y} gacha`, `Til sertifikati — 01.12.${y} dan keyin ham amal qiladigan`, `Dissertatsiya ≥70% va muassasa xulosasi — 01.10.${y} gacha`, 'Annotatsiya va yetakchi mutaxassislar fikri', 'Ilmiy kengashda muhokama va tavsiya', `Hujjat topshirish: 01.10–31.10.${y}`, `Test: 01.11–30.11.${y}`, `Vazirlik qarori: dekabr ${y}`];
+    const after = ['Stipendiya oxirgi kurs davomida to‘lanadi (oddiy stipendiyaning 2 barobari)', 'Mualliflik guvohnomasi, joriy etish dalolatnomasi', 'Dissertatsiyani yakunlash va himoyaga tayyorlash'];
+    const timeline = [1, 2, 3].map(n => [n, n < applyCourse ? prep : n === applyCourse ? applyItems : after]);
     const keyDates = [
       ['Kirgan sana', short(L.me.start_date)],
-      ['3-kurs (so‘nggi yil) boshlanadi', short(courseFrom(3))],
-      ['Hujjat qabuli', `01.10 – 31.10.${y}`],
-      ['Test', `01.11 – 30.11.${y}`],
+      [`Ariza — ${applyCourse}-kurs`, `01.10 – 31.10.${y}`],
+      ['Test / qaror', `noyabr / dekabr ${y}`],
+      ['Stipendiya davri (oxirgi kurs)', `${short(courseFrom(3))} – ${short(courseTo(3))}`],
       ['Doktorantura tugaydi', short(courseTo(3))]
     ];
 
