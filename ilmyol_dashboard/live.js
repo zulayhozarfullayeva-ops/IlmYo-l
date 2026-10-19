@@ -1961,8 +1961,20 @@
     const { error } = await sb.from('profiles').update(patch).eq('id', L.me.id);
     if (error) return fail(error);
     if (patch.topic) { IlmYolData.student.topic = patch.topic; const i = document.getElementById('topicSearchInput'); if (i) i.value = patch.topic; AppState.currentInputTopic = null; }
-    toast('Profil saqlandi');
-    reload();
+    await reload();
+    const isStudent = L.me.role === 'doctoral_student';
+    const missing = isStudent ? [['topic', 'mavzu'], ['specialty_code', 'ixtisoslik'], ['department', 'kafedra'], ['start_date', 'kirgan sana']].filter(([k]) => !L.me[k]).map(([, l]) => l) : [];
+    openLiveModal('Profil saqlandi', `
+      <div class="flex flex-col items-center text-center gap-3 py-2">
+        <span class="w-16 h-16 rounded-full bg-emerald-500 text-white flex items-center justify-center"><i data-lucide="check" class="w-9 h-9"></i></span>
+        <p class="text-base text-white font-semibold">Ma’lumotlaringiz bazaga yozildi</p>
+        ${missing.length ? `<p class="text-sm text-amber-300">To‘ldirilmagan: ${missing.join(', ')}</p>` : '<p class="text-sm text-slate-400">Endi reja muddatlari, eslatmalar va stipendiya taymeri shu ma’lumotlar asosida ishlaydi.</p>'}
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        ${isStudent ? `<button onclick="closeModal('liveModal'); switchView('dashboard')" class="btn-primary">Bosh sahifa</button>
+        <button onclick="closeModal('liveModal'); switchView('roadmap')" class="btn-ghost">Rejaga o‘tish</button>` : `<button onclick="closeModal('liveModal'); switchView('${landingView()}')" class="btn-primary">Bosh sahifa</button>`}
+        <button onclick="closeModal('liveModal')" class="btn-ghost">Shu yerda qolish</button>
+      </div>`);
   };
 
   // ---- Antiplagiat: free link-out to external systems + recorded result per article ----
