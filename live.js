@@ -23,7 +23,7 @@
     user: null,
     me: null,
     profiles: [],
-    plan: [], tasks: [], chapters: [], pubs: [], docs: [], evidence: [], comments: [], schol: [], plag: [],
+    plan: [], tasks: [], chapters: [], pubs: [], docs: [], evidence: [], comments: [], schol: [], plag: [], specs: [],
     myDataTab: 'profile',
     config: {},
     deptFilterYear: 'ALL',
@@ -141,7 +141,7 @@
   }
 
   async function loadAll() {
-    const [profiles, plan, tasks, chapters, pubs, docs, evidence, comments, config, schol, plag] = await Promise.all([
+    const [profiles, plan, tasks, chapters, pubs, docs, evidence, comments, config, schol, plag, specs] = await Promise.all([
       q(sb.from('profiles').select('*').order('full_name')),
       q(sb.from('plan_items').select('*')),
       q(sb.from('tasks').select('*').order('created_at', { ascending: false })),
@@ -152,9 +152,10 @@
       q(sb.from('comments').select('*').order('created_at', { ascending: false }).limit(500)),
       q(sb.from('app_config').select('*')),
       q(sb.from('scholarship_items').select('*').order('created_at')),
-      q(sb.from('plagiarism_services').select('*').order('sort_order'))
+      q(sb.from('plagiarism_services').select('*').order('sort_order')),
+      q(sb.from('specialties').select('*').order('code'))
     ]);
-    Object.assign(L, { profiles, plan, tasks, chapters, pubs, docs, evidence, comments, schol, plag });
+    Object.assign(L, { profiles, plan, tasks, chapters, pubs, docs, evidence, comments, schol, plag, specs });
     L.config = Object.fromEntries(config.map(c => [c.key, c.value]));
     L.me = byId(profiles, L.user.id) || null;
   }
@@ -1355,8 +1356,30 @@
           </tbody></table></div>
       </div>
       ${renderUsersAdmin()}
+      ${renderSpecialtiesAdmin()}
       ${renderPlagiarismAdmin()}`;
   }
+
+  function renderSpecialtiesAdmin() {
+    return `<div class="rounded-2xl p-5 bg-[#121E38] border border-[#1D3058] space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div><h3 class="text-base font-semibold text-white">Ixtisosliklar ro‘yxati</h3>
+          <p class="text-xs text-slate-400 mt-1">Doktorantlar profilda shu ro‘yxatdan tanlaydi.</p></div>
+        <button onclick="openForm('specialties')" class="btn-primary">+ Qo‘shish</button>
+      </div>
+      <div class="space-y-2">${L.specs.map(s => `<div class="step-row">
+        <span class="font-mono text-sm text-blue-300 shrink-0">${esc(s.code)}</span>
+        <div class="flex-1 min-w-0"><div class="step-title truncate">${esc(s.name)}</div>${s.source ? `<div class="text-xs text-slate-500 truncate">${esc(s.source)}</div>` : ''}</div>
+        <button onclick="deleteSpecialty('${esc(s.code)}')" class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800" title="O‘chirish"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+      </div>`).join('') || '<p class="text-sm text-slate-500">Ro‘yxat bo‘sh.</p>'}</div>
+    </div>`;
+  }
+  window.deleteSpecialty = async function (code) {
+    if (!confirm(`${code} ro‘yxatdan o‘chirilsinmi? (Doktorantlar profilidagi shifr o‘zgarmaydi)`)) return;
+    const { error } = await sb.from('specialties').delete().eq('code', code);
+    if (error) return fail(error);
+    toast('O‘chirildi'); reload();
+  };
 
   function renderPlagiarismAdmin() {
     return `<div class="rounded-2xl p-5 bg-[#121E38] border border-[#1D3058] space-y-3">
@@ -1474,6 +1497,13 @@
         { k: 'plagiarism_checked_at', l: 'Tekshirilgan sana', type: 'date' }
       ]
     },
+    specialties: {
+      label: 'Ixtisosliklar', single: 'Ixtisoslik', global: true, fields: [
+        { k: 'code', l: 'Shifr (masalan 10.00.09)', type: 'text', req: true },
+        { k: 'name', l: 'Nomi', type: 'text', req: true },
+        { k: 'source', l: 'Manba (ixtiyoriy)', type: 'text' }
+      ]
+    },
     plagiarism_services: {
       label: 'Antiplagiat tizimlari', single: 'Antiplagiat tizimi', global: true, fields: [
         { k: 'name', l: 'Nomi', type: 'text', req: true },
@@ -1504,7 +1534,7 @@
       { k: 'note', l: 'Izoh', type: 'text' }
     ]
   };
-  const LIST_KEY = { plan_items: 'plan', tasks: 'tasks', chapters: 'chapters', publications: 'pubs', documents: 'docs', scholarship_items: 'schol', plagiarism_services: 'plag' };
+  const LIST_KEY = { plan_items: 'plan', tasks: 'tasks', chapters: 'chapters', publications: 'pubs', documents: 'docs', scholarship_items: 'schol', plagiarism_services: 'plag', specialties: 'specs' };
 
   function renderMyDataView() {
     const isStudent = role() === 'doctoral_student';
@@ -1526,8 +1556,7 @@
       ${f('full_name', 'F.I.Sh.', 'text')}
       <div><label class="live-label">Email</label><input value="${esc(p.email || '')}" disabled class="live-input opacity-60"></div>
       ${isStudent ? f('topic', 'Dissertatsiya mavzusi', 'textarea', 'md:col-span-2') : f('academic_title', 'Ilmiy daraja va unvon', 'text')}
-      ${f('specialty_code', 'Ixtisoslik shifri (masalan 10.00.09)', 'text')}
-      ${f('specialty_name', 'Ixtisoslik nomi', 'text')}
+      ${specialtyPicker(p)}
       ${f('university', 'OTM / ilmiy muassasa', 'text')}
       ${f('department', 'Kafedra', 'text')}
       ${isStudent ? f('start_date', 'Doktoranturaga kirgan sana (reja muddatlari va stipendiya taymeri shundan hisoblanadi)', 'date') : ''}
@@ -1540,6 +1569,34 @@
       <div class="md:col-span-2 flex justify-end"><button class="btn-primary">Saqlash</button></div>
     </form>`;
   }
+  // Specialty is picked from the department-managed list; "Boshqa" reveals manual fields
+  function specialtyPicker(p) {
+    const known = L.specs.some(s => s.code === p.specialty_code);
+    const other = !!p.specialty_code && !known;
+    return `<div class="md:col-span-2">
+      <label class="live-label">Ixtisoslik</label>
+      <select id="pf_specialty_select" onchange="onSpecialtySelect(this.value)" class="live-input">
+        <option value="">— tanlang —</option>
+        ${L.specs.map(s => `<option value="${esc(s.code)}" ${p.specialty_code === s.code ? 'selected' : ''}>${esc(s.code)} — ${esc(s.name)}</option>`).join('')}
+        <option value="__other" ${other ? 'selected' : ''}>Boshqa (ro‘yxatda yo‘q)…</option>
+      </select>
+      <div id="pf_specialty_other" class="${other ? '' : 'hidden'} grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
+        <input id="pf_specialty_code" value="${esc(p.specialty_code || '')}" placeholder="Shifr, masalan 08.00.13" pattern="\\d{2}\\.\\d{2}\\.\\d{2}" class="live-input">
+        <input id="pf_specialty_name" value="${esc(p.specialty_name || '')}" placeholder="Ixtisoslik nomi" class="live-input md:col-span-2">
+      </div>
+    </div>`;
+  }
+  window.onSpecialtySelect = function (v) {
+    const box = document.getElementById('pf_specialty_other');
+    const code = document.getElementById('pf_specialty_code');
+    const name = document.getElementById('pf_specialty_name');
+    if (v === '__other') { box.classList.remove('hidden'); code.value = ''; name.value = ''; code.focus(); return; }
+    box.classList.add('hidden');
+    const s = L.specs.find(x => x.code === v);
+    code.value = s ? s.code : '';
+    name.value = s ? s.name : '';
+  };
+
   window.saveProfile = async function (e) {
     e.preventDefault();
     const keys = ['full_name', 'topic', 'academic_title', 'specialty_code', 'specialty_name', 'university', 'department', 'start_date', 'phone', 'supervisor_text'];
