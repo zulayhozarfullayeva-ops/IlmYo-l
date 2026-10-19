@@ -23,7 +23,7 @@
     user: null,
     me: null,
     profiles: [],
-    plan: [], tasks: [], chapters: [], pubs: [], docs: [], evidence: [], comments: [], schol: [], plag: [], specs: [], orders: [],
+    plan: [], tasks: [], chapters: [], pubs: [], docs: [], evidence: [], comments: [], schol: [], plag: [], specs: [], orders: [], depts: [],
     myDataTab: 'profile',
     config: {},
     deptFilterYear: 'ALL',
@@ -141,7 +141,7 @@
   }
 
   async function loadAll() {
-    const [profiles, plan, tasks, chapters, pubs, docs, evidence, comments, config, schol, plag, specs, orders] = await Promise.all([
+    const [profiles, plan, tasks, chapters, pubs, docs, evidence, comments, config, schol, plag, specs, orders, depts] = await Promise.all([
       q(sb.from('profiles').select('*').order('full_name')),
       q(sb.from('plan_items').select('*')),
       q(sb.from('tasks').select('*').order('created_at', { ascending: false })),
@@ -154,9 +154,10 @@
       q(sb.from('scholarship_items').select('*').order('created_at')),
       q(sb.from('plagiarism_services').select('*').order('sort_order')),
       q(sb.from('specialties').select('*').order('code')),
-      q(sb.from('admission_orders').select('*').order('order_date', { ascending: false }))
+      q(sb.from('admission_orders').select('*').order('order_date', { ascending: false })),
+      q(sb.from('departments').select('*').order('name'))
     ]);
-    Object.assign(L, { profiles, plan, tasks, chapters, pubs, docs, evidence, comments, schol, plag, specs, orders });
+    Object.assign(L, { profiles, plan, tasks, chapters, pubs, docs, evidence, comments, schol, plag, specs, orders, depts });
     L.config = Object.fromEntries(config.map(c => [c.key, c.value]));
     L.me = byId(profiles, L.user.id) || null;
   }
@@ -1603,6 +1604,7 @@
       ${renderUsersAdmin()}
       ${renderOrdersAdmin()}
       ${renderSpecialtiesAdmin()}
+      ${renderDepartmentsAdmin()}
       ${renderPlagiarismAdmin()}`;
   }
 
@@ -1622,6 +1624,24 @@
           <button onclick="deleteRow('admission_orders','${o.id}')" class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800" title="O‘chirish"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
         </div>`;
       }).join('') || '<p class="text-sm text-slate-500">Hali buyruq kiritilmagan.</p>'}</div>
+    </div>`;
+  }
+
+  function renderDepartmentsAdmin() {
+    return `<div class="rounded-2xl p-5 bg-[#121E38] border border-[#1D3058] space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div><h3 class="text-base font-semibold text-white">Kafedralar ro‘yxati</h3>
+          <p class="text-xs text-slate-400 mt-1">Doktorantlar profilda shu ro‘yxatdan tanlaydi.</p></div>
+        <button onclick="openForm('departments')" class="btn-primary">+ Qo‘shish</button>
+      </div>
+      <div class="space-y-2">${L.depts.map(d => {
+        const n = L.profiles.filter(p => p.department === d.name).length;
+        return `<div class="step-row">
+          <div class="flex-1 min-w-0"><div class="step-title truncate">${esc(d.name)}</div><div class="text-xs text-slate-500 truncate">${n} ta foydalanuvchi${d.university ? ' · ' + esc(d.university) : ''}</div></div>
+          <button onclick="openForm('departments','${d.id}')" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800" title="Tahrirlash"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+          <button onclick="deleteRow('departments','${d.id}')" class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800" title="O‘chirish"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </div>`;
+      }).join('') || '<p class="text-sm text-slate-500">Ro‘yxat bo‘sh.</p>'}</div>
     </div>`;
   }
 
@@ -1774,6 +1794,13 @@
         { k: 'note', l: 'Izoh', type: 'textarea' }
       ]
     },
+    departments: {
+      label: 'Kafedralar', single: 'Kafedra', global: true, fields: [
+        { k: 'name', l: 'Kafedra nomi', type: 'text', req: true },
+        { k: 'university', l: 'OTM', type: 'text' },
+        { k: 'source', l: 'Manba (ixtiyoriy)', type: 'text' }
+      ]
+    },
     specialties: {
       label: 'Ixtisosliklar', single: 'Ixtisoslik', global: true, fields: [
         { k: 'code', l: 'Shifr (masalan 10.00.09)', type: 'text', req: true },
@@ -1811,7 +1838,7 @@
       { k: 'note', l: 'Izoh', type: 'text' }
     ]
   };
-  const LIST_KEY = { plan_items: 'plan', tasks: 'tasks', chapters: 'chapters', publications: 'pubs', documents: 'docs', scholarship_items: 'schol', plagiarism_services: 'plag', specialties: 'specs', admission_orders: 'orders' };
+  const LIST_KEY = { plan_items: 'plan', tasks: 'tasks', chapters: 'chapters', publications: 'pubs', documents: 'docs', scholarship_items: 'schol', plagiarism_services: 'plag', specialties: 'specs', admission_orders: 'orders', departments: 'depts' };
 
   function renderMyDataView() {
     const isStudent = role() === 'doctoral_student';
@@ -1839,7 +1866,7 @@
       ${isStudent ? f('topic', 'Dissertatsiya mavzusi', 'textarea', 'md:col-span-2') : f('academic_title', 'Ilmiy daraja va unvon', 'text')}
       ${specialtyPicker(p)}
       ${f('university', 'OTM / ilmiy muassasa', 'text')}
-      ${f('department', 'Kafedra', 'text')}
+      ${departmentPicker(p)}
       ${isStudent ? orderPicker(p) : ''}
       ${isStudent ? f('start_date', 'Doktoranturaga kirgan sana (reja muddatlari va stipendiya taymeri shundan hisoblanadi)', 'date') : ''}
       ${f('phone', 'Telefon', 'tel')}
@@ -1868,6 +1895,27 @@
       </div>
     </div>`;
   }
+  // Department (kafedra) picked from the managed list; "Boshqa" reveals a text field
+  function departmentPicker(p) {
+    const known = L.depts.some(d => d.name === p.department);
+    const other = !!p.department && !known;
+    return `<div>
+      <label class="live-label">Kafedra</label>
+      <select id="pf_department_select" onchange="onDepartmentSelect(this.value)" class="live-input">
+        <option value="">— tanlang —</option>
+        ${L.depts.map(d => `<option value="${esc(d.name)}" ${p.department === d.name ? 'selected' : ''}>${esc(d.name)}</option>`).join('')}
+        <option value="__other" ${other ? 'selected' : ''}>Boshqa (ro‘yxatda yo‘q)…</option>
+      </select>
+      <input id="pf_department" value="${esc(p.department || '')}" placeholder="Kafedra nomi" class="live-input mt-2 ${other ? '' : 'hidden'}">
+    </div>`;
+  }
+  window.onDepartmentSelect = function (v) {
+    const input = document.getElementById('pf_department');
+    if (v === '__other') { input.classList.remove('hidden'); input.value = ''; input.focus(); return; }
+    input.classList.add('hidden');
+    input.value = v;
+  };
+
   // Admission order (department-managed) fixes the official study start date
   function orderPicker(p) {
     const o = L.orders.find(x => x.id === p.admission_order_id);
