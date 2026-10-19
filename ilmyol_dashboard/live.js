@@ -1051,33 +1051,16 @@
     return { s, items, applyYear, rows, readiness: pct(req.filter(r => r.ok).length, req.length) };
   }
 
-  // ---- Language preparation (IELTS / TRKI): two-stage plans created as tasks with reminders ----
+  // ---- Foreign-language certificate preparation: two-stage checkpoints created as tasks with reminders.
+  // Only a non-CIS language counts for the scholarship (VM 226, App. 1, cl. 3), so the track is IELTS;
+  // study content is left to the student and their teacher — only control points are created.
   const LANG_TRACKS = {
-    IELTS: {
-      label: 'IELTS (ingliz tili)', counts: true,
-      stage1: 'grammatika va so‘z boyligi (Academic Word List), har kuni 1 soat listening va reading',
-      mid1: 'diagnostik test — joriy darajani aniqlash',
-      end1: 'to‘liq mock test #1, natija bo‘yicha zaif ko‘nikmalarni belgilash',
-      stage2: 'imtihon formatida 4 ko‘nikma: har hafta Writing Task 1 va Task 2, Speaking mashqi',
-      mock2: 'to‘liq mock test #2 (maqsad — talab qilingan ball)',
-      register: 'imtihonga ro‘yxatdan o‘tish (rasmiy IELTS markazi)',
-      exam: 'IELTS imtihoni'
-    },
-    TRKI: {
-      label: 'TRKI (rus tili)', counts: false,
-      stage1: 'grammatika (kelishiklar, fe’l turlari va zamonlari) va leksika, har kuni o‘qish va tinglash',
-      mid1: 'diagnostik test — TRKI darajasini aniqlash (TRKI-1 / TRKI-2)',
-      end1: 'TRKI formatidagi sinov testi #1',
-      stage2: '5 subtest formati: leksika-grammatika, o‘qish, tinglash, yozish, gapirish',
-      mock2: 'TRKI sinov testi #2',
-      register: 'imtihonga ro‘yxatdan o‘tish (vakolatli test markazi)',
-      exam: 'TRKI imtihoni'
-    }
+    IELTS: { label: 'IELTS (ingliz tili)' }
   };
   const nextMonthStart = () => { const d = new Date(); return `${d.getFullYear() + (d.getMonth() === 11 ? 1 : 0)}-${String((d.getMonth() + 1) % 12 + 1).padStart(2, '0')}-01`; };
 
   function renderLanguagePrep(applyYear) {
-    const tasks = L.tasks.filter(t => t.student_id === L.me.id && /^(IELTS|TRKI) /.test(t.title))
+    const tasks = L.tasks.filter(t => t.student_id === L.me.id && /^IELTS /.test(t.title))
       .sort((a, b) => (a.due_date || '9999') < (b.due_date || '9999') ? -1 : 1);
     const latestExam = applyYear ? `${applyYear}-09-15` : null;
     const track = key => {
@@ -1085,12 +1068,10 @@
       const exam = mine.find(t => t.title.startsWith(`${key} imtihoni`) || t.title.includes('imtihoni'));
       const late = exam && latestExam && exam.due_date > latestExam;
       const done = mine.filter(t => t.done).length;
-      return `<div class="rounded-2xl p-5 bg-[#121E38] border ${LANG_TRACKS[key].counts ? 'border-[#1D3058]' : 'border-amber-500/30'} space-y-3">
+      return `<div class="rounded-2xl p-5 bg-[#121E38] border border-[#1D3058] space-y-3">
         <div class="flex items-center justify-between gap-2"><h4 class="font-semibold text-white">${LANG_TRACKS[key].label}</h4>
           ${mine.length ? `<span class="text-xs text-slate-400 font-mono">${done} / ${mine.length}</span>` : ''}</div>
-        ${LANG_TRACKS[key].counts
-          ? '<p class="text-xs text-emerald-300">Stipendiyaning chet tili talabiga mos (MDH davlatlari tili emas).</p>'
-          : '<p class="text-xs text-amber-300">Diqqat: rus tili MDH davlatining davlat tili — qarorga ko‘ra stipendiyaning chet tili talabini qoplamaydi. Umumiy malaka uchun foydali.</p>'}
+        <p class="text-xs text-slate-400">Faqat nazorat nuqtalari yaratiladi; o‘quv rejasini o‘qituvchingiz yoki kursingiz belgilaydi. Boshqa sertifikat (TOEFL, Goethe, DELF va h.k.) bo‘lsa, vazifalar nomini ✏️ bilan o‘zgartiring.</p>
         ${mine.length ? `<div class="space-y-1">${mine.map(taskRow).join('')}</div>
             ${late ? `<p class="text-xs text-rose-300">Imtihon ${fmtDate(exam.due_date)} — stipendiya hujjatlari (oktabr ${applyYear}) uchun kech. Boshlanish sanasini oldinroq qiling yoki intensiv variantni tanlang.</p>` : ''}
             <button onclick="deleteLanguagePlan('${key}')" class="text-xs text-slate-400 hover:text-rose-300">Rejani o‘chirish</button>`
@@ -1102,9 +1083,9 @@
       </div>`;
     };
     return `<div class="space-y-3">
-      <h3 class="text-lg font-semibold text-white">Til tayyorgarligi</h3>
-      <p class="text-sm text-slate-400">Ikki bosqichli reja vazifalar sifatida yaratiladi — har bir bosqich muddatida Telegram’da eslatma keladi.${latestExam ? ` Imtihonni ${fmtDate(latestExam)} gacha topshirish tavsiya etiladi; sertifikat 01.12.${applyYear} dan keyin ham amal qilishi kerak.` : ''}</p>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">${track('IELTS')}${track('TRKI')}</div>
+      <h3 class="text-lg font-semibold text-white">Chet tili sertifikatiga tayyorgarlik</h3>
+      <p class="text-sm text-slate-400">Stipendiya uchun MDH davlatlari tili bo‘lmagan chet tili kerak. Ikki bosqichli nazorat nuqtalari vazifa sifatida yaratiladi — har birining muddatida Telegram’da eslatma keladi.${latestExam ? ` Imtihonni ${fmtDate(latestExam)} gacha topshirish tavsiya etiladi; sertifikat 01.12.${applyYear} dan keyin ham amal qilishi kerak.` : ''}</p>
+      ${track('IELTS')}
     </div>`;
   }
 
@@ -1116,13 +1097,12 @@
     const at = m => addMonths(start, m);
     const v = months === 12 ? '1 yillik' : '6 oylik';
     const rows = [
-      [at(0), `${key} 1-bosqich boshlandi (${v}): ${t.stage1}`],
-      [at(Math.round(half / 2)), `${key} 1-bosqich oraliq nazorat: ${t.mid1}`],
-      [at(half), `${key} 1-bosqich yakuni: ${t.end1}`],
-      [at(half), `${key} 2-bosqich boshlandi: ${t.stage2}`],
-      [at(months - Math.max(1, months / 6)), `${key} ${t.mock2}`],
-      [at(months - 1), `${key} ${t.register}`],
-      [at(months), `${key} imtihoni — ${t.exam}`]
+      [at(0), `${key} 1-bosqich boshlandi (${v} reja)`],
+      [at(half), `${key} 1-bosqich yakuni: sinov testi`],
+      [at(half), `${key} 2-bosqich boshlandi: imtihon formatida tayyorgarlik`],
+      [at(months - Math.max(1, months / 6)), `${key} ikkinchi sinov testi`],
+      [at(months - 1), `${key}: imtihonga ro‘yxatdan o‘tish`],
+      [at(months), `${key} imtihoni`]
     ].map(([due_date, title]) => ({ student_id: L.me.id, title, due_date }));
     const { error } = await sb.from('tasks').insert(rows);
     if (error) return fail(error);
