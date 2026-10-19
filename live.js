@@ -23,7 +23,7 @@
     user: null,
     me: null,
     profiles: [],
-    plan: [], tasks: [], chapters: [], pubs: [], docs: [], evidence: [], comments: [], schol: [], plag: [], specs: [],
+    plan: [], tasks: [], chapters: [], pubs: [], docs: [], evidence: [], comments: [], schol: [], plag: [], specs: [], orders: [],
     myDataTab: 'profile',
     config: {},
     deptFilterYear: 'ALL',
@@ -141,7 +141,7 @@
   }
 
   async function loadAll() {
-    const [profiles, plan, tasks, chapters, pubs, docs, evidence, comments, config, schol, plag, specs] = await Promise.all([
+    const [profiles, plan, tasks, chapters, pubs, docs, evidence, comments, config, schol, plag, specs, orders] = await Promise.all([
       q(sb.from('profiles').select('*').order('full_name')),
       q(sb.from('plan_items').select('*')),
       q(sb.from('tasks').select('*').order('created_at', { ascending: false })),
@@ -153,9 +153,10 @@
       q(sb.from('app_config').select('*')),
       q(sb.from('scholarship_items').select('*').order('created_at')),
       q(sb.from('plagiarism_services').select('*').order('sort_order')),
-      q(sb.from('specialties').select('*').order('code'))
+      q(sb.from('specialties').select('*').order('code')),
+      q(sb.from('admission_orders').select('*').order('order_date', { ascending: false }))
     ]);
-    Object.assign(L, { profiles, plan, tasks, chapters, pubs, docs, evidence, comments, schol, plag, specs });
+    Object.assign(L, { profiles, plan, tasks, chapters, pubs, docs, evidence, comments, schol, plag, specs, orders });
     L.config = Object.fromEntries(config.map(c => [c.key, c.value]));
     L.me = byId(profiles, L.user.id) || null;
   }
@@ -1356,8 +1357,28 @@
           </tbody></table></div>
       </div>
       ${renderUsersAdmin()}
+      ${renderOrdersAdmin()}
       ${renderSpecialtiesAdmin()}
       ${renderPlagiarismAdmin()}`;
+  }
+
+  function renderOrdersAdmin() {
+    return `<div class="rounded-2xl p-5 bg-[#121E38] border border-[#1D3058] space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div><h3 class="text-base font-semibold text-white">Qabul buyruqlari</h3>
+          <p class="text-xs text-slate-400 mt-1">Doktorant profilda o‘z buyrug‘ini tanlaydi — kirgan sana va muddatlar shundan olinadi.</p></div>
+        <button onclick="openForm('admission_orders')" class="btn-primary">+ Qo‘shish</button>
+      </div>
+      <div class="space-y-2">${L.orders.map(o => {
+        const n = L.profiles.filter(p => p.admission_order_id === o.id).length;
+        return `<div class="step-row">
+          <div class="flex-1 min-w-0"><div class="step-title truncate">${esc(o.number)} · ${esc(fmtDate(o.order_date))} — ${esc(o.university)}</div>
+            <div class="text-xs text-slate-400 truncate">O‘qish: ${esc(fmtDate(o.study_start))} dan ${o.duration_years} yil · ${n} ta doktorant${o.doc_code ? ' · kod ' + esc(o.doc_code) : ''}</div></div>
+          <button onclick="openForm('admission_orders','${o.id}')" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800" title="Tahrirlash"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+          <button onclick="deleteRow('admission_orders','${o.id}')" class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800" title="O‘chirish"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </div>`;
+      }).join('') || '<p class="text-sm text-slate-500">Hali buyruq kiritilmagan.</p>'}</div>
+    </div>`;
   }
 
   function renderSpecialtiesAdmin() {
@@ -1497,6 +1518,18 @@
         { k: 'plagiarism_checked_at', l: 'Tekshirilgan sana', type: 'date' }
       ]
     },
+    admission_orders: {
+      label: 'Qabul buyruqlari', single: 'Qabul buyrug‘i', global: true, fields: [
+        { k: 'university', l: 'OTM / muassasa', type: 'text', req: true },
+        { k: 'number', l: 'Buyruq raqami (masalan D/86)', type: 'text', req: true },
+        { k: 'order_date', l: 'Buyruq sanasi', type: 'date', req: true },
+        { k: 'title', l: 'Buyruq nomi', type: 'text', req: true },
+        { k: 'study_start', l: 'O‘qish boshlanadigan sana', type: 'date', req: true },
+        { k: 'duration_years', l: 'Muddati (yil)', type: 'number', num: true, max: 6 },
+        { k: 'doc_code', l: 'Hujjat kodi (ijro.gov.uz)', type: 'text' },
+        { k: 'note', l: 'Izoh', type: 'textarea' }
+      ]
+    },
     specialties: {
       label: 'Ixtisosliklar', single: 'Ixtisoslik', global: true, fields: [
         { k: 'code', l: 'Shifr (masalan 10.00.09)', type: 'text', req: true },
@@ -1534,7 +1567,7 @@
       { k: 'note', l: 'Izoh', type: 'text' }
     ]
   };
-  const LIST_KEY = { plan_items: 'plan', tasks: 'tasks', chapters: 'chapters', publications: 'pubs', documents: 'docs', scholarship_items: 'schol', plagiarism_services: 'plag', specialties: 'specs' };
+  const LIST_KEY = { plan_items: 'plan', tasks: 'tasks', chapters: 'chapters', publications: 'pubs', documents: 'docs', scholarship_items: 'schol', plagiarism_services: 'plag', specialties: 'specs', admission_orders: 'orders' };
 
   function renderMyDataView() {
     const isStudent = role() === 'doctoral_student';
@@ -1559,6 +1592,7 @@
       ${specialtyPicker(p)}
       ${f('university', 'OTM / ilmiy muassasa', 'text')}
       ${f('department', 'Kafedra', 'text')}
+      ${isStudent ? orderPicker(p) : ''}
       ${isStudent ? f('start_date', 'Doktoranturaga kirgan sana (reja muddatlari va stipendiya taymeri shundan hisoblanadi)', 'date') : ''}
       ${f('phone', 'Telefon', 'tel')}
       ${isStudent ? (p.supervisor_id
@@ -1586,6 +1620,24 @@
       </div>
     </div>`;
   }
+  // Admission order (department-managed) fixes the official study start date
+  function orderPicker(p) {
+    const o = L.orders.find(x => x.id === p.admission_order_id);
+    return `<div>
+      <label class="live-label">Qabul buyrug‘i</label>
+      <select id="pf_admission_order_id" onchange="onOrderSelect(this.value)" class="live-input">
+        <option value="">— tanlanmagan —</option>
+        ${L.orders.map(x => `<option value="${x.id}" ${x.id === p.admission_order_id ? 'selected' : ''}>${esc(x.number)} (${esc(fmtDate(x.order_date))}) — o‘qish ${esc(fmtDate(x.study_start))} dan</option>`).join('')}
+      </select>
+      ${o ? `<p class="text-[11px] text-slate-500 mt-1">${esc(o.university)} · ${o.duration_years} yil${o.doc_code ? ' · kod ' + esc(o.doc_code) : ''}</p>` : ''}
+    </div>`;
+  }
+  window.onOrderSelect = function (id) {
+    const o = L.orders.find(x => x.id === id);
+    const start = document.getElementById('pf_start_date');
+    if (o && start) { start.value = o.study_start; toast(`Kirgan sana buyruq bo‘yicha: ${fmtDate(o.study_start)}`); }
+  };
+
   window.onSpecialtySelect = function (v) {
     const box = document.getElementById('pf_specialty_other');
     const code = document.getElementById('pf_specialty_code');
@@ -1599,7 +1651,7 @@
 
   window.saveProfile = async function (e) {
     e.preventDefault();
-    const keys = ['full_name', 'topic', 'academic_title', 'specialty_code', 'specialty_name', 'university', 'department', 'start_date', 'phone', 'supervisor_text'];
+    const keys = ['full_name', 'topic', 'academic_title', 'specialty_code', 'specialty_name', 'university', 'department', 'start_date', 'phone', 'supervisor_text', 'admission_order_id'];
     const patch = {};
     keys.forEach(k => { const el = document.getElementById(`pf_${k}`); if (el) patch[k] = el.value.trim() || null; });
     if (!patch.full_name) return toast('F.I.Sh. bo‘sh bo‘lmasin', 'error');
@@ -1691,7 +1743,7 @@
   window.openForm = function (tableKey, id, presetKind) {
     const spec = TABLES[tableKey];
     const row = id ? byId(L[LIST_KEY[tableKey]], id) : {};
-    const defaults = { year: 1, status: tableKey === 'publications' ? 'planned' : tableKey === 'documents' ? 'missing' : 'Boshlanmagan', pages_done: 0, pages_total: 0, sort_order: 0, done: true, kind: presetKind || 'exam' };
+    const defaults = { year: 1, status: tableKey === 'publications' ? 'planned' : tableKey === 'documents' ? 'missing' : 'Boshlanmagan', pages_done: 0, pages_total: 0, sort_order: 0, done: true, kind: presetKind || 'exam', duration_years: 3 };
     const val = k => (row[k] !== undefined && row[k] !== null ? row[k] : (id ? '' : (defaults[k] !== undefined ? defaults[k] : '')));
     const fields = spec.fields.map(f => {
       let input;
