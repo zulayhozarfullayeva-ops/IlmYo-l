@@ -1287,7 +1287,7 @@
   window.openStudent = function (id) {
     const p = byId(L.profiles, id);
     const s = stats(id);
-    const sup = p.supervisor_id ? profileName(p.supervisor_id) : 'biriktirilmagan';
+    const sup = p.supervisor_id ? profileName(p.supervisor_id) : (p.supervisor_text ? `${p.supervisor_text} (saytda yo‘q)` : 'biriktirilmagan');
     openLiveModal(p.full_name || p.email, `
       <div class="text-sm text-slate-300 p-3 rounded-xl bg-[#0C1427] border border-[#1D3058] space-y-1">
         <div><span class="text-slate-400">Mavzu:</span> ${esc(p.topic || '—')}</div>
@@ -1346,7 +1346,7 @@
               <td class="py-2.5 px-2 font-semibold text-slate-200">${esc(p.full_name || p.email)}</td>
               <td class="py-2.5 px-2 text-slate-400">${s.year ? s.year + '-yil' : '—'}</td>
               <td class="py-2.5 px-2 text-slate-300">${esc(p.specialty_code || '—')}</td>
-              <td class="py-2.5 px-2 text-slate-300">${esc(p.supervisor_id ? profileName(p.supervisor_id) : '—')}</td>
+              <td class="py-2.5 px-2 text-slate-300">${esc(p.supervisor_id ? profileName(p.supervisor_id) : (p.supervisor_text ? p.supervisor_text + ' *' : '—'))}</td>
               <td class="py-2.5 px-2 font-mono text-blue-400">${s.progress}%</td>
               <td class="py-2.5 px-2 font-mono ${s.overdue.length ? 'text-rose-400' : 'text-slate-500'}">${s.overdue.length}</td>
               <td class="py-2.5 px-2 font-mono text-amber-300">${(() => { const sc = scholarship(p.id); return sc.applyYear ? `${sc.readiness}% · ${sc.applyYear}` : '—'; })()}</td>
@@ -1411,7 +1411,7 @@
     const head = ['F.I.Sh.', 'Email', 'Yil', 'Ixtisoslik', 'Mavzu', 'Ilmiy rahbar', 'Reja %', 'Muddati o‘tgan', 'Dissertatsiya %', 'Maqolalar', 'Hujjatlar', 'Holat'];
     const lines = students.map(p => {
       const s = stats(p.id);
-      return [p.full_name, p.email, s.year || '', p.specialty_code, p.topic, p.supervisor_id ? profileName(p.supervisor_id) : '',
+      return [p.full_name, p.email, s.year || '', p.specialty_code, p.topic, p.supervisor_id ? profileName(p.supervisor_id) : (p.supervisor_text || ''),
         s.progress, s.overdue.length, s.pagesTotal ? s.dissPct : '', `${s.pubsDone}/${s.pubs.length}`, `${s.docsReady}/${s.docs.length}`, RISK[s.risk].label];
     });
     const csv = [head, ...lines].map(r => r.map(v => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`).join(';')).join('\r\n');
@@ -1532,13 +1532,17 @@
       ${f('department', 'Kafedra', 'text')}
       ${isStudent ? f('start_date', 'Doktoranturaga kirgan sana (reja muddatlari va stipendiya taymeri shundan hisoblanadi)', 'date') : ''}
       ${f('phone', 'Telefon', 'tel')}
-      ${isStudent ? `<div><label class="live-label">Ilmiy rahbar</label><input value="${esc(sup)}" disabled class="live-input opacity-60"></div>` : ''}
+      ${isStudent ? (p.supervisor_id
+        ? `<div><label class="live-label">Ilmiy rahbar (saytdagi akkaunt)</label><input value="${esc(sup)}" disabled class="live-input opacity-60">
+            <p class="text-[11px] text-slate-500 mt-1">Rahbarni ilmiy bo‘lim biriktiradi. Ismi noto‘g‘ri bo‘lsa, rahbar o‘z akkauntida “Ma’lumotlar → Profil”dan F.I.Sh.ni o‘zgartiradi.</p></div>`
+        : `<div><label class="live-label">Ilmiy rahbar F.I.Sh.</label><input id="pf_supervisor_text" type="text" value="${esc(p.supervisor_text || '')}" placeholder="Masalan: Rahimov Abdurahmon, f.f.d., professor" class="live-input">
+            <p class="text-[11px] text-slate-500 mt-1">Rahbar saytda ro‘yxatdan o‘tsa, ilmiy bo‘lim uni akkauntingizga biriktiradi — shunda tasdiqlash va Telegram xabarlari ishlaydi.</p></div>`) : ''}
       <div class="md:col-span-2 flex justify-end"><button class="btn-primary">Saqlash</button></div>
     </form>`;
   }
   window.saveProfile = async function (e) {
     e.preventDefault();
-    const keys = ['full_name', 'topic', 'academic_title', 'specialty_code', 'specialty_name', 'university', 'department', 'start_date', 'phone'];
+    const keys = ['full_name', 'topic', 'academic_title', 'specialty_code', 'specialty_name', 'university', 'department', 'start_date', 'phone', 'supervisor_text'];
     const patch = {};
     keys.forEach(k => { const el = document.getElementById(`pf_${k}`); if (el) patch[k] = el.value.trim() || null; });
     if (!patch.full_name) return toast('F.I.Sh. bo‘sh bo‘lmasin', 'error');
