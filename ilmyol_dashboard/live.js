@@ -409,6 +409,10 @@
   const origSwitchView = window.switchView;
   window.switchView = function (view) {
     if (L.mode === 'live' && !allowedViews().includes(view)) view = landingView();
+    if (window.onbeforeunload && AppState.currentView === 'mydata' && view !== 'mydata') {
+      if (!confirm('Profildagi o‘zgarishlar saqlanmagan. Saqlamasdan chiqilsinmi?')) return;
+      window.onbeforeunload = null;
+    }
     origSwitchView(view);
     if (L.mode === 'live') renderLiveView(view);
   };
@@ -1072,10 +1076,21 @@
         ${r.value ? `<span class="text-sm font-mono text-slate-300 shrink-0">${esc(r.value)}</span>` : ''}${btn}</div>`;
     };
 
+    // Course n runs from start + (n-1) years to the day before start + n years (own enrolment date)
+    const courseFrom = n => addMonths(L.me.start_date, 12 * (n - 1));
+    const courseTo = n => { const d = parseDate(addMonths(L.me.start_date, 12 * n)); d.setDate(d.getDate() - 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+    const short = s => { const d = parseDate(s); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`; };
     const timeline = [
-      [1, ['Malakaviy imtihonlarni faqat “a’lo”ga topshirish', '1-maqola yetakchi nashrda', 'Chet tili tayyorgarligi (kerakli darajani aniqlash)', 'Birinchi xalqaro konferensiya']],
-      [2, ['2-maqola (iloji bo‘lsa Scopus / Web of Science)', 'Xalqaro konferensiya to‘plamida maqola', 'Til sertifikati — 3-kurs noyabrigacha amal qiladigan', 'Dissertatsiya 40–60%', 'Mualliflik guvohnomasi, joriy etish dalolatnomasi']],
-      [3, ['Dissertatsiya ≥70% va muassasa xulosasi', 'Annotatsiya va mutaxassislar fikri', 'Ilmiy kengashda muhokama', `Hujjat topshirish: 1–31 oktabr ${y}`, `Test: 1–30 noyabr ${y}`]]
+      [1, ['Malakaviy imtihonlarni faqat “a’lo”ga topshirish', `1-maqola yetakchi nashrda — ${short(courseTo(1))} gacha`, 'Chet tili: kerakli darajani aniqlash va tayyorgarlik', 'Birinchi xalqaro konferensiya']],
+      [2, [`2-maqola (iloji bo‘lsa Scopus / Web of Science) — ${short(courseTo(2))} gacha`, 'Xalqaro konferensiya to‘plamida maqola', `Til sertifikati — 01.12.${y} dan keyin ham amal qiladigan`, 'Dissertatsiya 40–60%', 'Mualliflik guvohnomasi, joriy etish dalolatnomasi']],
+      [3, [`Dissertatsiya ≥70% va muassasa xulosasi — 01.10.${y} gacha`, 'Annotatsiya va mutaxassislar fikri', 'Ilmiy kengashda muhokama va tavsiya', `Hujjat topshirish: 01.10–31.10.${y}`, `Davlat test markazida test: 01.11–30.11.${y}`, `Vazirlik qarori: dekabr ${y}`]]
+    ];
+    const keyDates = [
+      ['Kirgan sana', short(L.me.start_date)],
+      ['3-kurs (so‘nggi yil) boshlanadi', short(courseFrom(3))],
+      ['Hujjat qabuli', `01.10 – 31.10.${y}`],
+      ['Test', `01.11 – 30.11.${y}`],
+      ['Doktorantura tugaydi', short(courseTo(3))]
     ];
 
     const myItems = sc.items.slice().sort((a, b) => Object.keys(SCHOL_KIND).indexOf(a.kind) - Object.keys(SCHOL_KIND).indexOf(b.kind));
@@ -1099,10 +1114,18 @@
       </div>
 
       <div class="space-y-3">
+        <h3 class="text-lg font-semibold text-white">Asosiy sanalar (kirgan sanangiz bo‘yicha)</h3>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+          ${keyDates.map(([l, v]) => `<div class="rounded-xl p-3 bg-[#121E38] border border-[#1D3058]"><div class="text-[11px] text-slate-400">${l}</div><div class="text-sm font-semibold text-white font-mono mt-1">${v}</div></div>`).join('')}
+        </div>
+      </div>
+
+      <div class="space-y-3">
         <h3 class="text-lg font-semibold text-white">Tayyorgarlik rejasi</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           ${timeline.map(([n, list]) => `<div class="rounded-2xl p-4 border ${n === curYear ? 'bg-[#16264A] border-blue-500/50' : 'bg-[#121E38] border-[#1D3058]'}">
-            <div class="flex items-center justify-between mb-2"><span class="font-semibold text-white">${n}-kurs</span>${n === curYear ? '<span class="step-badge badge-blue">Hozir</span>' : ''}</div>
+            <div class="flex items-center justify-between mb-1"><span class="font-semibold text-white">${n}-kurs</span>${n === curYear ? '<span class="step-badge badge-blue">Hozir</span>' : ''}</div>
+            <div class="text-[11px] text-slate-400 font-mono mb-2">${short(courseFrom(n))} – ${short(courseTo(n))}</div>
             <ul class="space-y-1.5 text-sm text-slate-300">${list.map(t => `<li class="flex gap-2"><span class="text-slate-500">•</span><span>${esc(t)}</span></li>`).join('')}</ul></div>`).join('')}
         </div>
       </div>
@@ -1730,7 +1753,11 @@
     const sup = p.supervisor_id ? profileName(p.supervisor_id) : 'Biriktirilmagan (ilmiy bo‘lim biriktiradi)';
     const f = (k, l, type, extra) => `<div class="${extra || ''}"><label class="live-label">${l}</label>
       ${type === 'textarea' ? `<textarea id="pf_${k}" rows="3" class="live-input">${esc(p[k] || '')}</textarea>` : `<input id="pf_${k}" type="${type}" value="${esc(p[k] || '')}" class="live-input">`}</div>`;
-    return `<form onsubmit="saveProfile(event)" class="rounded-2xl p-5 bg-[#121E38] border border-[#1D3058] grid grid-cols-1 md:grid-cols-2 gap-4">
+    return `<form id="profileForm" onsubmit="saveProfile(event)" oninput="markProfileDirty()" onchange="markProfileDirty()" class="rounded-2xl p-5 bg-[#121E38] border border-[#1D3058] grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div id="pfDirty" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-[65] px-4 py-3 rounded-2xl bg-amber-500 text-[#0F1B33] shadow-2xl flex items-center gap-3">
+        <span class="text-sm font-semibold">Saqlanmagan o‘zgarishlar bor</span>
+        <button class="px-4 py-1.5 rounded-xl bg-[#0F1B33] text-white text-sm font-semibold">Saqlash</button>
+      </div>
       ${f('full_name', 'F.I.Sh.', 'text')}
       <div><label class="live-label">Email</label><input value="${esc(p.email || '')}" disabled class="live-input opacity-60"></div>
       ${isStudent ? f('topic', 'Dissertatsiya mavzusi', 'textarea', 'md:col-span-2') : f('academic_title', 'Ilmiy daraja va unvon', 'text')}
@@ -1794,8 +1821,15 @@
     name.value = s ? s.name : '';
   };
 
+  window.markProfileDirty = function () {
+    const el = document.getElementById('pfDirty');
+    if (el) el.classList.remove('hidden');
+    window.onbeforeunload = () => 'Profildagi o‘zgarishlar saqlanmagan';
+  };
+
   window.saveProfile = async function (e) {
     e.preventDefault();
+    window.onbeforeunload = null;
     const keys = ['full_name', 'topic', 'academic_title', 'specialty_code', 'specialty_name', 'university', 'department', 'start_date', 'phone', 'supervisor_text', 'admission_order_id'];
     const patch = {};
     keys.forEach(k => { const el = document.getElementById(`pf_${k}`); if (el) patch[k] = el.value.trim() || null; });
