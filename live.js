@@ -1051,6 +1051,94 @@
     return { s, items, applyYear, rows, readiness: pct(req.filter(r => r.ok).length, req.length) };
   }
 
+  // ---- Language preparation (IELTS / TRKI): two-stage plans created as tasks with reminders ----
+  const LANG_TRACKS = {
+    IELTS: {
+      label: 'IELTS (ingliz tili)', counts: true,
+      stage1: 'grammatika va so‘z boyligi (Academic Word List), har kuni 1 soat listening va reading',
+      mid1: 'diagnostik test — joriy darajani aniqlash',
+      end1: 'to‘liq mock test #1, natija bo‘yicha zaif ko‘nikmalarni belgilash',
+      stage2: 'imtihon formatida 4 ko‘nikma: har hafta Writing Task 1 va Task 2, Speaking mashqi',
+      mock2: 'to‘liq mock test #2 (maqsad — talab qilingan ball)',
+      register: 'imtihonga ro‘yxatdan o‘tish (rasmiy IELTS markazi)',
+      exam: 'IELTS imtihoni'
+    },
+    TRKI: {
+      label: 'TRKI (rus tili)', counts: false,
+      stage1: 'grammatika (kelishiklar, fe’l turlari va zamonlari) va leksika, har kuni o‘qish va tinglash',
+      mid1: 'diagnostik test — TRKI darajasini aniqlash (TRKI-1 / TRKI-2)',
+      end1: 'TRKI formatidagi sinov testi #1',
+      stage2: '5 subtest formati: leksika-grammatika, o‘qish, tinglash, yozish, gapirish',
+      mock2: 'TRKI sinov testi #2',
+      register: 'imtihonga ro‘yxatdan o‘tish (vakolatli test markazi)',
+      exam: 'TRKI imtihoni'
+    }
+  };
+  const nextMonthStart = () => { const d = new Date(); return `${d.getFullYear() + (d.getMonth() === 11 ? 1 : 0)}-${String((d.getMonth() + 1) % 12 + 1).padStart(2, '0')}-01`; };
+
+  function renderLanguagePrep(applyYear) {
+    const tasks = L.tasks.filter(t => t.student_id === L.me.id && /^(IELTS|TRKI) /.test(t.title))
+      .sort((a, b) => (a.due_date || '9999') < (b.due_date || '9999') ? -1 : 1);
+    const latestExam = applyYear ? `${applyYear}-09-15` : null;
+    const track = key => {
+      const mine = tasks.filter(t => t.title.startsWith(key + ' '));
+      const exam = mine.find(t => t.title.startsWith(`${key} imtihoni`) || t.title.includes('imtihoni'));
+      const late = exam && latestExam && exam.due_date > latestExam;
+      const done = mine.filter(t => t.done).length;
+      return `<div class="rounded-2xl p-5 bg-[#121E38] border ${LANG_TRACKS[key].counts ? 'border-[#1D3058]' : 'border-amber-500/30'} space-y-3">
+        <div class="flex items-center justify-between gap-2"><h4 class="font-semibold text-white">${LANG_TRACKS[key].label}</h4>
+          ${mine.length ? `<span class="text-xs text-slate-400 font-mono">${done} / ${mine.length}</span>` : ''}</div>
+        ${LANG_TRACKS[key].counts
+          ? '<p class="text-xs text-emerald-300">Stipendiyaning chet tili talabiga mos (MDH davlatlari tili emas).</p>'
+          : '<p class="text-xs text-amber-300">Diqqat: rus tili MDH davlatining davlat tili — qarorga ko‘ra stipendiyaning chet tili talabini qoplamaydi. Umumiy malaka uchun foydali.</p>'}
+        ${mine.length ? `<div class="space-y-1">${mine.map(taskRow).join('')}</div>
+            ${late ? `<p class="text-xs text-rose-300">Imtihon ${fmtDate(exam.due_date)} — stipendiya hujjatlari (oktabr ${applyYear}) uchun kech. Boshlanish sanasini oldinroq qiling yoki intensiv variantni tanlang.</p>` : ''}
+            <button onclick="deleteLanguagePlan('${key}')" class="text-xs text-slate-400 hover:text-rose-300">Rejani o‘chirish</button>`
+          : `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+              <div><label class="live-label">Boshlanish sanasi</label><input id="langStart_${key}" type="date" value="${nextMonthStart()}" class="live-input"></div>
+              <button onclick="createLanguagePlan('${key}', 12)" class="btn-primary">1 yillik (2 × 6 oy)</button>
+              <button onclick="createLanguagePlan('${key}', 6)" class="btn-ghost">6 oylik intensiv (2 × 3 oy)</button>
+            </div>`}
+      </div>`;
+    };
+    return `<div class="space-y-3">
+      <h3 class="text-lg font-semibold text-white">Til tayyorgarligi</h3>
+      <p class="text-sm text-slate-400">Ikki bosqichli reja vazifalar sifatida yaratiladi — har bir bosqich muddatida Telegram’da eslatma keladi.${latestExam ? ` Imtihonni ${fmtDate(latestExam)} gacha topshirish tavsiya etiladi; sertifikat 01.12.${applyYear} dan keyin ham amal qilishi kerak.` : ''}</p>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">${track('IELTS')}${track('TRKI')}</div>
+    </div>`;
+  }
+
+  window.createLanguagePlan = async function (key, months) {
+    const t = LANG_TRACKS[key];
+    const start = document.getElementById(`langStart_${key}`).value;
+    if (!start) return toast('Boshlanish sanasini tanlang', 'error');
+    const half = months / 2;
+    const at = m => addMonths(start, m);
+    const v = months === 12 ? '1 yillik' : '6 oylik';
+    const rows = [
+      [at(0), `${key} 1-bosqich boshlandi (${v}): ${t.stage1}`],
+      [at(Math.round(half / 2)), `${key} 1-bosqich oraliq nazorat: ${t.mid1}`],
+      [at(half), `${key} 1-bosqich yakuni: ${t.end1}`],
+      [at(half), `${key} 2-bosqich boshlandi: ${t.stage2}`],
+      [at(months - Math.max(1, months / 6)), `${key} ${t.mock2}`],
+      [at(months - 1), `${key} ${t.register}`],
+      [at(months), `${key} imtihoni — ${t.exam}`]
+    ].map(([due_date, title]) => ({ student_id: L.me.id, title, due_date }));
+    const { error } = await sb.from('tasks').insert(rows);
+    if (error) return fail(error);
+    toast(`${t.label}: ${v} reja yaratildi`);
+    reload();
+  };
+
+  window.deleteLanguagePlan = async function (key) {
+    if (!confirm(`${key} tayyorgarlik rejasi (barcha bosqichlari) o‘chirilsinmi?`)) return;
+    const ids = L.tasks.filter(t => t.student_id === L.me.id && t.title.startsWith(key + ' ')).map(t => t.id);
+    if (!ids.length) return;
+    const { error } = await sb.from('tasks').delete().in('id', ids);
+    if (error) return fail(error);
+    toast('O‘chirildi'); reload();
+  };
+
   function renderScholarshipView() {
     const h = header('Prezident stipendiyasi', 'Tayanch doktorantura · Vazirlar Mahkamasining 226-son qarori, 1-ilova');
     if (!L.me.start_date) {
@@ -1135,6 +1223,8 @@
             <ul class="space-y-1.5 text-sm text-slate-300">${list.map(t => `<li class="flex gap-2"><span class="text-slate-500">•</span><span>${esc(t)}</span></li>`).join('')}</ul></div>`).join('')}
         </div>
       </div>
+
+      ${renderLanguagePrep(y)}
 
       <div class="space-y-2.5">
         <div class="flex items-center justify-between"><h3 class="text-lg font-semibold text-white">Mening yozuvlarim <span class="text-slate-500 text-sm font-normal">· ${myItems.length}</span></h3>
