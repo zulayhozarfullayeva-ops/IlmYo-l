@@ -66,7 +66,11 @@
         </div>
         <div>
           <label class="live-label">Email</label>
-          <input id="authEmail" name="email" type="email" required autocomplete="username" class="live-input" placeholder="siz@misol.uz">
+          <div class="relative">
+            <input id="authEmail" name="email" type="email" required autocomplete="username" class="live-input" placeholder="siz@misol.uz"
+              onfocus="showRecentEmails()" onclick="showRecentEmails()" oninput="showRecentEmails()" onblur="hideRecentEmails()">
+            <div id="recentEmails" class="hidden absolute left-0 right-0 top-full mt-1 z-10 rounded-xl bg-[#0C1427] border border-[#1D3058] shadow-2xl overflow-hidden"></div>
+          </div>
         </div>
         <div>
           <label class="live-label">Parol</label>
@@ -80,6 +84,7 @@
         </div>
         <p id="authMsg" class="text-xs min-h-[1rem]"></p>
         <button id="authSubmitBtn" class="btn-primary w-full">Kirish</button>
+        <button type="button" id="savedCredBtn" onclick="signInWithSavedPassword()" class="hidden w-full py-2 rounded-lg bg-[#16264A] border border-blue-500/40 text-sm font-medium text-blue-200 hover:border-blue-400">🔑 Brauzerda saqlangan parol bilan kirish</button>
         <button type="button" onclick="forgotPassword()" class="w-full py-2 rounded-lg border border-[#1D3058] text-sm font-medium text-blue-300 hover:text-white hover:border-blue-500">Parolni unutdingizmi? — tiklash</button>
       </form>
 
@@ -1687,7 +1692,7 @@
   <script src="data.js?v=5.0"></script>
   <script src="app.js?v=6.9"></script>
   <script src="corpus.js?v=5.2"></script>
-  <script src="live.js?v=7.6"></script>
+  <script src="live.js?v=7.7"></script>
   <script>
     // Initialize Lucide icons on page load
     lucide.createIcons();

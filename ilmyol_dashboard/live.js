@@ -298,9 +298,65 @@
     del: (s, k) => { try { window[s].removeItem(k); } catch (e) { /* storage blocked */ } }
   };
 
+  // ---- Recently used emails on this device (never passwords) ----
+  const RECENT_EMAILS = 'ilmyol_emails';
+  function recentEmails() {
+    let list = [];
+    try { list = JSON.parse(store.get('localStorage', RECENT_EMAILS) || '[]'); } catch (e) { list = []; }
+    const single = store.get('localStorage', REMEMBER_EMAIL);
+    if (single && !list.includes(single)) list.unshift(single);
+    return list.filter(x => typeof x === 'string' && x.includes('@')).slice(0, 5);
+  }
+  function addRecentEmail(email) {
+    const list = [email, ...recentEmails().filter(x => x !== email)].slice(0, 5);
+    store.set('localStorage', RECENT_EMAILS, JSON.stringify(list));
+  }
+  window.showRecentEmails = function () {
+    const box = document.getElementById('recentEmails');
+    const input = document.getElementById('authEmail');
+    if (!box || !input) return;
+    const q = input.value.trim().toLowerCase();
+    const list = recentEmails().filter(e => !q || (e.toLowerCase().startsWith(q) && e.toLowerCase() !== q));
+    if (!list.length) { box.classList.add('hidden'); return; }
+    box.innerHTML = `<div class="px-3 pt-2 pb-1 text-[11px] text-slate-500">Oxirgi kirilgan manzillar</div>` + list.map(e => `
+      <div class="flex items-center hover:bg-slate-800/70">
+        <button type="button" data-email="${esc(e)}" onmousedown="event.preventDefault(); pickRecentEmail(this.dataset.email)" class="flex-1 text-left px-3 py-2 text-sm text-slate-100 flex items-center gap-2">
+          <i data-lucide="user" class="w-4 h-4 text-slate-400"></i>${esc(e)}</button>
+        <button type="button" data-email="${esc(e)}" onmousedown="event.preventDefault(); forgetRecentEmail(this.dataset.email)" class="px-3 py-2 text-slate-500 hover:text-rose-300" title="Ro‘yxatdan olib tashlash">×</button>
+      </div>`).join('');
+    box.classList.remove('hidden');
+    icons();
+  };
+  window.hideRecentEmails = function () {
+    setTimeout(() => { const box = document.getElementById('recentEmails'); if (box) box.classList.add('hidden'); }, 120);
+  };
+  window.pickRecentEmail = function (email) {
+    document.getElementById('authEmail').value = email;
+    document.getElementById('recentEmails').classList.add('hidden');
+    const pw = document.getElementById('authPassword');
+    pw.focus(); // the browser's password manager now offers the saved password for this email
+  };
+  window.forgetRecentEmail = function (email) {
+    store.set('localStorage', RECENT_EMAILS, JSON.stringify(recentEmails().filter(x => x !== email)));
+    if (store.get('localStorage', REMEMBER_EMAIL) === email) store.del('localStorage', REMEMBER_EMAIL);
+    window.showRecentEmails();
+  };
+
+  // Chrome/Edge: ask the browser's password manager for a saved credential (the user confirms in the browser UI)
+  window.signInWithSavedPassword = async function () {
+    try {
+      const cred = await navigator.credentials.get({ password: true, mediation: 'optional' });
+      if (!cred || !cred.password) { setAuthMsg('Bu brauzerda saqlangan parol topilmadi. Email va parolni yozib kiring — brauzer keyingi safar eslab qoladi.', 'error'); return; }
+      document.getElementById('authEmail').value = cred.id;
+      document.getElementById('authPassword').value = cred.password;
+      document.getElementById('authForm').requestSubmit();
+    } catch (e) { setAuthMsg('Saqlangan parolni olib bo‘lmadi', 'error'); }
+  };
+
   async function rememberLogin(email, password, name) {
     const remember = document.getElementById('authRemember').checked;
     if (remember) {
+      addRecentEmail(email);
       store.set('localStorage', REMEMBER_EMAIL, email);
       store.del('localStorage', SESSION_ONLY);
     } else {
@@ -2284,6 +2340,9 @@
     });
     let demo = false;
     try { demo = sessionStorage.getItem('ilmyol_demo') === '1'; } catch (e) { /* ignore */ }
+    if (window.PasswordCredential && navigator.credentials) {
+      const b = document.getElementById('savedCredBtn'); if (b) b.classList.remove('hidden');
+    }
     const savedEmail = store.get('localStorage', REMEMBER_EMAIL);
     if (savedEmail) {
       document.getElementById('authEmail').value = savedEmail;
