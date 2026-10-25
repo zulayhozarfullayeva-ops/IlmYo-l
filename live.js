@@ -452,7 +452,14 @@
       AppState.currentInputTopic = null;
     }
     const needsProfile = role() === 'doctoral_student' && (!L.me.topic || !L.me.start_date);
+    // Open the section from the address, else the last one used on this device, else the home page
+    let saved = routeFromHash();
+    if (!saved) {
+      const last = store.get('localStorage', LAST_VIEW);
+      if (last) { const [slug, tab] = last.replace(/^#\/?/, '').split('/'); if (VIEW_BY_ROUTE[slug]) saved = { view: VIEW_BY_ROUTE[slug], tab }; }
+    }
     if (needsProfile) { L.myDataTab = 'profile'; switchView('mydata'); }
+    else if (saved && allowedViews().includes(saved.view)) { if (saved.tab) L.myDataTab = saved.tab; switchView(saved.view); }
     else switchView(landingView());
     if (L.recovery) showRecoveryModal();
     // ask the browser not to evict this site's storage (keeps the login on this device)
@@ -526,6 +533,37 @@
   // View routing overrides
   // =====================================================================
   const origSwitchView = window.switchView;
+  // ---- Each section has its own address (#antiplagiat …) so returning from an external link,
+  // a reload or the browser's Back button lands in the same section, not on the home page ----
+  const ROUTES = {
+    dashboard: 'asosiy', scholarship: 'stipendiya', roadmap: 'reja', topic_novelty: 'mavzu', journals: 'jurnallar',
+    plagiarism: 'antiplagiat', dissertation: 'ilmiy-ish', calendar: 'kalendar', defense: 'himoya', formatting: 'rasmiylashtirish',
+    mydata: 'malumotlar', supervisor: 'doktorantlar', department: 'bolim'
+  };
+  const VIEW_BY_ROUTE = Object.fromEntries(Object.entries(ROUTES).map(([v, r]) => [r, v]));
+  const LAST_VIEW = 'ilmyol_last_view';
+  function routeFromHash() {
+    const [slug, tab] = decodeURIComponent(location.hash.replace(/^#\/?/, '')).split('/');
+    const view = VIEW_BY_ROUTE[slug];
+    return view ? { view, tab } : null;
+  }
+  function rememberRoute(view) {
+    const hash = '#' + ROUTES[view] + (view === 'mydata' && L.myDataTab ? '/' + L.myDataTab : '');
+    if (location.hash !== hash) {
+      L.routing = true; // our own change: don't treat it as Back/Forward
+      location.hash = hash;
+    }
+    store.set('localStorage', LAST_VIEW, hash);
+  }
+  window.addEventListener('hashchange', () => {
+    if (L.routing) { L.routing = false; return; }
+    if (L.mode !== 'live') return;
+    const r = routeFromHash();
+    if (!r || (r.view === AppState.currentView && (r.view !== 'mydata' || r.tab === L.myDataTab))) return;
+    if (r.tab) L.myDataTab = r.tab;
+    window.switchView(r.view);
+  });
+
   window.switchView = function (view) {
     if (L.mode === 'live' && !allowedViews().includes(view)) view = landingView();
     if (window.onbeforeunload && AppState.currentView === 'mydata' && view !== 'mydata') {
@@ -533,7 +571,7 @@
       window.onbeforeunload = null;
     }
     origSwitchView(view);
-    if (L.mode === 'live') renderLiveView(view);
+    if (L.mode === 'live') { renderLiveView(view); if (ROUTES[view]) rememberRoute(view); }
   };
 
   const LIVE_RENDER = {
@@ -856,7 +894,11 @@
       <i data-lucide="chevron-right" class="w-5 h-5 text-slate-400 shrink-0"></i></button>`;
   }
 
-  window.goMyData = function (tab) { L.myDataTab = tab; switchView('mydata'); };
+  window.goMyData = function (tab) {
+    L.myDataTab = tab;
+    if (AppState.currentView === 'mydata') { renderLiveView('mydata'); rememberRoute('mydata'); }
+    else switchView('mydata');
+  };
 
   window.liveToggleTask = async function (id, done) {
     const { error } = await sb.from('tasks').update({ done }).eq('id', id);
