@@ -140,26 +140,31 @@
     return data || [];
   }
 
+  // Non-essential lists must never block login: an error there logs and yields []
+  async function qSoft(promise, label) {
+    try { return await q(promise); } catch (e) { console.warn(`[IlmYol live] ${label} yuklanmadi`, e); return []; }
+  }
+
   async function loadAll() {
     const [profiles, plan, tasks, chapters, pubs, docs, evidence, comments, config, schol, plag, specs, orders, depts] = await Promise.all([
       q(sb.from('profiles').select('*').order('full_name')),
-      q(sb.from('plan_items').select('*')),
-      q(sb.from('tasks').select('*').order('created_at', { ascending: false })),
-      q(sb.from('chapters').select('*').order('sort_order')),
-      q(sb.from('publications').select('*').order('created_at')),
-      q(sb.from('documents').select('*').order('created_at')),
-      q(sb.from('evidence_files').select('*').order('created_at', { ascending: false })),
-      q(sb.from('comments').select('*').order('created_at', { ascending: false }).limit(500)),
-      q(sb.from('app_config').select('*')),
-      q(sb.from('scholarship_items').select('*').order('created_at')),
-      q(sb.from('plagiarism_services').select('*').order('sort_order')),
-      q(sb.from('specialties').select('*').order('code')),
-      q(sb.from('admission_orders').select('*').order('order_date', { ascending: false })),
-      q(sb.from('departments').select('*').order('name'))
+      qSoft(sb.from('plan_items').select('*'), 'plan_items'),
+      qSoft(sb.from('tasks').select('*').order('created_at', { ascending: false }), 'tasks'),
+      qSoft(sb.from('chapters').select('*').order('sort_order'), 'chapters'),
+      qSoft(sb.from('publications').select('*').order('created_at'), 'publications'),
+      qSoft(sb.from('documents').select('*').order('created_at'), 'documents'),
+      qSoft(sb.from('evidence_files').select('*').order('created_at', { ascending: false }), 'evidence_files'),
+      qSoft(sb.from('comments').select('*').order('created_at', { ascending: false }).limit(500), 'comments'),
+      qSoft(sb.from('app_config').select('*'), 'app_config'),
+      qSoft(sb.from('scholarship_items').select('*').order('created_at'), 'scholarship_items'),
+      qSoft(sb.from('plagiarism_services').select('*').order('sort_order'), 'plagiarism_services'),
+      qSoft(sb.from('specialties').select('*').order('code'), 'specialties'),
+      qSoft(sb.from('admission_orders').select('*').order('order_date', { ascending: false }), 'admission_orders'),
+      qSoft(sb.from('departments').select('*').order('name'), 'departments')
     ]);
     Object.assign(L, { profiles, plan, tasks, chapters, pubs, docs, evidence, comments, schol, plag, specs, orders, depts });
     L.config = Object.fromEntries(config.map(c => [c.key, c.value]));
-    await loadAvatars();
+    try { await loadAvatars(); } catch (e) { console.warn('[IlmYol live] avatars', e); }
     L.me = byId(profiles, L.user.id) || null;
   }
 
@@ -450,6 +455,8 @@
     if (needsProfile) { L.myDataTab = 'profile'; switchView('mydata'); }
     else switchView(landingView());
     if (L.recovery) showRecoveryModal();
+    // ask the browser not to evict this site's storage (keeps the login on this device)
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* optional */ }
   }
 
   function showRecoveryModal() {
@@ -2348,16 +2355,45 @@
       document.getElementById('authEmail').value = savedEmail;
       document.getElementById('authPassword').focus();
     }
+    // Can this browser keep data at all? (private windows / "clear on exit" make every visit a new login)
+    let storageOk = true;
+    try { localStorage.setItem('ilmyol_probe', '1'); storageOk = localStorage.getItem('ilmyol_probe') === '1'; localStorage.removeItem('ilmyol_probe'); } catch (e) { storageOk = false; }
+
+    const showLoginForm = (msg, kind) => {
+      L.mode = 'auth'; showAuth(true);
+      document.getElementById('authLoading').classList.add('hidden');
+      document.getElementById('authForm').classList.remove('hidden');
+      if (!storageOk) setAuthMsg('Bu brauzer ma’lumotlarni saqlamayapti (yashirin oyna yoki “chiqishda tozalash” sozlamasi). Shuning uchun har safar kirish so‘raladi — oddiy oynada oching.', 'error');
+      else if (msg) setAuthMsg(msg, kind);
+    };
+
+    let session = null;
     try {
       // "Remember me" was off: the login lasts only until the browser is closed
       if (store.get('localStorage', SESSION_ONLY) === '1' && !store.get('sessionStorage', SESSION_ALIVE)) {
         await sb.auth.signOut({ scope: 'local' });
         store.del('localStorage', SESSION_ONLY);
       }
-      const { data: { session } } = await sb.auth.getSession();
-      if (session) return await enterLive(session.user);
-    } catch (e) { fail(e); }
+      ({ data: { session } } = await sb.auth.getSession());
+    } catch (e) { console.warn('[IlmYol live] getSession', e); }
+
+    if (session) {
+      // A saved session must not silently turn into a login form: retry once after refreshing the token
+      try { return await enterLive(session.user); } catch (e1) {
+        console.warn('[IlmYol live] enterLive, retrying', e1);
+        try {
+          const { data } = await sb.auth.refreshSession();
+          if (data && data.session) return await enterLive(data.session.user);
+        } catch (e2) { console.warn('[IlmYol live] retry failed', e2); }
+        showLoginForm('Siz tizimdasiz, lekin ma’lumotlarni yuklab bo‘lmadi (internet?). Sahifani yangilang — qayta parol kiritish shart emas.', 'error');
+        const retry = document.createElement('button');
+        retry.type = 'button'; retry.className = 'btn-ghost w-full'; retry.textContent = '↻ Qayta urinish';
+        retry.onclick = () => location.reload();
+        document.getElementById('authMsg').after(retry);
+        return;
+      }
+    }
     if (demo) window.enterDemo();
-    else { L.mode = 'auth'; showAuth(true); document.getElementById('authLoading').classList.add('hidden'); document.getElementById('authForm').classList.remove('hidden'); }
+    else showLoginForm();
   });
 })();
